@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "split_id": "live-joint-wikipedia-frozen-tune-v1",
+  "split_role": "tune",
+  "formal_eligible": false,
+  "description": "Frozen-call-graph form of the 16-source development tune split. Live Bing search still runs, while expected_url fixes the authoritative Wikipedia visit identity across mechanism screens. This split is never formal evidence.",
+  "sources": [
+    {
+      "source_id": "tune-wiki001",
+      "question": "Who was Ada Lovelace and what computing contribution is she known for?",
+      "search_query": "Ada Lovelace",
+      "expected_url": "https://en.wikipedia.org/wiki/Ada_Lovelace"
+    },
+    {
+      "source_id": "tune-wiki002",
+      "question": "When did the International Space Station begin continuous human occupation?",
+      "search_query": "International Space Station",
+      "expected_url": "https://en.wikipedia.org/wiki/International_Space_Station"
+    },
+    {
+      "source_id": "tune-wiki003",
+      "question": "Where is the Taj Mahal and who commissioned it?",
+      "search_query": "Taj Mahal",
+      "expected_url": "https://en.wikipedia.org/wiki/Taj_Mahal"
+    },
+    {
+      "source_id": "tune-wiki004",
+      "question": "What was the Magna Carta and when was it first issued?",
+      "search_query": "Magna Carta",
+      "expected_url": "https://en.wikipedia.org/wiki/Magna_Carta"
+    },
+    {
+      "source_id": "tune-wiki005",
+      "question": "Who proposed the Turing machine and what does the model describe?",
+      "search_query": "Turing machine",
+      "expected_url": "https://en.wikipedia.org/wiki/Turing_machine"
+    },
+    {
+      "source_id": "tune-wiki006",
+      "question": "Where is the Dead Sea and why is its salinity notable?",
+      "search_query": "Dead Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Dead_Sea"
+    },
+    {
+      "source_id": "tune-wiki007",
+      "question": "What is the World Wide Web and who invented it?",
+      "search_query": "World Wide Web",
+      "expected_url": "https://en.wikipedia.org/wiki/World_Wide_Web"
+    },
+    {
+      "source_id": "tune-wiki008",
+      "question": "When did Krakatoa's major 1883 eruption occur and what effects did it cause?",
+      "search_query": "1883 eruption of Krakatoa",
+      "expected_url": "https://en.wikipedia.org/wiki/1883_eruption_of_Krakatoa"
+    },
+    {
+      "source_id": "tune-wiki009",
+      "question": "What did the Antarctic Treaty establish and when did it enter into force?",
+      "search_query": "Antarctic Treaty System",
+      "expected_url": "https://en.wikipedia.org/wiki/Antarctic_Treaty_System"
+    },
+    {
+      "source_id": "tune-wiki010",
+      "question": "Who discovered radioactivity and through what observation?",
+      "search_query": "Discovery of radioactivity",
+      "expected_url": "https://en.wikipedia.org/wiki/Radioactivity"
+    },
+    {
+      "source_id": "tune-wiki011",
+      "question": "What is the Bayeux Tapestry and which conquest does it depict?",
+      "search_query": "Bayeux Tapestry",
+      "expected_url": "https://en.wikipedia.org/wiki/Bayeux_Tapestry"
+    },
+    {
+      "source_id": "tune-wiki012",
+      "question": "When was the first successful heart transplant performed and by whom?",
+      "search_query": "Heart transplantation Christiaan Barnard",
+      "expected_url": "https://en.wikipedia.org/wiki/Heart_transplantation"
+    },
+    {
+      "source_id": "tune-wiki013",
+      "question": "What is the Atacama Desert and where is it located?",
+      "search_query": "Atacama Desert",
+      "expected_url": "https://en.wikipedia.org/wiki/Atacama_Desert"
+    },
+    {
+      "source_id": "tune-wiki014",
+      "question": "Who developed the first widely used smallpox vaccine and when?",
+      "search_query": "Smallpox vaccine Edward Jenner",
+      "expected_url": "https://en.wikipedia.org/wiki/Smallpox_vaccine"
+    },
+    {
+      "source_id": "tune-wiki015",
+      "question": "What is the Moai tradition of Rapa Nui and where are the statues found?",
+      "search_query": "Moai",
+      "expected_url": "https://en.wikipedia.org/wiki/Moai"
+    },
+    {
+      "source_id": "tune-wiki016",
+      "question": "When was the Treaty of Versailles signed and which war did it formally end?",
+      "search_query": "Treaty of Versailles",
+      "expected_url": "https://en.wikipedia.org/wiki/Treaty_of_Versailles"
+    }
+  ]
+}

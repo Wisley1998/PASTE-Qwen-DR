@@ -1,0 +1,513 @@
+{
+  "authoritative_state_entries": 88,
+  "executor": "deterministic trace replay (no network calls)",
+  "held_out_evaluation": {
+    "authoritative_url_invocations": 88,
+    "baseline_exposed_tool_stall_s": 38.51363468170166,
+    "executable": {
+      "covered_examples": 30,
+      "covered_invocations": 70,
+      "example_coverage": 0.8823529411764706,
+      "invocation_coverage": 0.7954545454545454
+    },
+    "held_out_sessions": 19,
+    "latency_hit_examples": 26,
+    "latency_model": "per transition: min(visit stall, preceding LLM inference) x exact URL-invocation hit fraction",
+    "latency_top_k": 5,
+    "optimized_exposed_tool_stall_s": 19.647426882055075,
+    "saved_time_s": 18.866207799646585,
+    "search_visit_examples": 34,
+    "stall_reduction": 0.48985788943493747,
+    "top_k_concrete_invocation_hit": {
+      "1": {
+        "concrete_predictions": 34,
+        "example_hit_rate": 0.5,
+        "example_hits": 17,
+        "invocation_hit_rate": 0.19318181818181818,
+        "invocation_hits": 17,
+        "prediction_precision": 0.5
+      },
+      "3": {
+        "concrete_predictions": 102,
+        "example_hit_rate": 0.7352941176470589,
+        "example_hits": 25,
+        "invocation_hit_rate": 0.4318181818181818,
+        "invocation_hits": 38,
+        "prediction_precision": 0.37254901960784315
+      },
+      "5": {
+        "concrete_predictions": 170,
+        "example_hit_rate": 0.7647058823529411,
+        "example_hits": 26,
+        "invocation_hit_rate": 0.5568181818181818,
+        "invocation_hits": 49,
+        "prediction_precision": 0.28823529411764703
+      }
+    }
+  },
+  "model_artifact": {
+    "artifact_sha256": "30a0cb7c58b35a29603ea6a805e17d09fca9fa6542a3e186c461ca303902bc56",
+    "mapper": {
+      "kind": "learned_within_query_url_rank",
+      "learned_rank_order": [
+        2,
+        4,
+        3,
+        1,
+        5
+      ],
+      "mapped_targets": 123,
+      "rank_counts": {
+        "1": 8,
+        "2": 72,
+        "3": 9,
+        "4": 31,
+        "5": 3
+      },
+      "searches_seen": 265,
+      "targets_seen": 148,
+      "training_executable_coverage": 0.831081081081081,
+      "transition_confidence": 0.30943396226415093,
+      "transitions_seen": 82
+    },
+    "schema": "paste_repro.url_rank_mapper",
+    "training_split": {
+      "algorithm": "sha256(seed + NUL + session_id), exact whole-file prefix split",
+      "held_out_sessions": [
+        {
+          "session_id": "trace_20260129_125406_task1_收集整理目前中国9阶层实际收入和财务状况_特别研究得出中国的.jsonl",
+          "sha256": "d5a37dfdffc0736432594417fe39f130878bf84c554f020998f2d6205c0afa07"
+        },
+        {
+          "session_id": "trace_20260129_130834_task6_请帮我整理下目前全球具身智能发展的技术路线_以及各个路线的代.jsonl",
+          "sha256": "634d2dfb06faf3a44551c16d8ca04d2838cf7a0f537820d1f430dbc52338ea03"
+        },
+        {
+          "session_id": "trace_20260129_152650_task12_收集整理近10年来国际上自来水生产及销售企业在技术创新且已经.jsonl",
+          "sha256": "2cda759c6610ce556c22f27b49de5f5fd4f4e9fd2301997717ab8fe7ccab4783"
+        },
+        {
+          "session_id": "trace_20260129_153229_task15_收集整理目前世界上关于量子网络的研究_横向比较各课题组的相关.jsonl",
+          "sha256": "131b05943afa552fef3e7749e389e340609a0374dc83da40996d5cec90258b5d"
+        },
+        {
+          "session_id": "trace_20260129_153605_task17___在当今软件开发行业中_低代码_无代码平台对传统开发流程的.jsonl",
+          "sha256": "c8f25e4600b1d31c4bbb76466629efe8ffc22ce9091e186380339bce87d77fd8"
+        },
+        {
+          "session_id": "trace_20260129_153747_task18_请你学习一下GCS算法的原理_目前的GCS算法主要是用于安全.jsonl",
+          "sha256": "b53f84b9a66308e15e98156db1a383501bcd71a80e5b1efb5c0b6742770ca0e0"
+        },
+        {
+          "session_id": "trace_20260129_154633_task20_研究下Anthropic最新发布的Streamable_HT.jsonl",
+          "sha256": "44e80bf05f64f490817f5bf4f7a818d06ea77b1370ee609ee3127a3843f09590"
+        },
+        {
+          "session_id": "trace_20260129_154807_task21_现在AI这么热门_我最感兴趣的就是人工智能在教育领域应用现状.jsonl",
+          "sha256": "34f9f7185bc8218352e8cd6f292afa3230d0d4e5ca4bb26d571a86f2f57bd1fd"
+        },
+        {
+          "session_id": "trace_20260129_163011_task27_如何将AI心理咨询和人类心理咨询有机结合_以便为人类心理健康.jsonl",
+          "sha256": "c534494284d607bc54030215039c8445047be0a3e3318573cf8601eddabf309f"
+        },
+        {
+          "session_id": "trace_20260129_170942_task36_制造业离散制造_单件小批_基本上靠人的技能才能完成的_为我调.jsonl",
+          "sha256": "a8719ad8b0ff052a7015363231e9e201a19755b2d11119abddb42ce1fd1d0f0e"
+        },
+        {
+          "session_id": "trace_20260129_171332_task37_调研问题_爵士钢琴在现代音乐创作中的创新与风格演变研究__背.jsonl",
+          "sha256": "b43916f0d9e9ee81e1cc3fe8cb9da408aea53f1a71159a6cc9092124df8a17e0"
+        },
+        {
+          "session_id": "trace_20260129_171620_task38_收集针对近三年内珠宝设计流行趋势变化_如高奢类品牌珠宝以及高.jsonl",
+          "sha256": "bb40dbc57d7501bd58564edea594a194d54145baaf991eca91f44dadc39ef879"
+        },
+        {
+          "session_id": "trace_20260129_172730_task41_收集整理目前中国电影票房前十的电影的相关资料_横向比较各电影.jsonl",
+          "sha256": "0b850014cf97e8719f14d7f67266241ba7d1803cc8004c92900bde0b3b51a530"
+        },
+        {
+          "session_id": "trace_20260129_175319_task46_房地产行业可持续发展的动力是什么_未来10年国家在政策_资金.jsonl",
+          "sha256": "db97ec89a9b4441ecedb7f33e704338ef686805c536cb4b46f0835105e7731e5"
+        },
+        {
+          "session_id": "trace_20260129_182104_task52_What_are_the_investment_philos.jsonl",
+          "sha256": "cab848641a9b1d454ada34126233dc9927df3a405aef3b285ba517589b5c4344"
+        },
+        {
+          "session_id": "trace_20260129_184959_task59_In_ecology__how_do_birds_achie.jsonl",
+          "sha256": "b7d28ac6d6e108457b30acb4fff00534f8d4138f2f3b9590ee62fcef6f4ff8fe"
+        },
+        {
+          "session_id": "trace_20260129_190100_task62_What_are_the_most_effective_ap.jsonl",
+          "sha256": "3076d151fc76465725a5cb817ef66c9a64ad152a8e975ad739584c4bfe511281"
+        },
+        {
+          "session_id": "trace_20260129_190724_task64_Regarding_the_attitude_control.jsonl",
+          "sha256": "9f7189d2d526f7b9d1512cffa01ae0520ff48ab30f9052186987523aa4f64da7"
+        },
+        {
+          "session_id": "trace_20260129_192137_task67_Summarize_recent_research_prog.jsonl",
+          "sha256": "8cbe31114a309c1ee74cbcfdb570442b421a411c07f48a58ef6f186bd32b6769"
+        },
+        {
+          "session_id": "trace_20260129_192805_task68_I_need_to_dynamically_adjust_K.jsonl",
+          "sha256": "0b5f756c86e9e52d236003a99bbca6e185f31f4af9f45fdbf277d1c9701362ec"
+        },
+        {
+          "session_id": "trace_20260129_193541_task71_Acting_as_an_expert_in_K-12_ed.jsonl",
+          "sha256": "77c94d7e5259399e45546c2f762d918f21e6c6e7eed0e49de99de0768d2ce26a"
+        },
+        {
+          "session_id": "trace_20260129_193742_task72_Please_write_a_literature_revi.jsonl",
+          "sha256": "3904e1a40f1cd614cbc69b6ac6e873503312d81a5882d1b679735ea41c05da08"
+        },
+        {
+          "session_id": "trace_20260129_193957_task73_As_a_senior_elementary_school.jsonl",
+          "sha256": "ce61756f24dd5266571fbd3ba47451d64316506c38ec36efd5d67788d6fa7f02"
+        },
+        {
+          "session_id": "trace_20260129_194507_task77_What_is_the_role_of_need_for_c.jsonl",
+          "sha256": "dca9873c1aa353c85f26279b2b1f81277588fadceaf19a5d1f15f611de603a48"
+        },
+        {
+          "session_id": "trace_20260129_195211_task81_Write_an_analysis_exploring_ho.jsonl",
+          "sha256": "12b66850ceab8cacc44c6318f358158c47314ee3c9397f33cc9b16d49d9b6ccf"
+        },
+        {
+          "session_id": "trace_20260129_203546_task91_I_would_like_a_detailed_analys.jsonl",
+          "sha256": "80dda85ff7f2a620565506ff791bbc2192a218cd36fc1475411904cb58a8eec4"
+        },
+        {
+          "session_id": "trace_20260129_204609_task92_For_a_research_project_titled.jsonl",
+          "sha256": "1f6fcb5d7991ec7b9fd24b9fcbfd2088bacd90814cde330eff2e6a8413bbc1c9"
+        },
+        {
+          "session_id": "trace_20260129_211023_task97_Find_data_and_evidence_to_supp.jsonl",
+          "sha256": "589184338b2fb85c936f427d925e84d33a04cc3df4b4a951fe45e97bcef38618"
+        },
+        {
+          "session_id": "trace_20260129_212736_task99_Research_the_current_applicati.jsonl",
+          "sha256": "be9032bfa009ba536dcb520463a24f86c5e1c818d1052c1f78cdbc9984fa1934"
+        },
+        {
+          "session_id": "trace_20260129_213057_task100_Write_a_paper_to_discuss_the_i.jsonl",
+          "sha256": "2bdc2090ac5cff4e3d1ecec7d10081ad6fa341762232e300b45d21e15f416650"
+        }
+      ],
+      "manifest_sha256": "1bf8984620a1a6eb5c4472dce76ed5039eb37ccb28c2e03ccdf460eff0425402",
+      "seed": "paste-repro-v1",
+      "train_ratio": 0.7,
+      "train_sessions": [
+        {
+          "session_id": "trace_20260129_125523_task2_收集整理目前国际综合实力前十的保险公司的相关资料_横向比较各.jsonl",
+          "sha256": "787a360b5aa2b0da2ab248226319df734304349499959e81ab605670a6baeeac"
+        },
+        {
+          "session_id": "trace_20260129_125632_task3_中国金融未来的发展趋势_未来哪一个细分领域_例如投行_pe_.jsonl",
+          "sha256": "4f2896c30373324efbc147ae8f734c74dee439e00bcc560aee1bac51dbc06a6d"
+        },
+        {
+          "session_id": "trace_20260129_125841_task4_分析_2010_年至今的黄金走势_用思维导图告诉我黄金未来有.jsonl",
+          "sha256": "f021ea26b0cdfaeff32c190fdf227c998f7d8c29250b2a39f536a706833f0afc"
+        },
+        {
+          "session_id": "trace_20260129_125922_task5_调研国内金融机构之间的投资借贷关系与系统性风险的联系_对不同.jsonl",
+          "sha256": "c643b0c63667e6502dcff83f8b1f7858bb210f5cfd2de8b5497d0831d94dd5eb"
+        },
+        {
+          "session_id": "trace_20260129_130942_task7_在当前中国房地产市场低迷的情况下_政府税收减少_这会多大程度.jsonl",
+          "sha256": "f137c9a3e9a484da8e0df70c0f9fd136c2d8340a75c4b995093f095178f576c8"
+        },
+        {
+          "session_id": "trace_20260129_131103_task8_能否给我提供一份详尽的报告_分析机器学习或者深度学习在优化材.jsonl",
+          "sha256": "9d333067b0ad3cc7cfa30b0c0fbc3505ddeaf5d3dd440b7f902726c9cf199b8b"
+        },
+        {
+          "session_id": "trace_20260129_131409_task9_在计算化学这个领域_我们通常使用Gaussian软件模拟各种.jsonl",
+          "sha256": "133820a78bd4f5b3b3981a27a85e4ee2c9eecd566ce7f5c3a4fb54e2c34d24d6"
+        },
+        {
+          "session_id": "trace_20260129_152333_task10_在800V高压_碳化硅电驱_固态电池_分布式驱动等技术迭代加.jsonl",
+          "sha256": "015bb686c522b60f4655572e11ebaa6d0c47deab94bd597e035d789506d28723"
+        },
+        {
+          "session_id": "trace_20260129_152515_task11_请总结碳钢常用缓蚀剂种类_并分析每种缓蚀剂是具有拉曼活性还是.jsonl",
+          "sha256": "133908266f3feb1131fe2be94109dd821df3542bb680bc77ed7cf882b96115e0"
+        },
+        {
+          "session_id": "trace_20260129_152828_task13_为我调研AI算法能否提升现有电子学读出时幅修正方法.jsonl",
+          "sha256": "2a963f64d69d7ccb3d104673295da3d096bc05e5c78db5c9f623551d3e47c0ca"
+        },
+        {
+          "session_id": "trace_20260129_153000_task14_收集整理全球数学与量子计算交叉领域的主要研究团队及其成果_横.jsonl",
+          "sha256": "2ff556c5defe429b7488ac1e41f08b6b94a0b44b9eba6b87bb70a0896722ba9b"
+        },
+        {
+          "session_id": "trace_20260129_153419_task16_收集整理目前非接触式感知领域做的最好的算法策略_并为我评估他.jsonl",
+          "sha256": "60e69d04abb4562f03dd2720120655f7ebc582d4ac9b880f133a5dc9249e8fe1"
+        },
+        {
+          "session_id": "trace_20260129_154409_task19_prometheus_的高流失率会造成什么影响_有什么系统的.jsonl",
+          "sha256": "cd6fb750f3257b01dca7e655fe0b13c4d77e03c2a7446e981633d628444c3232"
+        },
+        {
+          "session_id": "trace_20260129_155613_task22_中国的艺术生就业领域长期以来较为单一_主要集中在传统艺术机构.jsonl",
+          "sha256": "0e613ef3cf144a2b80a26c2b1ccf4de59e2264a96ffccf50348e38a26b5fc2f1"
+        },
+        {
+          "session_id": "trace_20260129_160058_task23_我们部门正在辅导高校老师竞赛_比较想了解创新赛_青教赛的全国.jsonl",
+          "sha256": "b8bb675c0e4619113689f1bb8cc449828ede2aeb4297f7ce4907ab570ac867c8"
+        },
+        {
+          "session_id": "trace_20260129_160324_task24_如何增强自闭症学生课堂参与度_有哪些有效的策略可供选择_.jsonl",
+          "sha256": "41c5b98b97caf8a6086a90cbdb955ea762a37143d10b2454a69c28d5808af654"
+        },
+        {
+          "session_id": "trace_20260129_162304_task25_请为我整合近几年有关_中性粒细胞在脑缺血急性期和慢性期的功能.jsonl",
+          "sha256": "80afa65f416f96316d904261ef6d52e451794191d426f2d6720208826ffde144"
+        },
+        {
+          "session_id": "trace_20260129_162605_task26_为我调研在慢性抗原刺激下_如肿瘤微环境或HIV潜伏感染__C.jsonl",
+          "sha256": "0a2764dabbb39dca2ff082f58b4effb256ba797828c8cfdb589708ab88cea8d0"
+        },
+        {
+          "session_id": "trace_20260129_163259_task28_传统的药物研究_即便是从多组学角度出发也难以系统地_宏观地解.jsonl",
+          "sha256": "8b381d548b3c6c7b4f46c122a260e6201232be81d6c4dc6e26d0987841e9e75a"
+        },
+        {
+          "session_id": "trace_20260129_163553_task29_50年代至今_中国大陆中国古代文学研究头部学者知识背景差异调.jsonl",
+          "sha256": "725cfa5bab77195d082f8f4d7fefd119c9feab2c0f3f1c097e8c65cffec09317"
+        },
+        {
+          "session_id": "trace_20260129_164054_task30_全球南方合作如何推动文明交流互鉴_从理论角度给出深入的学术分.jsonl",
+          "sha256": "2400bad4a1bdbd931105e9c70836d5dfc5f0ea890bee9cba8c80361ff09a3a7f"
+        },
+        {
+          "session_id": "trace_20260129_164342_task31_选题_中外博物馆教育的现状与未来趋势_要求1_分别总结国内外.jsonl",
+          "sha256": "6dfc5e69c0ba5f4b9acca0f3ed089365257bbeb34c5fbe6acc5314fcca28e2ce"
+        },
+        {
+          "session_id": "trace_20260129_164748_task32_收集整理目前中国历史学界对1937-1949年_抗日战争以及.jsonl",
+          "sha256": "5050d81b7080f457bad0289d21ce452d5f19199195e7ce4b83fa626edbf3d5a8"
+        },
+        {
+          "session_id": "trace_20260129_165547_task33_在微电子工艺中_金属薄膜的生长可以使用多种设备_物理气相沉积.jsonl",
+          "sha256": "bfe56400cc8a094af2afadc233c621ce19c13b24de68887bbd01d80174b48e5a"
+        },
+        {
+          "session_id": "trace_20260129_165954_task34_在二维半导体的接触领域_科研人员为了降低接触电阻做了许多努力.jsonl",
+          "sha256": "1e9e7b34d81b5b78dc7a1530c9d2f90aeec27b9304c905316783df9a64da18c2"
+        },
+        {
+          "session_id": "trace_20260129_170520_task35_市政污水收集和处理大部分城市采取的模式是核拨制_但这种机制造.jsonl",
+          "sha256": "5db40cca43e1993ac911eb1ea6bfef4653c62bef66da00282c43c3c535bc9ce5"
+        },
+        {
+          "session_id": "trace_20260129_172022_task39_我是一名游戏开发_帮我分析一下不同类型游戏的用户群体画像.jsonl",
+          "sha256": "cd1cd243db95dbaf8a8b6aa80036de4687a488578e5bf2ae98c5eaacd2223d6b"
+        },
+        {
+          "session_id": "trace_20260129_172402_task40_中国当前的刑罚体系中_死刑_死刑缓期执行_终身监禁的数量_比.jsonl",
+          "sha256": "1463a1ef50b3022516b0919da9ad12e7f0d858c95b036dc38d3bbc999bab63a9"
+        },
+        {
+          "session_id": "trace_20260129_173246_task42_中共中央_国务院2025年印发的_教育强国建设规划纲要_20.jsonl",
+          "sha256": "61b2ce2a5d6aaf3894cb1d7a1a5a5589ebc3215a4ca94967164a8595d1514d57"
+        },
+        {
+          "session_id": "trace_20260129_173617_task43_软件行业未来趋势和被AI替代的可能性.jsonl",
+          "sha256": "ae98bb9f6f94d478c16ac58ce5a3d5f2d1e423ae29386759a0cf4e949a405c5e"
+        },
+        {
+          "session_id": "trace_20260129_173840_task44_国内城市轨道交通行业_主要指地铁_每年的碳滑板用量是多少_主.jsonl",
+          "sha256": "9e17f48d44e9a1773fa3b91bd30683cdca7f530ed63b6b71cb199cbaa2fe6613"
+        },
+        {
+          "session_id": "trace_20260129_174348_task45_分析_老子_历代注本中_神_的发展.jsonl",
+          "sha256": "0c3f7dbcc255a313c4905eb6f58dd826a3faadb9fe6142844f6280314a1d5543"
+        },
+        {
+          "session_id": "trace_20260129_175644_task47_2025_年_有哪些因素影响着旅客选择前往不同目的地旅游.jsonl",
+          "sha256": "93957041850c4e28a9b804a2ac5839b10cfc666d8f79dcfcab3cf7838e5d8395"
+        },
+        {
+          "session_id": "trace_20260129_175815_task48_我今年五十三岁_体重一百六十斤_为我提供一份两周的食谱_包含.jsonl",
+          "sha256": "8f14510f2a1a259ea9191b77c4803f2c529be1db6db5d6e4035e00f2e9a6acaa"
+        },
+        {
+          "session_id": "trace_20260129_180023_task49_为我调研全球范围内_20-30岁的女性对口腔正畸和医美的共同.jsonl",
+          "sha256": "65b0d888d839e4dd8c2c71ba44a4e432446e9fa7cc44dfb013ccda6241230263"
+        },
+        {
+          "session_id": "trace_20260129_181515_task50_收集整理有关孩子身心健康成长的相关资料_比如怎样合理安排学习.jsonl",
+          "sha256": "ffc560411016c48728a9eb8b7267244c4e3c70184caefff54376c2739bbf9f39"
+        },
+        {
+          "session_id": "trace_20260129_181716_task51_From_2020_to_2050__how_many_el.jsonl",
+          "sha256": "5d9ba66ab0ec30096e9d197d1e6649e739ad1783318906b9dd6fe13f3c5968ba"
+        },
+        {
+          "session_id": "trace_20260129_182252_task53_Researching_how_the_world_s_we.jsonl",
+          "sha256": "168d027659ab312019c4ffb992d50b1c22c380f90164315f72e258c22c49f778"
+        },
+        {
+          "session_id": "trace_20260129_182409_task54_In_the_field_of_FinTech__machi.jsonl",
+          "sha256": "c0c3cf7ddaa1f40a8df3a433da0c29c2f0de13b888ddd17bf7e66300e191915a"
+        },
+        {
+          "session_id": "trace_20260129_182954_task55_While_the_market_features_dive.jsonl",
+          "sha256": "578aae36cbb331f0c85c740f531e90dd49c235a07e2a052802bb56c1c3c3bd17"
+        },
+        {
+          "session_id": "trace_20260129_183321_task56_Is_there_a_general_method_for.jsonl",
+          "sha256": "7beb5bc3a58b7e9f905ec0b5de883b20cf1bc799be19b30af4ac1c87d38bd2af"
+        },
+        {
+          "session_id": "trace_20260129_184006_task57_Summarize_the_global_investmen.jsonl",
+          "sha256": "9783d2ef0b3a09e10a86983ddcca7119efd989b1d03e329b4522930668462fdf"
+        },
+        {
+          "session_id": "trace_20260129_184801_task58_Exploring_Horizontal_Gene_Tran.jsonl",
+          "sha256": "2af8a8d046b57d0b7323337e834f6dce64f0157e65b542e315b7eceda690ed40"
+        },
+        {
+          "session_id": "trace_20260129_185333_task60_How_to_conduct_comprehensive_a.jsonl",
+          "sha256": "5b271fc7e4da7b807e114f0877254215d39245a806b735bb12011bf5e8d6f883"
+        },
+        {
+          "session_id": "trace_20260129_185704_task61_Research_on_the_price_dynamics.jsonl",
+          "sha256": "44bef88e5dce6e7335e38d3f91635a90cf4180b40f2a6973948d348cc68660b2"
+        },
+        {
+          "session_id": "trace_20260129_190604_task63__working_on_LN-based_nonlinear.jsonl",
+          "sha256": "a2a08c231d09632f0c33af4318d9c4537c343ea2d170ec70214985239f2008cd"
+        },
+        {
+          "session_id": "trace_20260129_191021_task65_As_an_agricultural_engineering.jsonl",
+          "sha256": "1ce7bbf138655412f5e0b46c341fa2f8eac8a9fc6241bb90e4607a7e1a244630"
+        },
+        {
+          "session_id": "trace_20260129_191422_task66_Which_Obsidian_plugins_can_eff.jsonl",
+          "sha256": "d95ee5a30c8165ad2c26bccf265e0fc796018f0595acc706980a7df783b86328"
+        },
+        {
+          "session_id": "trace_20260129_193204_task69_Please_provide_a_detailed_expl.jsonl",
+          "sha256": "52e856063321429d105c6fb99a7e841582661d955dded54ce9ff58a7e1927690"
+        },
+        {
+          "session_id": "trace_20260129_193436_task70_Trace_the_evolution_from_Java.jsonl",
+          "sha256": "670f220aba1e654252d37810d3f1a98f2915d80488277ffbae513cb07aeea128"
+        },
+        {
+          "session_id": "trace_20260129_194102_task74_Please_conduct_a_study_and_pre.jsonl",
+          "sha256": "673552ee726b8a9dcc5951aa03bbd7dcd5d1352f28c6e54a336bb34dccc99010"
+        },
+        {
+          "session_id": "trace_20260129_194149_task75_Could_the_rapeutic_interventio.jsonl",
+          "sha256": "f85cf78a3c7884599e2e9bf2d21e5ad3546d596895b98775c58c3c6a53a83086"
+        },
+        {
+          "session_id": "trace_20260129_194249_task76_The_significance_of_the_gut_mi.jsonl",
+          "sha256": "c04296948eb677ba39fcbdc8e71490e898e90cf761a5079f3205cc872bc0af5f"
+        },
+        {
+          "session_id": "trace_20260129_194634_task78_Parkinson_s_disease_has_a_prof.jsonl",
+          "sha256": "94f5ca5666ca4c589aca8ab0e6f4910efed10359ecb4e9544b2d7bf5e87ed90e"
+        },
+        {
+          "session_id": "trace_20260129_194840_task79_Write_a_paper_on_Middle_Easter.jsonl",
+          "sha256": "6253f585935bf39985e410e3126bfc50298d96fe881d6c3b77e292ec2b17a08b"
+        },
+        {
+          "session_id": "trace_20260129_195012_task80_Please_investigate_the_influen.jsonl",
+          "sha256": "5c281cb469c34f86507b1aa5af64709600373fbcfd27eaea9ba15e8dc0388bcb"
+        },
+        {
+          "session_id": "trace_20260129_195638_task82_Research_and_analyze_the_diver.jsonl",
+          "sha256": "0d635e3045558f8b98c147f9dcb570d597a9dd378f8779e90ed77fd89b1814eb"
+        },
+        {
+          "session_id": "trace_20260129_195857_task83_Acting_as_a_senior_hardware_pr.jsonl",
+          "sha256": "40679409b838a9ece550534b5ac884102dd27396b1288d77d507b00319544a8a"
+        },
+        {
+          "session_id": "trace_20260129_200117_task84_Research_for_me_how_to_improve.jsonl",
+          "sha256": "f59f484abc35a0e63045dd106475242a1811f93677fe95b522326205f83b05c8"
+        },
+        {
+          "session_id": "trace_20260129_200407_task85_The_primary_components_of_a_pr.jsonl",
+          "sha256": "9595ddb381133d21743b2e5f3149ed18b6a1527d022c77eebe8bdd53adff5c15"
+        },
+        {
+          "session_id": "trace_20260129_200910_task86_Conduct_a_research_report_on_t.jsonl",
+          "sha256": "35968505f6db5baa121bba388189cd916525afb7e035003f43c30e16689b3811"
+        },
+        {
+          "session_id": "trace_20260129_201743_task87_Are_AI_fashion_design_tools_le.jsonl",
+          "sha256": "d0752989f037b9b542229d83255f9e4a96beef5431f82a5f61da0fb85d1b2a56"
+        },
+        {
+          "session_id": "trace_20260129_202117_task88_How_did_Netflix_manage_to_succ.jsonl",
+          "sha256": "f87029fab35c255f7234abe8e7c9c431c4511e02d5c09cc727790f555b010b74"
+        },
+        {
+          "session_id": "trace_20260129_202340_task89_Research_and_analyze_the_lates.jsonl",
+          "sha256": "0bf9b2e989e934635bf52812a81fcbcfcbeea3a137e5d37469d07cb385d816dc"
+        },
+        {
+          "session_id": "trace_20260129_202616_task90_Analyze_the_complex_issue_of_l.jsonl",
+          "sha256": "6ad311dcae0a398d4d9afdc394b614cb4fb21a300e5ad97fc2529de140dbdf38"
+        },
+        {
+          "session_id": "trace_20260129_205038_task93_Please_prepare_a_market_resear.jsonl",
+          "sha256": "4a3301bdfa9782b5e99ce30adeaae5c435260782ad3aa5ced86db2c9dd569854"
+        },
+        {
+          "session_id": "trace_20260129_205428_task94_Could_you_provide_information.jsonl",
+          "sha256": "5a307a9ca7ae87736c8a423e6274855452b9d85b4be678ec7e286c2ae5678a0b"
+        },
+        {
+          "session_id": "trace_20260129_205929_task95_Create_comprehensive__in-depth.jsonl",
+          "sha256": "4baafcec3a43973ae0f0c3101325101deb30a310d0a0a97ea8d3f82a444df585"
+        },
+        {
+          "session_id": "trace_20260129_210554_task96_Please_draft_a_research_report.jsonl",
+          "sha256": "1fc71ea8a8a2158d47a22511c8b2cf2aaf3dbd1d4c50712233aff28050793799"
+        },
+        {
+          "session_id": "trace_20260129_212451_task98_Research_Topic__Crafting_Techn.jsonl",
+          "sha256": "f7337a0116d0e00d2aa25fec2b920c0b02059cf9785971e34e4e024752169026"
+        }
+      ]
+    },
+    "version": 1
+  },
+  "replayed_authoritative_invocations": 88,
+  "replayed_examples": 34,
+  "scheduler": {
+    "admitted": 170,
+    "authoritative_executions": 39,
+    "commits": 88,
+    "completed_reuse": 23,
+    "duplicate_predictions": 0,
+    "expired": 121,
+    "inflight_promotions": 26,
+    "misses": 39,
+    "rejected_capacity": 0,
+    "saved_time_s": 0.00274984393035993,
+    "speculative_failures": 0
+  },
+  "schema": "paste_repro.tool_only_replay",
+  "split": {
+    "held_out_search_visit_examples": 34,
+    "held_out_sessions": 30,
+    "seed": "paste-repro-v1",
+    "total_sessions": 100,
+    "train_ratio": 0.7,
+    "train_search_visit_examples": 82,
+    "train_sessions": 70
+  },
+  "state_isolation_violations": 0,
+  "version": 1
+}

@@ -1,0 +1,389 @@
+{
+  "schema_version": 2,
+  "split_id": "live-joint-wikipedia-frozen-formal-v7",
+  "split_role": "formal_heldout",
+  "formal_eligible": true,
+  "created_date_utc": "2026-08-16",
+  "used_for_tuning": false,
+  "used_for_parameter_selection": false,
+  "untouched_at_freeze": true,
+  "frozen_call_graph": true,
+  "language": "en",
+  "source_count": 60,
+  "search_backend": "bing_html_search",
+  "visit_backend": "r.jina.ai",
+  "description": "Untouched formal held-out sources for the frozen v7 live tool/LLM experiment. These sources were selected and frozen offline before any v7 execution, without inspecting performance artifacts, and are disjoint from every development, tuning, frozen-development, frozen-tuning, and formal-v2 through formal-v6 source. Each authoritative Wikipedia visit URL was committed before execution; this split must not be inspected for tuning, load selection, or parameter selection.",
+  "excluded_workloads": [
+    "live_joint_wikipedia_v1.json",
+    "live_joint_wikipedia_tune_v1.json",
+    "live_joint_wikipedia_frozen_dev_v1.json",
+    "live_joint_wikipedia_frozen_tune_v1.json",
+    "live_joint_wikipedia_frozen_formal_v2.json",
+    "live_joint_wikipedia_frozen_formal_v3.json",
+    "live_joint_wikipedia_frozen_formal_v4.json",
+    "live_joint_wikipedia_frozen_formal_v5.json",
+    "live_joint_wikipedia_frozen_formal_v6.json"
+  ],
+  "sources": [
+    {
+      "source_id": "formal-v7-001",
+      "question": "Where did the Hittites establish their kingdom, and which regions did they control?",
+      "search_query": "Hittites",
+      "expected_url": "https://en.wikipedia.org/wiki/Hittites"
+    },
+    {
+      "source_id": "formal-v7-002",
+      "question": "Who founded the Seleucid Empire, and across which territories did it extend?",
+      "search_query": "Seleucid Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Seleucid_Empire"
+    },
+    {
+      "source_id": "formal-v7-003",
+      "question": "When did the Sasanian Empire rule, and how was its government organized?",
+      "search_query": "Sasanian Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Sasanian_Empire"
+    },
+    {
+      "source_id": "formal-v7-004",
+      "question": "Where was the Kingdom of Kush centered, and which cultures shaped it?",
+      "search_query": "Kingdom of Kush",
+      "expected_url": "https://en.wikipedia.org/wiki/Kingdom_of_Kush"
+    },
+    {
+      "source_id": "formal-v7-005",
+      "question": "Where did the Kingdom of Aksum develop, and what supported its prosperity?",
+      "search_query": "Kingdom of Aksum",
+      "expected_url": "https://en.wikipedia.org/wiki/Kingdom_of_Aksum"
+    },
+    {
+      "source_id": "formal-v7-006",
+      "question": "Where was Srivijaya based, and how did it influence maritime trade?",
+      "search_query": "Srivijaya",
+      "expected_url": "https://en.wikipedia.org/wiki/Srivijaya"
+    },
+    {
+      "source_id": "formal-v7-007",
+      "question": "Where did the Songhai Empire emerge, and how did its rulers expand it?",
+      "search_query": "Songhai Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Songhai_Empire"
+    },
+    {
+      "source_id": "formal-v7-008",
+      "question": "When did the Delhi Sultanate govern, and which dynasties led it?",
+      "search_query": "Delhi Sultanate",
+      "expected_url": "https://en.wikipedia.org/wiki/Delhi_Sultanate"
+    },
+    {
+      "source_id": "formal-v7-009",
+      "question": "How was the Dutch Republic governed, and what drove its commercial growth?",
+      "search_query": "Dutch Republic",
+      "expected_url": "https://en.wikipedia.org/wiki/Dutch_Republic"
+    },
+    {
+      "source_id": "formal-v7-010",
+      "question": "Why did the War of the Spanish Succession begin, and how did it end?",
+      "search_query": "War of the Spanish Succession",
+      "expected_url": "https://en.wikipedia.org/wiki/War_of_the_Spanish_Succession"
+    },
+    {
+      "source_id": "formal-v7-011",
+      "question": "What prompted the Greek War of Independence, and when was sovereignty recognized?",
+      "search_query": "Greek War of Independence",
+      "expected_url": "https://en.wikipedia.org/wiki/Greek_War_of_Independence"
+    },
+    {
+      "source_id": "formal-v7-012",
+      "question": "What caused the An Lushan Rebellion, and how did it affect imperial rule?",
+      "search_query": "An Lushan Rebellion",
+      "expected_url": "https://en.wikipedia.org/wiki/An_Lushan_Rebellion"
+    },
+    {
+      "source_id": "formal-v7-013",
+      "question": "Where does the Lena River flow, and into which sea does it empty?",
+      "search_query": "Lena River",
+      "expected_url": "https://en.wikipedia.org/wiki/Lena_River"
+    },
+    {
+      "source_id": "formal-v7-014",
+      "question": "Where does the Zambezi flow, and which notable waterfall lies along it?",
+      "search_query": "Zambezi",
+      "expected_url": "https://en.wikipedia.org/wiki/Zambezi"
+    },
+    {
+      "source_id": "formal-v7-015",
+      "question": "Where is Lake Chad located, and why has its area varied over time?",
+      "search_query": "Lake Chad",
+      "expected_url": "https://en.wikipedia.org/wiki/Lake_Chad"
+    },
+    {
+      "source_id": "formal-v7-016",
+      "question": "Which countries border the Black Sea, and which straits connect it outward?",
+      "search_query": "Black Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Black_Sea"
+    },
+    {
+      "source_id": "formal-v7-017",
+      "question": "Which waters does the Strait of Hormuz connect, and why is it strategic?",
+      "search_query": "Strait of Hormuz",
+      "expected_url": "https://en.wikipedia.org/wiki/Strait_of_Hormuz"
+    },
+    {
+      "source_id": "formal-v7-018",
+      "question": "Where do the Appalachian Mountains extend, and how did they form?",
+      "search_query": "Appalachian Mountains",
+      "expected_url": "https://en.wikipedia.org/wiki/Appalachian_Mountains"
+    },
+    {
+      "source_id": "formal-v7-019",
+      "question": "Where do the Atlas Mountains extend, and which peaks are highest?",
+      "search_query": "Atlas Mountains",
+      "expected_url": "https://en.wikipedia.org/wiki/Atlas_Mountains"
+    },
+    {
+      "source_id": "formal-v7-020",
+      "question": "Where are the Ethiopian Highlands, and which forces shaped their terrain?",
+      "search_query": "Ethiopian Highlands",
+      "expected_url": "https://en.wikipedia.org/wiki/Ethiopian_Highlands"
+    },
+    {
+      "source_id": "formal-v7-021",
+      "question": "Where is the Taklamakan Desert, and what physical features surround it?",
+      "search_query": "Taklamakan Desert",
+      "expected_url": "https://en.wikipedia.org/wiki/Taklamakan_Desert"
+    },
+    {
+      "source_id": "formal-v7-022",
+      "question": "Where is the Kamchatka Peninsula, and why is its volcanism notable?",
+      "search_query": "Kamchatka Peninsula",
+      "expected_url": "https://en.wikipedia.org/wiki/Kamchatka_Peninsula"
+    },
+    {
+      "source_id": "formal-v7-023",
+      "question": "Which countries border the Persian Gulf, and how does it connect seaward?",
+      "search_query": "Persian Gulf",
+      "expected_url": "https://en.wikipedia.org/wiki/Persian_Gulf"
+    },
+    {
+      "source_id": "formal-v7-024",
+      "question": "Where is the Mozambique Channel, and which landmasses define its boundaries?",
+      "search_query": "Mozambique Channel",
+      "expected_url": "https://en.wikipedia.org/wiki/Mozambique_Channel"
+    },
+    {
+      "source_id": "formal-v7-025",
+      "question": "What electrical relationship does Ohm's law express for a conductor?",
+      "search_query": "Ohm's law",
+      "expected_url": "https://en.wikipedia.org/wiki/Ohm%27s_law"
+    },
+    {
+      "source_id": "formal-v7-026",
+      "question": "How does Boyle's law relate gas pressure and volume at constant temperature?",
+      "search_query": "Boyle's law",
+      "expected_url": "https://en.wikipedia.org/wiki/Boyle%27s_law"
+    },
+    {
+      "source_id": "formal-v7-027",
+      "question": "What restriction does the Pauli exclusion principle place on identical fermions?",
+      "search_query": "Pauli exclusion principle",
+      "expected_url": "https://en.wikipedia.org/wiki/Pauli_exclusion_principle"
+    },
+    {
+      "source_id": "formal-v7-028",
+      "question": "What happens during Compton scattering, and how does photon wavelength change?",
+      "search_query": "Compton scattering",
+      "expected_url": "https://en.wikipedia.org/wiki/Compton_scattering"
+    },
+    {
+      "source_id": "formal-v7-029",
+      "question": "How does the Hall effect produce voltage across a current-carrying material?",
+      "search_query": "Hall effect",
+      "expected_url": "https://en.wikipedia.org/wiki/Hall_effect"
+    },
+    {
+      "source_id": "formal-v7-030",
+      "question": "What does conservation of energy require within an isolated physical system?",
+      "search_query": "Conservation of energy",
+      "expected_url": "https://en.wikipedia.org/wiki/Conservation_of_energy"
+    },
+    {
+      "source_id": "formal-v7-031",
+      "question": "How does Le Chatelier's principle predict shifts in chemical equilibrium?",
+      "search_query": "Le Chatelier's principle",
+      "expected_url": "https://en.wikipedia.org/wiki/Le_Chatelier%27s_principle"
+    },
+    {
+      "source_id": "formal-v7-032",
+      "question": "How does distillation separate substances using differences in volatility?",
+      "search_query": "Distillation",
+      "expected_url": "https://en.wikipedia.org/wiki/Distillation"
+    },
+    {
+      "source_id": "formal-v7-033",
+      "question": "What occurs during apoptosis, and why is controlled cell death useful?",
+      "search_query": "Apoptosis",
+      "expected_url": "https://en.wikipedia.org/wiki/Apoptosis"
+    },
+    {
+      "source_id": "formal-v7-034",
+      "question": "How does homeostasis maintain stable internal conditions in living organisms?",
+      "search_query": "Homeostasis",
+      "expected_url": "https://en.wikipedia.org/wiki/Homeostasis"
+    },
+    {
+      "source_id": "formal-v7-035",
+      "question": "How does ecological succession change a biological community over time?",
+      "search_query": "Ecological succession",
+      "expected_url": "https://en.wikipedia.org/wiki/Ecological_succession"
+    },
+    {
+      "source_id": "formal-v7-036",
+      "question": "What functions does the lysosome perform inside a eukaryotic cell?",
+      "search_query": "Lysosome",
+      "expected_url": "https://en.wikipedia.org/wiki/Lysosome"
+    },
+    {
+      "source_id": "formal-v7-037",
+      "question": "How does heap sort organize elements, and which data structure does it use?",
+      "search_query": "Heap sort",
+      "expected_url": "https://en.wikipedia.org/wiki/Heap_sort"
+    },
+    {
+      "source_id": "formal-v7-038",
+      "question": "How does the Bellman-Ford algorithm find paths when edges may be negative?",
+      "search_query": "Bellman-Ford algorithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm"
+    },
+    {
+      "source_id": "formal-v7-039",
+      "question": "How does an AVL tree restore balance after insertions or deletions?",
+      "search_query": "AVL tree",
+      "expected_url": "https://en.wikipedia.org/wiki/AVL_tree"
+    },
+    {
+      "source_id": "formal-v7-040",
+      "question": "How does a trie store strings, and which lookups does it accelerate?",
+      "search_query": "Trie",
+      "expected_url": "https://en.wikipedia.org/wiki/Trie"
+    },
+    {
+      "source_id": "formal-v7-041",
+      "question": "How does Transport Layer Security protect communication between networked applications?",
+      "search_query": "Transport Layer Security",
+      "expected_url": "https://en.wikipedia.org/wiki/Transport_Layer_Security"
+    },
+    {
+      "source_id": "formal-v7-042",
+      "question": "How does a file system organize stored data and associated metadata?",
+      "search_query": "File system",
+      "expected_url": "https://en.wikipedia.org/wiki/File_system"
+    },
+    {
+      "source_id": "formal-v7-043",
+      "question": "How does database normalization reduce redundancy and preserve data consistency?",
+      "search_query": "Database normalization",
+      "expected_url": "https://en.wikipedia.org/wiki/Database_normalization"
+    },
+    {
+      "source_id": "formal-v7-044",
+      "question": "How does garbage collection reclaim unreachable storage during program execution?",
+      "search_query": "Garbage collection (computer science)",
+      "expected_url": "https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)"
+    },
+    {
+      "source_id": "formal-v7-045",
+      "question": "What creates a race condition, and why can its outcome vary?",
+      "search_query": "Race condition",
+      "expected_url": "https://en.wikipedia.org/wiki/Race_condition"
+    },
+    {
+      "source_id": "formal-v7-046",
+      "question": "How does deadlock arise when processes compete for shared resources?",
+      "search_query": "Deadlock",
+      "expected_url": "https://en.wikipedia.org/wiki/Deadlock"
+    },
+    {
+      "source_id": "formal-v7-047",
+      "question": "How does functional programming build computations from functions and expressions?",
+      "search_query": "Functional programming",
+      "expected_url": "https://en.wikipedia.org/wiki/Functional_programming"
+    },
+    {
+      "source_id": "formal-v7-048",
+      "question": "How does version control track revisions and coordinate changes among collaborators?",
+      "search_query": "Version control",
+      "expected_url": "https://en.wikipedia.org/wiki/Version_control"
+    },
+    {
+      "source_id": "formal-v7-049",
+      "question": "What does the Discobolus depict, and who created its original design?",
+      "search_query": "Discobolus",
+      "expected_url": "https://en.wikipedia.org/wiki/Discobolus"
+    },
+    {
+      "source_id": "formal-v7-050",
+      "question": "What figure does the Apollo Belvedere portray, and where is it displayed?",
+      "search_query": "Apollo Belvedere",
+      "expected_url": "https://en.wikipedia.org/wiki/Apollo_Belvedere"
+    },
+    {
+      "source_id": "formal-v7-051",
+      "question": "Who painted the Sistine Chapel ceiling, and which scenes appear there?",
+      "search_query": "Sistine Chapel ceiling",
+      "expected_url": "https://en.wikipedia.org/wiki/Sistine_Chapel_ceiling"
+    },
+    {
+      "source_id": "formal-v7-052",
+      "question": "Who painted The Last Supper, and which event does it represent?",
+      "search_query": "The Last Supper (Leonardo)",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Last_Supper_(Leonardo)"
+    },
+    {
+      "source_id": "formal-v7-053",
+      "question": "Who painted The Milkmaid, and what domestic activity does it show?",
+      "search_query": "The Milkmaid (Vermeer)",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Milkmaid_(Vermeer)"
+    },
+    {
+      "source_id": "formal-v7-054",
+      "question": "Who painted The Raft of the Medusa, and which disaster inspired it?",
+      "search_query": "The Raft of the Medusa",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Raft_of_the_Medusa"
+    },
+    {
+      "source_id": "formal-v7-055",
+      "question": "Who painted Olympia, and why did its exhibition provoke controversy?",
+      "search_query": "Olympia (Manet)",
+      "expected_url": "https://en.wikipedia.org/wiki/Olympia_(Manet)"
+    },
+    {
+      "source_id": "formal-v7-056",
+      "question": "Who painted Whistler's Mother, and how is its subject posed?",
+      "search_query": "Whistler's Mother",
+      "expected_url": "https://en.wikipedia.org/wiki/Whistler%27s_Mother"
+    },
+    {
+      "source_id": "formal-v7-057",
+      "question": "Who wrote The Decameron, and how are its stories framed?",
+      "search_query": "The Decameron",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Decameron"
+    },
+    {
+      "source_id": "formal-v7-058",
+      "question": "Who wrote Gulliver's Travels, and which societies does its traveler encounter?",
+      "search_query": "Gulliver's Travels",
+      "expected_url": "https://en.wikipedia.org/wiki/Gulliver%27s_Travels"
+    },
+    {
+      "source_id": "formal-v7-059",
+      "question": "Who wrote Frankenstein, and how does the created being come to life?",
+      "search_query": "Frankenstein",
+      "expected_url": "https://en.wikipedia.org/wiki/Frankenstein"
+    },
+    {
+      "source_id": "formal-v7-060",
+      "question": "Who wrote Beloved, and how does the past haunt its central family?",
+      "search_query": "Beloved (novel)",
+      "expected_url": "https://en.wikipedia.org/wiki/Beloved_(novel)"
+    }
+  ]
+}

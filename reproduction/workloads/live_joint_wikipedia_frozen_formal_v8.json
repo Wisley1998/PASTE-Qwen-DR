@@ -1,0 +1,510 @@
+{
+  "schema_version": 2,
+  "split_id": "live-joint-wikipedia-frozen-formal-v8",
+  "split_role": "formal_heldout",
+  "formal_eligible": true,
+  "created_date_utc": "2026-08-16",
+  "used_for_tuning": false,
+  "used_for_parameter_selection": false,
+  "untouched_at_freeze": true,
+  "frozen_call_graph": true,
+  "language": "en",
+  "source_count": 80,
+  "search_backend": "bing_html_search",
+  "visit_backend": "r.jina.ai",
+  "description": "Untouched formal held-out sources for the frozen v8 live tool/LLM experiment. These 80 sources were selected and frozen offline before any v8 execution, without inspecting performance artifacts, and are disjoint from every development, tuning, frozen-development, frozen-tuning, and formal-v2 through formal-v7 source. Each authoritative Wikipedia visit URL was committed before execution; this split must use exactly one replica per source and must not be inspected for tuning, load selection, or parameter selection.",
+  "excluded_workloads": [
+    "live_joint_wikipedia_v1.json",
+    "live_joint_wikipedia_tune_v1.json",
+    "live_joint_wikipedia_frozen_dev_v1.json",
+    "live_joint_wikipedia_frozen_tune_v1.json",
+    "live_joint_wikipedia_frozen_formal_v2.json",
+    "live_joint_wikipedia_frozen_formal_v3.json",
+    "live_joint_wikipedia_frozen_formal_v4.json",
+    "live_joint_wikipedia_frozen_formal_v5.json",
+    "live_joint_wikipedia_frozen_formal_v6.json",
+    "live_joint_wikipedia_frozen_formal_v7.json"
+  ],
+  "sources": [
+    {
+      "source_id": "formal-v8-001",
+      "question": "Where did the Olmecs flourish, and what cultural legacy did they leave?",
+      "search_query": "Olmecs",
+      "expected_url": "https://en.wikipedia.org/wiki/Olmecs"
+    },
+    {
+      "source_id": "formal-v8-002",
+      "question": "Where did Minoan civilization develop, and what supported its maritime influence?",
+      "search_query": "Minoan civilization",
+      "expected_url": "https://en.wikipedia.org/wiki/Minoan_civilization"
+    },
+    {
+      "source_id": "formal-v8-003",
+      "question": "Where did Etruscan civilization arise, and how was its society organized?",
+      "search_query": "Etruscan civilization",
+      "expected_url": "https://en.wikipedia.org/wiki/Etruscan_civilization"
+    },
+    {
+      "source_id": "formal-v8-004",
+      "question": "When did the Parthian Empire rule, and how did it resist neighboring powers?",
+      "search_query": "Parthian Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Parthian_Empire"
+    },
+    {
+      "source_id": "formal-v8-005",
+      "question": "Where did the Chola dynasty rule, and what enabled its overseas reach?",
+      "search_query": "Chola dynasty",
+      "expected_url": "https://en.wikipedia.org/wiki/Chola_dynasty"
+    },
+    {
+      "source_id": "formal-v8-006",
+      "question": "Who established the Timurid Empire, and which regions came under its rule?",
+      "search_query": "Timurid Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Timurid_Empire"
+    },
+    {
+      "source_id": "formal-v8-007",
+      "question": "Where was the Ghana Empire centered, and what sustained its commerce?",
+      "search_query": "Ghana Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Ghana_Empire"
+    },
+    {
+      "source_id": "formal-v8-008",
+      "question": "Where was the Benin Empire located, and how was its court governed?",
+      "search_query": "Benin Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Benin_Empire"
+    },
+    {
+      "source_id": "formal-v8-009",
+      "question": "When did the Warring States period occur, and which states competed?",
+      "search_query": "Warring States period",
+      "expected_url": "https://en.wikipedia.org/wiki/Warring_States_period"
+    },
+    {
+      "source_id": "formal-v8-010",
+      "question": "When did the Sengoku period unfold, and how did political authority change?",
+      "search_query": "Sengoku period",
+      "expected_url": "https://en.wikipedia.org/wiki/Sengoku_period"
+    },
+    {
+      "source_id": "formal-v8-011",
+      "question": "What triggered the Revolutions of 1848, and where did uprisings spread?",
+      "search_query": "Revolutions of 1848",
+      "expected_url": "https://en.wikipedia.org/wiki/Revolutions_of_1848"
+    },
+    {
+      "source_id": "formal-v8-012",
+      "question": "Why did the Russo-Japanese War begin, and what settlement ended it?",
+      "search_query": "Russo-Japanese War",
+      "expected_url": "https://en.wikipedia.org/wiki/Russo-Japanese_War"
+    },
+    {
+      "source_id": "formal-v8-013",
+      "question": "Why did the Hundred Years' War begin, and how did it conclude?",
+      "search_query": "Hundred Years' War",
+      "expected_url": "https://en.wikipedia.org/wiki/Hundred_Years%27_War"
+    },
+    {
+      "source_id": "formal-v8-014",
+      "question": "What caused the Indian Rebellion of 1857, and how was it suppressed?",
+      "search_query": "Indian Rebellion of 1857",
+      "expected_url": "https://en.wikipedia.org/wiki/Indian_Rebellion_of_1857"
+    },
+    {
+      "source_id": "formal-v8-015",
+      "question": "How did the Zulu Kingdom form, and which leaders expanded its power?",
+      "search_query": "Zulu Kingdom",
+      "expected_url": "https://en.wikipedia.org/wiki/Zulu_Kingdom"
+    },
+    {
+      "source_id": "formal-v8-016",
+      "question": "What prompted the Mexican War of Independence, and when was independence achieved?",
+      "search_query": "Mexican War of Independence",
+      "expected_url": "https://en.wikipedia.org/wiki/Mexican_War_of_Independence"
+    },
+    {
+      "source_id": "formal-v8-017",
+      "question": "Where does the Volga flow, and into which body of water does it empty?",
+      "search_query": "Volga",
+      "expected_url": "https://en.wikipedia.org/wiki/Volga"
+    },
+    {
+      "source_id": "formal-v8-018",
+      "question": "Where does the Yangtze flow, and which major regions does it cross?",
+      "search_query": "Yangtze",
+      "expected_url": "https://en.wikipedia.org/wiki/Yangtze"
+    },
+    {
+      "source_id": "formal-v8-019",
+      "question": "Where is Lake Balkhash, and why do its waters differ across the basin?",
+      "search_query": "Lake Balkhash",
+      "expected_url": "https://en.wikipedia.org/wiki/Lake_Balkhash"
+    },
+    {
+      "source_id": "formal-v8-020",
+      "question": "Which lands surround the Red Sea, and how does it connect outward?",
+      "search_query": "Red Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Red_Sea"
+    },
+    {
+      "source_id": "formal-v8-021",
+      "question": "Which countries border the Sea of Japan, and how is it connected?",
+      "search_query": "Sea of Japan",
+      "expected_url": "https://en.wikipedia.org/wiki/Sea_of_Japan"
+    },
+    {
+      "source_id": "formal-v8-022",
+      "question": "Where is the Gulf of California, and what geographic features define it?",
+      "search_query": "Gulf of California",
+      "expected_url": "https://en.wikipedia.org/wiki/Gulf_of_California"
+    },
+    {
+      "source_id": "formal-v8-023",
+      "question": "Where is Baffin Bay, and which landmasses form its boundaries?",
+      "search_query": "Baffin Bay",
+      "expected_url": "https://en.wikipedia.org/wiki/Baffin_Bay"
+    },
+    {
+      "source_id": "formal-v8-024",
+      "question": "Where is Drake Passage, and why are its ocean conditions notable?",
+      "search_query": "Drake Passage",
+      "expected_url": "https://en.wikipedia.org/wiki/Drake_Passage"
+    },
+    {
+      "source_id": "formal-v8-025",
+      "question": "Which waters does the Strait of Magellan connect, and where is it located?",
+      "search_query": "Strait of Magellan",
+      "expected_url": "https://en.wikipedia.org/wiki/Strait_of_Magellan"
+    },
+    {
+      "source_id": "formal-v8-026",
+      "question": "Where is the Sinai Peninsula, and which bodies of water border it?",
+      "search_query": "Sinai Peninsula",
+      "expected_url": "https://en.wikipedia.org/wiki/Sinai_Peninsula"
+    },
+    {
+      "source_id": "formal-v8-027",
+      "question": "Which region does the Balkan Peninsula occupy, and how are its limits defined?",
+      "search_query": "Balkan Peninsula",
+      "expected_url": "https://en.wikipedia.org/wiki/Balkan_Peninsula"
+    },
+    {
+      "source_id": "formal-v8-028",
+      "question": "Where are the Pamir Mountains, and which major ranges meet there?",
+      "search_query": "Pamir Mountains",
+      "expected_url": "https://en.wikipedia.org/wiki/Pamir_Mountains"
+    },
+    {
+      "source_id": "formal-v8-029",
+      "question": "Where does the Tian Shan extend, and how did its peaks form?",
+      "search_query": "Tian Shan",
+      "expected_url": "https://en.wikipedia.org/wiki/Tian_Shan"
+    },
+    {
+      "source_id": "formal-v8-030",
+      "question": "Where is Salar de Uyuni, and how did this salt flat develop?",
+      "search_query": "Salar de Uyuni",
+      "expected_url": "https://en.wikipedia.org/wiki/Salar_de_Uyuni"
+    },
+    {
+      "source_id": "formal-v8-031",
+      "question": "Where does the Mackenzie River flow, and which drainage basin feeds it?",
+      "search_query": "Mackenzie River",
+      "expected_url": "https://en.wikipedia.org/wiki/Mackenzie_River"
+    },
+    {
+      "source_id": "formal-v8-032",
+      "question": "Where does the Narmada River flow, and which terrain shapes its course?",
+      "search_query": "Narmada River",
+      "expected_url": "https://en.wikipedia.org/wiki/Narmada_River"
+    },
+    {
+      "source_id": "formal-v8-033",
+      "question": "What relationship does Gauss's law establish for electric fields and charge?",
+      "search_query": "Gauss's law",
+      "expected_url": "https://en.wikipedia.org/wiki/Gauss%27s_law"
+    },
+    {
+      "source_id": "formal-v8-034",
+      "question": "What does Kirchhoff's law of thermal radiation relate at equilibrium?",
+      "search_query": "Kirchhoff's law of thermal radiation",
+      "expected_url": "https://en.wikipedia.org/wiki/Kirchhoff%27s_law_of_thermal_radiation"
+    },
+    {
+      "source_id": "formal-v8-035",
+      "question": "What question does the Fermi paradox pose about extraterrestrial civilizations?",
+      "search_query": "Fermi paradox",
+      "expected_url": "https://en.wikipedia.org/wiki/Fermi_paradox"
+    },
+    {
+      "source_id": "formal-v8-036",
+      "question": "How does quantum tunnelling let particles cross a classically forbidden barrier?",
+      "search_query": "Quantum tunnelling",
+      "expected_url": "https://en.wikipedia.org/wiki/Quantum_tunnelling"
+    },
+    {
+      "source_id": "formal-v8-037",
+      "question": "Under what conditions does a Bose-Einstein condensate form, and what behavior emerges?",
+      "search_query": "Bose-Einstein condensate",
+      "expected_url": "https://en.wikipedia.org/wiki/Bose%E2%80%93Einstein_condensate"
+    },
+    {
+      "source_id": "formal-v8-038",
+      "question": "What stellar mass boundary is described by the Chandrasekhar limit?",
+      "search_query": "Chandrasekhar limit",
+      "expected_url": "https://en.wikipedia.org/wiki/Chandrasekhar_limit"
+    },
+    {
+      "source_id": "formal-v8-039",
+      "question": "What connection does Hubble's law describe between distance and recession speed?",
+      "search_query": "Hubble's law",
+      "expected_url": "https://en.wikipedia.org/wiki/Hubble%27s_law"
+    },
+    {
+      "source_id": "formal-v8-040",
+      "question": "How does nucleosynthesis create atomic nuclei in cosmic environments?",
+      "search_query": "Nucleosynthesis",
+      "expected_url": "https://en.wikipedia.org/wiki/Nucleosynthesis"
+    },
+    {
+      "source_id": "formal-v8-041",
+      "question": "How does a Geiger counter detect and register ionizing radiation?",
+      "search_query": "Geiger counter",
+      "expected_url": "https://en.wikipedia.org/wiki/Geiger_counter"
+    },
+    {
+      "source_id": "formal-v8-042",
+      "question": "How does mass spectrometry separate ions and identify chemical substances?",
+      "search_query": "Mass spectrometry",
+      "expected_url": "https://en.wikipedia.org/wiki/Mass_spectrometry"
+    },
+    {
+      "source_id": "formal-v8-043",
+      "question": "How does X-ray crystallography reveal the atomic arrangement within crystals?",
+      "search_query": "X-ray crystallography",
+      "expected_url": "https://en.wikipedia.org/wiki/X-ray_crystallography"
+    },
+    {
+      "source_id": "formal-v8-044",
+      "question": "How does a buffer solution resist changes in acidity or alkalinity?",
+      "search_query": "Buffer solution",
+      "expected_url": "https://en.wikipedia.org/wiki/Buffer_solution"
+    },
+    {
+      "source_id": "formal-v8-045",
+      "question": "What happens during transcription in biology, and which molecules participate?",
+      "search_query": "Transcription (biology)",
+      "expected_url": "https://en.wikipedia.org/wiki/Transcription_(biology)"
+    },
+    {
+      "source_id": "formal-v8-046",
+      "question": "How does an antibody recognize a target and help neutralize it?",
+      "search_query": "Antibody",
+      "expected_url": "https://en.wikipedia.org/wiki/Antibody"
+    },
+    {
+      "source_id": "formal-v8-047",
+      "question": "What makes a keystone species disproportionately important to its community?",
+      "search_query": "Keystone species",
+      "expected_url": "https://en.wikipedia.org/wiki/Keystone_species"
+    },
+    {
+      "source_id": "formal-v8-048",
+      "question": "How does Mendelian inheritance explain the transmission of biological traits?",
+      "search_query": "Mendelian inheritance",
+      "expected_url": "https://en.wikipedia.org/wiki/Mendelian_inheritance"
+    },
+    {
+      "source_id": "formal-v8-049",
+      "question": "How does the Floyd-Warshall algorithm compute paths between every vertex pair?",
+      "search_query": "Floyd-Warshall algorithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm"
+    },
+    {
+      "source_id": "formal-v8-050",
+      "question": "How does Kruskal's algorithm construct a minimum spanning forest?",
+      "search_query": "Kruskal's algorithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Kruskal%27s_algorithm"
+    },
+    {
+      "source_id": "formal-v8-051",
+      "question": "How does topological sorting order vertices in a directed graph?",
+      "search_query": "Topological sorting",
+      "expected_url": "https://en.wikipedia.org/wiki/Topological_sorting"
+    },
+    {
+      "source_id": "formal-v8-052",
+      "question": "How does a suffix array represent ordered suffixes for efficient lookup?",
+      "search_query": "Suffix array",
+      "expected_url": "https://en.wikipedia.org/wiki/Suffix_array"
+    },
+    {
+      "source_id": "formal-v8-053",
+      "question": "How does a skip list support probabilistic search and updates?",
+      "search_query": "Skip list",
+      "expected_url": "https://en.wikipedia.org/wiki/Skip_list"
+    },
+    {
+      "source_id": "formal-v8-054",
+      "question": "How does a disjoint-set data structure track separate and merged groups?",
+      "search_query": "Disjoint-set data structure",
+      "expected_url": "https://en.wikipedia.org/wiki/Disjoint-set_data_structure"
+    },
+    {
+      "source_id": "formal-v8-055",
+      "question": "How does an R-tree index multidimensional spatial information efficiently?",
+      "search_query": "R-tree",
+      "expected_url": "https://en.wikipedia.org/wiki/R-tree"
+    },
+    {
+      "source_id": "formal-v8-056",
+      "question": "How does arithmetic coding represent an entire message as an interval?",
+      "search_query": "Arithmetic coding",
+      "expected_url": "https://en.wikipedia.org/wiki/Arithmetic_coding"
+    },
+    {
+      "source_id": "formal-v8-057",
+      "question": "How does Huffman coding assign variable-length codes using symbol frequencies?",
+      "search_query": "Huffman coding",
+      "expected_url": "https://en.wikipedia.org/wiki/Huffman_coding"
+    },
+    {
+      "source_id": "formal-v8-058",
+      "question": "How does public-key cryptography use different keys for secure communication?",
+      "search_query": "Public-key cryptography",
+      "expected_url": "https://en.wikipedia.org/wiki/Public-key_cryptography"
+    },
+    {
+      "source_id": "formal-v8-059",
+      "question": "How does elliptic-curve cryptography derive security from algebraic curves?",
+      "search_query": "Elliptic-curve cryptography",
+      "expected_url": "https://en.wikipedia.org/wiki/Elliptic-curve_cryptography"
+    },
+    {
+      "source_id": "formal-v8-060",
+      "question": "How does Kerberos authenticate clients and services across an untrusted network?",
+      "search_query": "Kerberos (protocol)",
+      "expected_url": "https://en.wikipedia.org/wiki/Kerberos_(protocol)"
+    },
+    {
+      "source_id": "formal-v8-061",
+      "question": "How does containerization isolate applications while sharing an operating kernel?",
+      "search_query": "Containerization (computing)",
+      "expected_url": "https://en.wikipedia.org/wiki/Containerization_(computing)"
+    },
+    {
+      "source_id": "formal-v8-062",
+      "question": "How does a microkernel divide core services from user-space components?",
+      "search_query": "Microkernel",
+      "expected_url": "https://en.wikipedia.org/wiki/Microkernel"
+    },
+    {
+      "source_id": "formal-v8-063",
+      "question": "How does a database index speed retrieval, and what costs accompany it?",
+      "search_query": "Database index",
+      "expected_url": "https://en.wikipedia.org/wiki/Database_index"
+    },
+    {
+      "source_id": "formal-v8-064",
+      "question": "How does memory management allocate, track, and reclaim computer storage?",
+      "search_query": "Memory management",
+      "expected_url": "https://en.wikipedia.org/wiki/Memory_management"
+    },
+    {
+      "source_id": "formal-v8-065",
+      "question": "Who painted Primavera, and which figures appear in its allegorical scene?",
+      "search_query": "Primavera (Botticelli)",
+      "expected_url": "https://en.wikipedia.org/wiki/Primavera_(Botticelli)"
+    },
+    {
+      "source_id": "formal-v8-066",
+      "question": "Who painted The Ambassadors, and which symbolic objects fill the scene?",
+      "search_query": "The Ambassadors (Holbein)",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Ambassadors_(Holbein)"
+    },
+    {
+      "source_id": "formal-v8-067",
+      "question": "Who painted A Sunday Afternoon on the Island of La Grande Jatte, and how?",
+      "search_query": "A Sunday Afternoon on the Island of La Grande Jatte",
+      "expected_url": "https://en.wikipedia.org/wiki/A_Sunday_Afternoon_on_the_Island_of_La_Grande_Jatte"
+    },
+    {
+      "source_id": "formal-v8-068",
+      "question": "Who painted The Swing, and what movement and setting does it depict?",
+      "search_query": "The Swing (Fragonard)",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Swing_(Fragonard)"
+    },
+    {
+      "source_id": "formal-v8-069",
+      "question": "Who painted The Hay Wain, and which rural landscape does it show?",
+      "search_query": "The Hay Wain",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Hay_Wain"
+    },
+    {
+      "source_id": "formal-v8-070",
+      "question": "Who painted The Fighting Temeraire, and what final journey is represented?",
+      "search_query": "The Fighting Temeraire",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Fighting_Temeraire"
+    },
+    {
+      "source_id": "formal-v8-071",
+      "question": "Who painted The Third of May 1808, and what event does it portray?",
+      "search_query": "The Third of May 1808",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Third_of_May_1808"
+    },
+    {
+      "source_id": "formal-v8-072",
+      "question": "Who painted The Sleeping Gypsy, and what unusual encounter is shown?",
+      "search_query": "The Sleeping Gypsy",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Sleeping_Gypsy"
+    },
+    {
+      "source_id": "formal-v8-073",
+      "question": "Who painted Les Demoiselles d'Avignon, and why was its style influential?",
+      "search_query": "Les Demoiselles d'Avignon",
+      "expected_url": "https://en.wikipedia.org/wiki/Les_Demoiselles_d%27Avignon"
+    },
+    {
+      "source_id": "formal-v8-074",
+      "question": "Who created Campbell's Soup Cans, and how was the series presented?",
+      "search_query": "Campbell's Soup Cans",
+      "expected_url": "https://en.wikipedia.org/wiki/Campbell%27s_Soup_Cans"
+    },
+    {
+      "source_id": "formal-v8-075",
+      "question": "Who wrote The Metamorphosis, and what transformation drives its story?",
+      "search_query": "The Metamorphosis",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Metamorphosis"
+    },
+    {
+      "source_id": "formal-v8-076",
+      "question": "Who wrote The Stranger, and which themes shape its central character?",
+      "search_query": "The Stranger (Camus)",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Stranger_(Camus)"
+    },
+    {
+      "source_id": "formal-v8-077",
+      "question": "Who wrote Invisible Man, and what social experiences does its narrator confront?",
+      "search_query": "Invisible Man",
+      "expected_url": "https://en.wikipedia.org/wiki/Invisible_Man"
+    },
+    {
+      "source_id": "formal-v8-078",
+      "question": "Who wrote The Sun Also Rises, and where do its characters travel?",
+      "search_query": "The Sun Also Rises",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Sun_Also_Rises"
+    },
+    {
+      "source_id": "formal-v8-079",
+      "question": "Who wrote To the Lighthouse, and how does time reshape its family?",
+      "search_query": "To the Lighthouse",
+      "expected_url": "https://en.wikipedia.org/wiki/To_the_Lighthouse"
+    },
+    {
+      "source_id": "formal-v8-080",
+      "question": "Who wrote The Color Purple, and whose letters structure its narrative?",
+      "search_query": "The Color Purple",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Color_Purple"
+    }
+  ]
+}

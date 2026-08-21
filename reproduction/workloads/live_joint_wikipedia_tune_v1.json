@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "split_id": "live-joint-wikipedia-tune-v1",
+  "split_role": "tune",
+  "formal_eligible": false,
+  "description": "Sixteen independent tuning questions for one-block autonomous live-tool screening. These sources are disjoint from live_joint_wikipedia_v1.json and must never be counted as formal held-out evidence.",
+  "sources": [
+    {
+      "source_id": "tune-wiki001",
+      "question": "Who was Ada Lovelace and what computing contribution is she known for?",
+      "search_query": "Ada Lovelace"
+    },
+    {
+      "source_id": "tune-wiki002",
+      "question": "When did the International Space Station begin continuous human occupation?",
+      "search_query": "International Space Station"
+    },
+    {
+      "source_id": "tune-wiki003",
+      "question": "Where is the Taj Mahal and who commissioned it?",
+      "search_query": "Taj Mahal"
+    },
+    {
+      "source_id": "tune-wiki004",
+      "question": "What was the Magna Carta and when was it first issued?",
+      "search_query": "Magna Carta"
+    },
+    {
+      "source_id": "tune-wiki005",
+      "question": "Who proposed the Turing machine and what does the model describe?",
+      "search_query": "Turing machine"
+    },
+    {
+      "source_id": "tune-wiki006",
+      "question": "Where is the Dead Sea and why is its salinity notable?",
+      "search_query": "Dead Sea"
+    },
+    {
+      "source_id": "tune-wiki007",
+      "question": "What is the World Wide Web and who invented it?",
+      "search_query": "World Wide Web"
+    },
+    {
+      "source_id": "tune-wiki008",
+      "question": "When did Krakatoa's major 1883 eruption occur and what effects did it cause?",
+      "search_query": "1883 eruption of Krakatoa"
+    },
+    {
+      "source_id": "tune-wiki009",
+      "question": "What did the Antarctic Treaty establish and when did it enter into force?",
+      "search_query": "Antarctic Treaty System"
+    },
+    {
+      "source_id": "tune-wiki010",
+      "question": "Who discovered radioactivity and through what observation?",
+      "search_query": "Discovery of radioactivity"
+    },
+    {
+      "source_id": "tune-wiki011",
+      "question": "What is the Bayeux Tapestry and which conquest does it depict?",
+      "search_query": "Bayeux Tapestry"
+    },
+    {
+      "source_id": "tune-wiki012",
+      "question": "When was the first successful heart transplant performed and by whom?",
+      "search_query": "Heart transplantation Christiaan Barnard"
+    },
+    {
+      "source_id": "tune-wiki013",
+      "question": "What is the Atacama Desert and where is it located?",
+      "search_query": "Atacama Desert"
+    },
+    {
+      "source_id": "tune-wiki014",
+      "question": "Who developed the first widely used smallpox vaccine and when?",
+      "search_query": "Smallpox vaccine Edward Jenner"
+    },
+    {
+      "source_id": "tune-wiki015",
+      "question": "What is the Moai tradition of Rapa Nui and where are the statues found?",
+      "search_query": "Moai"
+    },
+    {
+      "source_id": "tune-wiki016",
+      "question": "When was the Treaty of Versailles signed and which war did it formally end?",
+      "search_query": "Treaty of Versailles"
+    }
+  ]
+}

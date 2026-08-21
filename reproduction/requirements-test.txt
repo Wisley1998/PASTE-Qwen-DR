@@ -1,0 +1,2 @@
+# Optional test-only dependency; the vLLM runtime lock stays in ../requirements.txt.
+pytest==9.0.3

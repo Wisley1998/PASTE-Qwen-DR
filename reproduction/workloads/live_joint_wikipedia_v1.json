@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "split_id": "live-joint-wikipedia-development-v1",
+  "split_role": "development",
+  "formal_eligible": false,
+  "description": "Development-only encyclopedia questions for live tool/LLM engineering. At least 24 sources were inspected during backend and load probes on 2026-08-16; this file is not untouched and must never be used for formal promotion. Search and visit remain real external HTTP calls; no recorded timing or payload is embedded here.",
+  "sources": [
+    {
+      "source_id": "wiki001",
+      "question": "When did Apollo 11 land on the Moon, and who walked on it?",
+      "search_query": "Apollo 11"
+    },
+    {
+      "source_id": "wiki002",
+      "question": "Who created the Python programming language and when was it first released?",
+      "search_query": "Python programming language"
+    },
+    {
+      "source_id": "wiki003",
+      "question": "Where is the Eiffel Tower and how tall is it?",
+      "search_query": "Eiffel Tower"
+    },
+    {
+      "source_id": "wiki004",
+      "question": "When was the Hubble Space Telescope launched and what is its purpose?",
+      "search_query": "Hubble Space Telescope"
+    },
+    {
+      "source_id": "wiki005",
+      "question": "Who discovered penicillin and in what year?",
+      "search_query": "Discovery of penicillin"
+    },
+    {
+      "source_id": "wiki006",
+      "question": "Where is the Great Barrier Reef located and why is it notable?",
+      "search_query": "Great Barrier Reef"
+    },
+    {
+      "source_id": "wiki007",
+      "question": "What is the exact defined speed of light in vacuum?",
+      "search_query": "Speed of light"
+    },
+    {
+      "source_id": "wiki008",
+      "question": "What is the commonly reported elevation of Mount Everest?",
+      "search_query": "Mount Everest"
+    },
+    {
+      "source_id": "wiki009",
+      "question": "When was the United Nations founded and where is its headquarters?",
+      "search_query": "United Nations"
+    },
+    {
+      "source_id": "wiki010",
+      "question": "Which scientists are credited with the double-helix model of DNA?",
+      "search_query": "Molecular structure of DNA"
+    },
+    {
+      "source_id": "wiki011",
+      "question": "When was Voyager 1 launched and what distinction does it hold?",
+      "search_query": "Voyager 1"
+    },
+    {
+      "source_id": "wiki012",
+      "question": "Who painted The Starry Night and when?",
+      "search_query": "The Starry Night"
+    },
+    {
+      "source_id": "wiki013",
+      "question": "What causes auroras near Earth's polar regions?",
+      "search_query": "Aurora"
+    },
+    {
+      "source_id": "wiki014",
+      "question": "What is photosynthesis and which organisms perform it?",
+      "search_query": "Photosynthesis"
+    },
+    {
+      "source_id": "wiki015",
+      "question": "Who developed the theory of general relativity and when was it published?",
+      "search_query": "General relativity"
+    },
+    {
+      "source_id": "wiki016",
+      "question": "What was the Rosetta Stone and why was it important?",
+      "search_query": "Rosetta Stone"
+    },
+    {
+      "source_id": "wiki017",
+      "question": "Where does the Amazon River flow and what is notable about its discharge?",
+      "search_query": "Amazon River"
+    },
+    {
+      "source_id": "wiki018",
+      "question": "When did the Berlin Wall fall and what did it separate?",
+      "search_query": "Berlin Wall"
+    },
+    {
+      "source_id": "wiki019",
+      "question": "What is CRISPR gene editing based on?",
+      "search_query": "CRISPR gene editing"
+    },
+    {
+      "source_id": "wiki020",
+      "question": "Who composed The Four Seasons and around when was it published?",
+      "search_query": "The Four Seasons Vivaldi"
+    },
+    {
+      "source_id": "wiki021",
+      "question": "What is the Mariana Trench and where is its deepest point?",
+      "search_query": "Mariana Trench"
+    },
+    {
+      "source_id": "wiki022",
+      "question": "When did the first powered Wright Flyer flight occur?",
+      "search_query": "Wright Flyer"
+    },
+    {
+      "source_id": "wiki023",
+      "question": "What is the Large Hadron Collider and where is it located?",
+      "search_query": "Large Hadron Collider"
+    },
+    {
+      "source_id": "wiki024",
+      "question": "Who wrote Pride and Prejudice and when was it published?",
+      "search_query": "Pride and Prejudice"
+    },
+    {
+      "source_id": "wiki025",
+      "question": "What is the function of mitochondria in eukaryotic cells?",
+      "search_query": "Mitochondrion"
+    },
+    {
+      "source_id": "wiki026",
+      "question": "Where is Machu Picchu and which civilization built it?",
+      "search_query": "Machu Picchu"
+    },
+    {
+      "source_id": "wiki027",
+      "question": "What is plate tectonics and what does it explain?",
+      "search_query": "Plate tectonics"
+    },
+    {
+      "source_id": "wiki028",
+      "question": "Who was the first woman to win a Nobel Prize and in what field?",
+      "search_query": "Marie Curie"
+    },
+    {
+      "source_id": "wiki029",
+      "question": "When was the printing press developed in Europe and by whom?",
+      "search_query": "Printing press Gutenberg"
+    },
+    {
+      "source_id": "wiki030",
+      "question": "What is the role of insulin in the human body?",
+      "search_query": "Insulin"
+    },
+    {
+      "source_id": "wiki031",
+      "question": "Where is the Serengeti ecosystem and what migration is it known for?",
+      "search_query": "Serengeti"
+    },
+    {
+      "source_id": "wiki032",
+      "question": "What was the Manhattan Project and when did it operate?",
+      "search_query": "Manhattan Project"
+    },
+    {
+      "source_id": "wiki033",
+      "question": "Who proposed continental drift and what did the idea claim?",
+      "search_query": "Continental drift"
+    },
+    {
+      "source_id": "wiki034",
+      "question": "What are the rings of Saturn primarily made of?",
+      "search_query": "Rings of Saturn"
+    },
+    {
+      "source_id": "wiki035",
+      "question": "When did the Chernobyl disaster occur and where?",
+      "search_query": "Chernobyl disaster"
+    },
+    {
+      "source_id": "wiki036",
+      "question": "What is the Fibonacci sequence and how does it begin?",
+      "search_query": "Fibonacci sequence"
+    },
+    {
+      "source_id": "wiki037",
+      "question": "Who wrote One Hundred Years of Solitude and when was it published?",
+      "search_query": "One Hundred Years of Solitude"
+    },
+    {
+      "source_id": "wiki038",
+      "question": "What is the deepest lake in the world and where is it?",
+      "search_query": "Lake Baikal"
+    },
+    {
+      "source_id": "wiki039",
+      "question": "What did the Human Genome Project accomplish and when was it completed?",
+      "search_query": "Human Genome Project"
+    },
+    {
+      "source_id": "wiki040",
+      "question": "Who sculpted David in Florence and during which period?",
+      "search_query": "David Michelangelo"
+    },
+    {
+      "source_id": "wiki041",
+      "question": "What is quantum entanglement?",
+      "search_query": "Quantum entanglement"
+    },
+    {
+      "source_id": "wiki042",
+      "question": "When was the Suez Canal opened and which seas does it connect?",
+      "search_query": "Suez Canal"
+    },
+    {
+      "source_id": "wiki043",
+      "question": "What is the largest species of living animal?",
+      "search_query": "Blue whale"
+    },
+    {
+      "source_id": "wiki044",
+      "question": "Who formulated the laws of planetary motion?",
+      "search_query": "Kepler's laws of planetary motion"
+    },
+    {
+      "source_id": "wiki045",
+      "question": "What was the Silk Road and which regions did it connect?",
+      "search_query": "Silk Road"
+    },
+    {
+      "source_id": "wiki046",
+      "question": "What is the greenhouse effect?",
+      "search_query": "Greenhouse effect"
+    },
+    {
+      "source_id": "wiki047",
+      "question": "Who composed the Ninth Symphony commonly called the Choral Symphony?",
+      "search_query": "Beethoven Symphony No. 9"
+    },
+    {
+      "source_id": "wiki048",
+      "question": "Where is Angkor Wat and when was it built?",
+      "search_query": "Angkor Wat"
+    },
+    {
+      "source_id": "wiki049",
+      "question": "What is a pulsar and how is it observed?",
+      "search_query": "Pulsar"
+    },
+    {
+      "source_id": "wiki050",
+      "question": "When was the first successful polio vaccine announced and who developed it?",
+      "search_query": "Polio vaccine Jonas Salk"
+    },
+    {
+      "source_id": "wiki051",
+      "question": "What is the Panama Canal and which oceans does it connect?",
+      "search_query": "Panama Canal"
+    },
+    {
+      "source_id": "wiki052",
+      "question": "Who wrote The Odyssey and what kind of work is it?",
+      "search_query": "Odyssey Homer"
+    },
+    {
+      "source_id": "wiki053",
+      "question": "What is the significance of the Galápagos Islands to evolutionary science?",
+      "search_query": "Galapagos Islands evolution"
+    },
+    {
+      "source_id": "wiki054",
+      "question": "When did India gain independence from British rule?",
+      "search_query": "Indian independence"
+    },
+    {
+      "source_id": "wiki055",
+      "question": "What is superconductivity?",
+      "search_query": "Superconductivity"
+    },
+    {
+      "source_id": "wiki056",
+      "question": "Who designed the first widely recognized periodic table?",
+      "search_query": "Periodic table Mendeleev"
+    },
+    {
+      "source_id": "wiki057",
+      "question": "What is the tallest waterfall commonly recognized in the world?",
+      "search_query": "Angel Falls"
+    },
+    {
+      "source_id": "wiki058",
+      "question": "When did the first transatlantic telegraph cable become successfully operational?",
+      "search_query": "Transatlantic telegraph cable"
+    },
+    {
+      "source_id": "wiki059",
+      "question": "What is a black hole event horizon?",
+      "search_query": "Event horizon black hole"
+    },
+    {
+      "source_id": "wiki060",
+      "question": "Who built the first practical alternating-current induction motor?",
+      "search_query": "Induction motor Nikola Tesla"
+    }
+  ]
+}

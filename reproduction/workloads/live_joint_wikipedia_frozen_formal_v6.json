@@ -1,0 +1,388 @@
+{
+  "schema_version": 2,
+  "split_id": "live-joint-wikipedia-frozen-formal-v6",
+  "split_role": "formal_heldout",
+  "formal_eligible": true,
+  "created_date_utc": "2026-08-16",
+  "used_for_tuning": false,
+  "used_for_parameter_selection": false,
+  "untouched_at_freeze": true,
+  "frozen_call_graph": true,
+  "language": "en",
+  "source_count": 60,
+  "search_backend": "bing_html_search",
+  "visit_backend": "r.jina.ai",
+  "description": "Untouched formal held-out sources for the frozen v6 live tool/LLM experiment. These sources were selected and frozen offline before any v6 execution, without inspecting performance artifacts, and are disjoint from every development, tuning, frozen-development, frozen-tuning, and formal-v2 through formal-v5 source. Each authoritative Wikipedia visit URL was committed before execution; this split must not be inspected for tuning, load selection, or parameter selection.",
+  "excluded_workloads": [
+    "live_joint_wikipedia_v1.json",
+    "live_joint_wikipedia_tune_v1.json",
+    "live_joint_wikipedia_frozen_dev_v1.json",
+    "live_joint_wikipedia_frozen_tune_v1.json",
+    "live_joint_wikipedia_frozen_formal_v2.json",
+    "live_joint_wikipedia_frozen_formal_v3.json",
+    "live_joint_wikipedia_frozen_formal_v4.json",
+    "live_joint_wikipedia_frozen_formal_v5.json"
+  ],
+  "sources": [
+    {
+      "source_id": "formal-v6-001",
+      "question": "Where did the Akkadian Empire arise, and how was its territory governed?",
+      "search_query": "Akkadian Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Akkadian_Empire"
+    },
+    {
+      "source_id": "formal-v6-002",
+      "question": "When did the Neo-Assyrian Empire flourish, and how far did it extend?",
+      "search_query": "Neo-Assyrian Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Neo-Assyrian_Empire"
+    },
+    {
+      "source_id": "formal-v6-003",
+      "question": "Who established the Ptolemaic Kingdom, and where was its capital located?",
+      "search_query": "Ptolemaic Kingdom",
+      "expected_url": "https://en.wikipedia.org/wiki/Ptolemaic_Kingdom"
+    },
+    {
+      "source_id": "formal-v6-004",
+      "question": "Where did the Khmer Empire develop, and which monuments reflect its power?",
+      "search_query": "Khmer Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Khmer_Empire"
+    },
+    {
+      "source_id": "formal-v6-005",
+      "question": "Where was Majapahit centered, and how did its regional influence expand?",
+      "search_query": "Majapahit",
+      "expected_url": "https://en.wikipedia.org/wiki/Majapahit"
+    },
+    {
+      "source_id": "formal-v6-006",
+      "question": "Who founded the Mughal Empire, and which regions did it eventually control?",
+      "search_query": "Mughal Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Mughal_Empire"
+    },
+    {
+      "source_id": "formal-v6-007",
+      "question": "Who founded Safavid Iran, and which religious policy distinguished the state?",
+      "search_query": "Safavid Iran",
+      "expected_url": "https://en.wikipedia.org/wiki/Safavid_Iran"
+    },
+    {
+      "source_id": "formal-v6-008",
+      "question": "What was the Reconquista, and when did its campaigns finally conclude?",
+      "search_query": "Reconquista",
+      "expected_url": "https://en.wikipedia.org/wiki/Reconquista"
+    },
+    {
+      "source_id": "formal-v6-009",
+      "question": "What prompted the English Reformation, and how did it reshape the church?",
+      "search_query": "English Reformation",
+      "expected_url": "https://en.wikipedia.org/wiki/English_Reformation"
+    },
+    {
+      "source_id": "formal-v6-010",
+      "question": "Which conflicts comprise the Napoleonic Wars, and how did they end?",
+      "search_query": "Napoleonic Wars",
+      "expected_url": "https://en.wikipedia.org/wiki/Napoleonic_Wars"
+    },
+    {
+      "source_id": "formal-v6-011",
+      "question": "Why did the Crimean War begin, and which powers participated in it?",
+      "search_query": "Crimean War",
+      "expected_url": "https://en.wikipedia.org/wiki/Crimean_War"
+    },
+    {
+      "source_id": "formal-v6-012",
+      "question": "What caused the Boshin War, and which political order emerged afterward?",
+      "search_query": "Boshin War",
+      "expected_url": "https://en.wikipedia.org/wiki/Boshin_War"
+    },
+    {
+      "source_id": "formal-v6-013",
+      "question": "Where does the Colorado River originate, and which landscapes does it cross?",
+      "search_query": "Colorado River",
+      "expected_url": "https://en.wikipedia.org/wiki/Colorado_River"
+    },
+    {
+      "source_id": "formal-v6-014",
+      "question": "Which countries border Lake Tanganyika, and what makes its ecology distinctive?",
+      "search_query": "Lake Tanganyika",
+      "expected_url": "https://en.wikipedia.org/wiki/Lake_Tanganyika"
+    },
+    {
+      "source_id": "formal-v6-015",
+      "question": "Where is the Bay of Bengal, and which major rivers discharge into it?",
+      "search_query": "Bay of Bengal",
+      "expected_url": "https://en.wikipedia.org/wiki/Bay_of_Bengal"
+    },
+    {
+      "source_id": "formal-v6-016",
+      "question": "Which countries border the Gulf of Mexico, and how was it formed?",
+      "search_query": "Gulf of Mexico",
+      "expected_url": "https://en.wikipedia.org/wiki/Gulf_of_Mexico"
+    },
+    {
+      "source_id": "formal-v6-017",
+      "question": "Which waters does the Strait of Gibraltar connect, and what borders it?",
+      "search_query": "Strait of Gibraltar",
+      "expected_url": "https://en.wikipedia.org/wiki/Strait_of_Gibraltar"
+    },
+    {
+      "source_id": "formal-v6-018",
+      "question": "Where do the Carpathian Mountains extend, and how was the range formed?",
+      "search_query": "Carpathian Mountains",
+      "expected_url": "https://en.wikipedia.org/wiki/Carpathian_Mountains"
+    },
+    {
+      "source_id": "formal-v6-019",
+      "question": "Where do the Ural Mountains extend, and which regions do they divide?",
+      "search_query": "Ural Mountains",
+      "expected_url": "https://en.wikipedia.org/wiki/Ural_Mountains"
+    },
+    {
+      "source_id": "formal-v6-020",
+      "question": "Where is the Deccan Plateau, and which geological processes shaped it?",
+      "search_query": "Deccan Plateau",
+      "expected_url": "https://en.wikipedia.org/wiki/Deccan_Plateau"
+    },
+    {
+      "source_id": "formal-v6-021",
+      "question": "Where is the Tibetan Plateau, and why is its elevation climatically important?",
+      "search_query": "Tibetan Plateau",
+      "expected_url": "https://en.wikipedia.org/wiki/Tibetan_Plateau"
+    },
+    {
+      "source_id": "formal-v6-022",
+      "question": "Where is the Sonoran Desert, and which environments characterize its landscape?",
+      "search_query": "Sonoran Desert",
+      "expected_url": "https://en.wikipedia.org/wiki/Sonoran_Desert"
+    },
+    {
+      "source_id": "formal-v6-023",
+      "question": "Where are the Aleutian Islands, and what geological activity formed them?",
+      "search_query": "Aleutian Islands",
+      "expected_url": "https://en.wikipedia.org/wiki/Aleutian_Islands"
+    },
+    {
+      "source_id": "formal-v6-024",
+      "question": "Where is Tasmania, and which natural features distinguish the island?",
+      "search_query": "Tasmania",
+      "expected_url": "https://en.wikipedia.org/wiki/Tasmania"
+    },
+    {
+      "source_id": "formal-v6-025",
+      "question": "What interaction does Coulomb's law quantify, and how does distance matter?",
+      "search_query": "Coulomb's law",
+      "expected_url": "https://en.wikipedia.org/wiki/Coulomb%27s_law"
+    },
+    {
+      "source_id": "formal-v6-026",
+      "question": "How does Snell's law describe refraction when light crosses a boundary?",
+      "search_query": "Snell's law",
+      "expected_url": "https://en.wikipedia.org/wiki/Snell%27s_law"
+    },
+    {
+      "source_id": "formal-v6-027",
+      "question": "What does Bernoulli's principle relate within a steadily flowing fluid?",
+      "search_query": "Bernoulli's principle",
+      "expected_url": "https://en.wikipedia.org/wiki/Bernoulli%27s_principle"
+    },
+    {
+      "source_id": "formal-v6-028",
+      "question": "How does Hooke's law relate deformation to an applied restoring force?",
+      "search_query": "Hooke's law",
+      "expected_url": "https://en.wikipedia.org/wiki/Hooke%27s_law"
+    },
+    {
+      "source_id": "formal-v6-029",
+      "question": "How does electromagnetic induction generate voltage from a changing magnetic field?",
+      "search_query": "Electromagnetic induction",
+      "expected_url": "https://en.wikipedia.org/wiki/Electromagnetic_induction"
+    },
+    {
+      "source_id": "formal-v6-030",
+      "question": "How does nuclear fusion release energy, and which nuclei can combine?",
+      "search_query": "Nuclear fusion",
+      "expected_url": "https://en.wikipedia.org/wiki/Nuclear_fusion"
+    },
+    {
+      "source_id": "formal-v6-031",
+      "question": "What occurs during radioactive decay, and how is its rate characterized?",
+      "search_query": "Radioactive decay",
+      "expected_url": "https://en.wikipedia.org/wiki/Radioactive_decay"
+    },
+    {
+      "source_id": "formal-v6-032",
+      "question": "What does the double-slit experiment reveal about waves and particles?",
+      "search_query": "Double-slit experiment",
+      "expected_url": "https://en.wikipedia.org/wiki/Double-slit_experiment"
+    },
+    {
+      "source_id": "formal-v6-033",
+      "question": "What does stoichiometry calculate, and which chemical relationships does it use?",
+      "search_query": "Stoichiometry",
+      "expected_url": "https://en.wikipedia.org/wiki/Stoichiometry"
+    },
+    {
+      "source_id": "formal-v6-034",
+      "question": "How does chromatography separate mixture components, and what drives their movement?",
+      "search_query": "Chromatography",
+      "expected_url": "https://en.wikipedia.org/wiki/Chromatography"
+    },
+    {
+      "source_id": "formal-v6-035",
+      "question": "What occurs during meiosis, and how does it produce genetic variation?",
+      "search_query": "Meiosis",
+      "expected_url": "https://en.wikipedia.org/wiki/Meiosis"
+    },
+    {
+      "source_id": "formal-v6-036",
+      "question": "How does osmosis move solvent across a selectively permeable membrane?",
+      "search_query": "Osmosis",
+      "expected_url": "https://en.wikipedia.org/wiki/Osmosis"
+    },
+    {
+      "source_id": "formal-v6-037",
+      "question": "How does merge sort order data, and how are its sublists combined?",
+      "search_query": "Merge sort",
+      "expected_url": "https://en.wikipedia.org/wiki/Merge_sort"
+    },
+    {
+      "source_id": "formal-v6-038",
+      "question": "How does depth-first search traverse a graph, and what controls backtracking?",
+      "search_query": "Depth-first search",
+      "expected_url": "https://en.wikipedia.org/wiki/Depth-first_search"
+    },
+    {
+      "source_id": "formal-v6-039",
+      "question": "How does a red-black tree preserve balance during updates and searches?",
+      "search_query": "Red-black tree",
+      "expected_url": "https://en.wikipedia.org/wiki/Red%E2%80%93black_tree"
+    },
+    {
+      "source_id": "formal-v6-040",
+      "question": "How does dynamic programming reuse subproblem results to solve larger problems?",
+      "search_query": "Dynamic programming",
+      "expected_url": "https://en.wikipedia.org/wiki/Dynamic_programming"
+    },
+    {
+      "source_id": "formal-v6-041",
+      "question": "What is the Advanced Encryption Standard, and how does it encrypt blocks?",
+      "search_query": "Advanced Encryption Standard",
+      "expected_url": "https://en.wikipedia.org/wiki/Advanced_Encryption_Standard"
+    },
+    {
+      "source_id": "formal-v6-042",
+      "question": "What does Secure Shell provide, and how does it protect remote sessions?",
+      "search_query": "Secure Shell",
+      "expected_url": "https://en.wikipedia.org/wiki/Secure_Shell"
+    },
+    {
+      "source_id": "formal-v6-043",
+      "question": "How does the User Datagram Protocol transmit messages, and what guarantees are omitted?",
+      "search_query": "User Datagram Protocol",
+      "expected_url": "https://en.wikipedia.org/wiki/User_Datagram_Protocol"
+    },
+    {
+      "source_id": "formal-v6-044",
+      "question": "How does virtual memory extend address space, and where are pages stored?",
+      "search_query": "Virtual memory",
+      "expected_url": "https://en.wikipedia.org/wiki/Virtual_memory"
+    },
+    {
+      "source_id": "formal-v6-045",
+      "question": "How does a CPU cache reduce access latency, and which levels are common?",
+      "search_query": "CPU cache",
+      "expected_url": "https://en.wikipedia.org/wiki/CPU_cache"
+    },
+    {
+      "source_id": "formal-v6-046",
+      "question": "What does a type system classify, and which programming errors can it prevent?",
+      "search_query": "Type system",
+      "expected_url": "https://en.wikipedia.org/wiki/Type_system"
+    },
+    {
+      "source_id": "formal-v6-047",
+      "question": "How does a regular expression describe patterns, and where is it commonly used?",
+      "search_query": "Regular expression",
+      "expected_url": "https://en.wikipedia.org/wiki/Regular_expression"
+    },
+    {
+      "source_id": "formal-v6-048",
+      "question": "How does software testing evaluate programs, and which defects can it reveal?",
+      "search_query": "Software testing",
+      "expected_url": "https://en.wikipedia.org/wiki/Software_testing"
+    },
+    {
+      "source_id": "formal-v6-049",
+      "question": "Where was the Venus de Milo found, and whom might it portray?",
+      "search_query": "Venus de Milo",
+      "expected_url": "https://en.wikipedia.org/wiki/Venus_de_Milo"
+    },
+    {
+      "source_id": "formal-v6-050",
+      "question": "Where was the Winged Victory of Samothrace discovered, and what does it depict?",
+      "search_query": "Winged Victory of Samothrace",
+      "expected_url": "https://en.wikipedia.org/wiki/Winged_Victory_of_Samothrace"
+    },
+    {
+      "source_id": "formal-v6-051",
+      "question": "Who painted the Arnolfini Portrait, and which figures appear in it?",
+      "search_query": "Arnolfini Portrait",
+      "expected_url": "https://en.wikipedia.org/wiki/Arnolfini_Portrait"
+    },
+    {
+      "source_id": "formal-v6-052",
+      "question": "Who painted The Garden of Earthly Delights, and how is it arranged?",
+      "search_query": "The Garden of Earthly Delights",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Garden_of_Earthly_Delights"
+    },
+    {
+      "source_id": "formal-v6-053",
+      "question": "Who painted Liberty Leading the People, and which uprising inspired it?",
+      "search_query": "Liberty Leading the People",
+      "expected_url": "https://en.wikipedia.org/wiki/Liberty_Leading_the_People"
+    },
+    {
+      "source_id": "formal-v6-054",
+      "question": "Who painted Nighthawks, and what nighttime setting does the work show?",
+      "search_query": "Nighthawks (Hopper)",
+      "expected_url": "https://en.wikipedia.org/wiki/Nighthawks_(Hopper)"
+    },
+    {
+      "source_id": "formal-v6-055",
+      "question": "Who painted The Son of Man, and what obscures its subject?",
+      "search_query": "The Son of Man",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Son_of_Man"
+    },
+    {
+      "source_id": "formal-v6-056",
+      "question": "Who wrote Anna Karenina, and which relationships shape the novel?",
+      "search_query": "Anna Karenina",
+      "expected_url": "https://en.wikipedia.org/wiki/Anna_Karenina"
+    },
+    {
+      "source_id": "formal-v6-057",
+      "question": "Who wrote Middlemarch, and which community does the novel portray?",
+      "search_query": "Middlemarch",
+      "expected_url": "https://en.wikipedia.org/wiki/Middlemarch"
+    },
+    {
+      "source_id": "formal-v6-058",
+      "question": "Who wrote Things Fall Apart, and whose life anchors the novel?",
+      "search_query": "Things Fall Apart",
+      "expected_url": "https://en.wikipedia.org/wiki/Things_Fall_Apart"
+    },
+    {
+      "source_id": "formal-v6-059",
+      "question": "Who wrote The Trial, and what predicament confronts its protagonist?",
+      "search_query": "The Trial",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Trial"
+    },
+    {
+      "source_id": "formal-v6-060",
+      "question": "Who wrote Waiting for Godot, and what are its characters awaiting?",
+      "search_query": "Waiting for Godot",
+      "expected_url": "https://en.wikipedia.org/wiki/Waiting_for_Godot"
+    }
+  ]
+}

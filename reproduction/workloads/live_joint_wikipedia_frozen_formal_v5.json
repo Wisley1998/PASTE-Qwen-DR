@@ -1,0 +1,387 @@
+{
+  "schema_version": 2,
+  "split_id": "live-joint-wikipedia-frozen-formal-v5",
+  "split_role": "formal_heldout",
+  "formal_eligible": true,
+  "created_date_utc": "2026-08-16",
+  "used_for_tuning": false,
+  "used_for_parameter_selection": false,
+  "untouched_at_freeze": true,
+  "frozen_call_graph": true,
+  "language": "en",
+  "source_count": 60,
+  "search_backend": "bing_html_search",
+  "visit_backend": "r.jina.ai",
+  "description": "Untouched formal held-out sources for the frozen v5 live tool/LLM experiment. These sources were selected and frozen offline before any v5 execution, without inspecting performance artifacts, and are disjoint from every development, tuning, frozen-development, frozen-tuning, and formal-v2 through formal-v4 source. Each authoritative Wikipedia visit URL was committed before execution; this split must not be inspected for tuning, load selection, or parameter selection.",
+  "excluded_workloads": [
+    "live_joint_wikipedia_v1.json",
+    "live_joint_wikipedia_tune_v1.json",
+    "live_joint_wikipedia_frozen_dev_v1.json",
+    "live_joint_wikipedia_frozen_tune_v1.json",
+    "live_joint_wikipedia_frozen_formal_v2.json",
+    "live_joint_wikipedia_frozen_formal_v3.json",
+    "live_joint_wikipedia_frozen_formal_v4.json"
+  ],
+  "sources": [
+    {
+      "source_id": "formal-v5-001",
+      "question": "Where did Ancient Egypt develop, and how was its kingdom governed?",
+      "search_query": "Ancient Egypt",
+      "expected_url": "https://en.wikipedia.org/wiki/Ancient_Egypt"
+    },
+    {
+      "source_id": "formal-v5-002",
+      "question": "Where did the Aztec Empire arise, and how was it organized?",
+      "search_query": "Aztec Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Aztec_Empire"
+    },
+    {
+      "source_id": "formal-v5-003",
+      "question": "Who founded the Qin dynasty, and how did it unify China?",
+      "search_query": "Qin dynasty",
+      "expected_url": "https://en.wikipedia.org/wiki/Qin_dynasty"
+    },
+    {
+      "source_id": "formal-v5-004",
+      "question": "When did the Gupta Empire flourish, and what achievements distinguished it?",
+      "search_query": "Gupta Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Gupta_Empire"
+    },
+    {
+      "source_id": "formal-v5-005",
+      "question": "When was the Viking Age, and where did Norse expeditions travel?",
+      "search_query": "Viking Age",
+      "expected_url": "https://en.wikipedia.org/wiki/Viking_Age"
+    },
+    {
+      "source_id": "formal-v5-006",
+      "question": "Who led the Norman Conquest, and how did it transform England?",
+      "search_query": "Norman Conquest",
+      "expected_url": "https://en.wikipedia.org/wiki/Norman_Conquest"
+    },
+    {
+      "source_id": "formal-v5-007",
+      "question": "Which factions fought the Wars of the Roses, and who prevailed?",
+      "search_query": "Wars of the Roses",
+      "expected_url": "https://en.wikipedia.org/wiki/Wars_of_the_Roses"
+    },
+    {
+      "source_id": "formal-v5-008",
+      "question": "What caused the Glorious Revolution, and which constitutional settlement followed?",
+      "search_query": "Glorious Revolution",
+      "expected_url": "https://en.wikipedia.org/wiki/Glorious_Revolution"
+    },
+    {
+      "source_id": "formal-v5-009",
+      "question": "Which powers fought the Seven Years' War, and where were its campaigns?",
+      "search_query": "Seven Years' War",
+      "expected_url": "https://en.wikipedia.org/wiki/Seven_Years%27_War"
+    },
+    {
+      "source_id": "formal-v5-010",
+      "question": "What triggered the Taiping Rebellion, and how did the conflict conclude?",
+      "search_query": "Taiping Rebellion",
+      "expected_url": "https://en.wikipedia.org/wiki/Taiping_Rebellion"
+    },
+    {
+      "source_id": "formal-v5-011",
+      "question": "What provoked the Boxer Rebellion, and which forces ultimately suppressed it?",
+      "search_query": "Boxer Rebellion",
+      "expected_url": "https://en.wikipedia.org/wiki/Boxer_Rebellion"
+    },
+    {
+      "source_id": "formal-v5-012",
+      "question": "Why did the Partition of India occur, and which states emerged?",
+      "search_query": "Partition of India",
+      "expected_url": "https://en.wikipedia.org/wiki/Partition_of_India"
+    },
+    {
+      "source_id": "formal-v5-013",
+      "question": "Where does the Hindu Kush extend, and how was the range formed?",
+      "search_query": "Hindu Kush",
+      "expected_url": "https://en.wikipedia.org/wiki/Hindu_Kush"
+    },
+    {
+      "source_id": "formal-v5-014",
+      "question": "Where is the Amazon rainforest, and what sustains its biodiversity?",
+      "search_query": "Amazon rainforest",
+      "expected_url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+    },
+    {
+      "source_id": "formal-v5-015",
+      "question": "Where does the Rhine begin, and through which regions does it flow?",
+      "search_query": "Rhine",
+      "expected_url": "https://en.wikipedia.org/wiki/Rhine"
+    },
+    {
+      "source_id": "formal-v5-016",
+      "question": "Where is the Great Australian Bight, and what characterizes its coastline?",
+      "search_query": "Great Australian Bight",
+      "expected_url": "https://en.wikipedia.org/wiki/Great_Australian_Bight"
+    },
+    {
+      "source_id": "formal-v5-017",
+      "question": "Which countries occupy the Iberian Peninsula, and which waters border it?",
+      "search_query": "Iberian Peninsula",
+      "expected_url": "https://en.wikipedia.org/wiki/Iberian_Peninsula"
+    },
+    {
+      "source_id": "formal-v5-018",
+      "question": "Where is the Caucasus, and which mountain systems define the region?",
+      "search_query": "Caucasus",
+      "expected_url": "https://en.wikipedia.org/wiki/Caucasus"
+    },
+    {
+      "source_id": "formal-v5-019",
+      "question": "Which countries share the Scandinavian Peninsula, and how was it shaped?",
+      "search_query": "Scandinavian Peninsula",
+      "expected_url": "https://en.wikipedia.org/wiki/Scandinavian_Peninsula"
+    },
+    {
+      "source_id": "formal-v5-020",
+      "question": "Where does the Orinoco flow, and which basin does it drain?",
+      "search_query": "Orinoco",
+      "expected_url": "https://en.wikipedia.org/wiki/Orinoco"
+    },
+    {
+      "source_id": "formal-v5-021",
+      "question": "Where does the Murray River flow, and why is its basin important?",
+      "search_query": "Murray River",
+      "expected_url": "https://en.wikipedia.org/wiki/Murray_River"
+    },
+    {
+      "source_id": "formal-v5-022",
+      "question": "Which countries border Lake Malawi, and what makes its ecosystem notable?",
+      "search_query": "Lake Malawi",
+      "expected_url": "https://en.wikipedia.org/wiki/Lake_Malawi"
+    },
+    {
+      "source_id": "formal-v5-023",
+      "question": "Where does the Niger River originate, and which regions does it cross?",
+      "search_query": "Niger River",
+      "expected_url": "https://en.wikipedia.org/wiki/Niger_River"
+    },
+    {
+      "source_id": "formal-v5-024",
+      "question": "Where is the Sea of Okhotsk, and which lands enclose it?",
+      "search_query": "Sea of Okhotsk",
+      "expected_url": "https://en.wikipedia.org/wiki/Sea_of_Okhotsk"
+    },
+    {
+      "source_id": "formal-v5-025",
+      "question": "What causes the photoelectric effect, and how does light frequency matter?",
+      "search_query": "Photoelectric effect",
+      "expected_url": "https://en.wikipedia.org/wiki/Photoelectric_effect"
+    },
+    {
+      "source_id": "formal-v5-026",
+      "question": "What does the uncertainty principle limit, and how is that limit expressed?",
+      "search_query": "Uncertainty principle",
+      "expected_url": "https://en.wikipedia.org/wiki/Uncertainty_principle"
+    },
+    {
+      "source_id": "formal-v5-027",
+      "question": "What produces Cherenkov radiation, and why does its characteristic glow appear?",
+      "search_query": "Cherenkov radiation",
+      "expected_url": "https://en.wikipedia.org/wiki/Cherenkov_radiation"
+    },
+    {
+      "source_id": "formal-v5-028",
+      "question": "How does Lagrangian mechanics describe motion, and which quantity does it use?",
+      "search_query": "Lagrangian mechanics",
+      "expected_url": "https://en.wikipedia.org/wiki/Lagrangian_mechanics"
+    },
+    {
+      "source_id": "formal-v5-029",
+      "question": "What does the Reynolds number compare, and what flow regimes can it indicate?",
+      "search_query": "Reynolds number",
+      "expected_url": "https://en.wikipedia.org/wiki/Reynolds_number"
+    },
+    {
+      "source_id": "formal-v5-030",
+      "question": "What does Archimedes' principle predict about an immersed object's buoyancy?",
+      "search_query": "Archimedes' principle",
+      "expected_url": "https://en.wikipedia.org/wiki/Archimedes%27_principle"
+    },
+    {
+      "source_id": "formal-v5-031",
+      "question": "How does the ideal gas law relate pressure, volume, and temperature?",
+      "search_query": "Ideal gas law",
+      "expected_url": "https://en.wikipedia.org/wiki/Ideal_gas_law"
+    },
+    {
+      "source_id": "formal-v5-032",
+      "question": "What occurs in a redox reaction, and how do oxidation states change?",
+      "search_query": "Redox",
+      "expected_url": "https://en.wikipedia.org/wiki/Redox"
+    },
+    {
+      "source_id": "formal-v5-033",
+      "question": "What forms a coordination complex, and how are its ligands arranged?",
+      "search_query": "Coordination complex",
+      "expected_url": "https://en.wikipedia.org/wiki/Coordination_complex"
+    },
+    {
+      "source_id": "formal-v5-034",
+      "question": "How does protein folding produce structure, and what interactions guide it?",
+      "search_query": "Protein folding",
+      "expected_url": "https://en.wikipedia.org/wiki/Protein_folding"
+    },
+    {
+      "source_id": "formal-v5-035",
+      "question": "How does the genetic code map nucleotide sequences to amino acids?",
+      "search_query": "Genetic code",
+      "expected_url": "https://en.wikipedia.org/wiki/Genetic_code"
+    },
+    {
+      "source_id": "formal-v5-036",
+      "question": "What is a bacteriophage, and how does it reproduce inside bacteria?",
+      "search_query": "Bacteriophage",
+      "expected_url": "https://en.wikipedia.org/wiki/Bacteriophage"
+    },
+    {
+      "source_id": "formal-v5-037",
+      "question": "How does the nitrogen cycle move nitrogen through living and nonliving systems?",
+      "search_query": "Nitrogen cycle",
+      "expected_url": "https://en.wikipedia.org/wiki/Nitrogen_cycle"
+    },
+    {
+      "source_id": "formal-v5-038",
+      "question": "How do organisms generate bioluminescence, and what purposes can it serve?",
+      "search_query": "Bioluminescence",
+      "expected_url": "https://en.wikipedia.org/wiki/Bioluminescence"
+    },
+    {
+      "source_id": "formal-v5-039",
+      "question": "What is symbiosis, and which relationships can participating organisms form?",
+      "search_query": "Symbiosis",
+      "expected_url": "https://en.wikipedia.org/wiki/Symbiosis"
+    },
+    {
+      "source_id": "formal-v5-040",
+      "question": "What initiates coagulation, and how does the process limit bleeding?",
+      "search_query": "Coagulation",
+      "expected_url": "https://en.wikipedia.org/wiki/Coagulation"
+    },
+    {
+      "source_id": "formal-v5-041",
+      "question": "How does quicksort partition data, and what determines its running time?",
+      "search_query": "Quicksort",
+      "expected_url": "https://en.wikipedia.org/wiki/Quicksort"
+    },
+    {
+      "source_id": "formal-v5-042",
+      "question": "How does breadth-first search traverse a graph, and what structure guides it?",
+      "search_query": "Breadth-first search",
+      "expected_url": "https://en.wikipedia.org/wiki/Breadth-first_search"
+    },
+    {
+      "source_id": "formal-v5-043",
+      "question": "How does a Bloom filter test membership, and why can false positives occur?",
+      "search_query": "Bloom filter",
+      "expected_url": "https://en.wikipedia.org/wiki/Bloom_filter"
+    },
+    {
+      "source_id": "formal-v5-044",
+      "question": "How does the Domain Name System translate names, and how is it distributed?",
+      "search_query": "Domain Name System",
+      "expected_url": "https://en.wikipedia.org/wiki/Domain_Name_System"
+    },
+    {
+      "source_id": "formal-v5-045",
+      "question": "What does HTTP exchange, and how are its requests and responses structured?",
+      "search_query": "HTTP",
+      "expected_url": "https://en.wikipedia.org/wiki/HTTP"
+    },
+    {
+      "source_id": "formal-v5-046",
+      "question": "How does a cellular automaton evolve, and which local rules govern it?",
+      "search_query": "Cellular automaton",
+      "expected_url": "https://en.wikipedia.org/wiki/Cellular_automaton"
+    },
+    {
+      "source_id": "formal-v5-047",
+      "question": "How does a B-tree organize keys, and why is it useful for storage?",
+      "search_query": "B-tree",
+      "expected_url": "https://en.wikipedia.org/wiki/B-tree"
+    },
+    {
+      "source_id": "formal-v5-048",
+      "question": "What asks the P versus NP problem, and why is it unresolved?",
+      "search_query": "P versus NP problem",
+      "expected_url": "https://en.wikipedia.org/wiki/P_versus_NP_problem"
+    },
+    {
+      "source_id": "formal-v5-049",
+      "question": "Who painted The Birth of Venus, and what scene does it depict?",
+      "search_query": "The Birth of Venus",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Birth_of_Venus"
+    },
+    {
+      "source_id": "formal-v5-050",
+      "question": "Who painted Las Meninas, and how does its composition involve the viewer?",
+      "search_query": "Las Meninas",
+      "expected_url": "https://en.wikipedia.org/wiki/Las_Meninas"
+    },
+    {
+      "source_id": "formal-v5-051",
+      "question": "Who painted The Night Watch, and which civic group appears in it?",
+      "search_query": "The Night Watch",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Night_Watch"
+    },
+    {
+      "source_id": "formal-v5-052",
+      "question": "Who painted American Gothic, and which two figures does it portray?",
+      "search_query": "American Gothic",
+      "expected_url": "https://en.wikipedia.org/wiki/American_Gothic"
+    },
+    {
+      "source_id": "formal-v5-053",
+      "question": "Who created The Kiss by Klimt, and what style characterizes it?",
+      "search_query": "The Kiss (Klimt)",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Kiss_(Klimt)"
+    },
+    {
+      "source_id": "formal-v5-054",
+      "question": "Who painted The School of Athens, and which thinkers are represented?",
+      "search_query": "The School of Athens",
+      "expected_url": "https://en.wikipedia.org/wiki/The_School_of_Athens"
+    },
+    {
+      "source_id": "formal-v5-055",
+      "question": "Who wrote David Copperfield, and how does its narrator mature?",
+      "search_query": "David Copperfield",
+      "expected_url": "https://en.wikipedia.org/wiki/David_Copperfield"
+    },
+    {
+      "source_id": "formal-v5-056",
+      "question": "Who wrote Wuthering Heights, and which families drive its conflict?",
+      "search_query": "Wuthering Heights",
+      "expected_url": "https://en.wikipedia.org/wiki/Wuthering_Heights"
+    },
+    {
+      "source_id": "formal-v5-057",
+      "question": "Who wrote The Brothers Karamazov, and what dispute divides the family?",
+      "search_query": "The Brothers Karamazov",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Brothers_Karamazov"
+    },
+    {
+      "source_id": "formal-v5-058",
+      "question": "Who wrote The Sound and the Fury, and how is its story narrated?",
+      "search_query": "The Sound and the Fury",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Sound_and_the_Fury"
+    },
+    {
+      "source_id": "formal-v5-059",
+      "question": "Who wrote Madame Bovary, and what dissatisfaction drives its protagonist?",
+      "search_query": "Madame Bovary",
+      "expected_url": "https://en.wikipedia.org/wiki/Madame_Bovary"
+    },
+    {
+      "source_id": "formal-v5-060",
+      "question": "Who wrote A Doll's House, and which social expectations does it challenge?",
+      "search_query": "A Doll's House",
+      "expected_url": "https://en.wikipedia.org/wiki/A_Doll%27s_House"
+    }
+  ]
+}

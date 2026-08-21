@@ -1,0 +1,384 @@
+{
+  "schema_version": 2,
+  "split_id": "live-joint-wikipedia-frozen-formal-v3",
+  "split_role": "formal_heldout",
+  "formal_eligible": true,
+  "created_date_utc": "2026-08-16",
+  "used_for_tuning": false,
+  "used_for_parameter_selection": false,
+  "untouched_at_freeze": true,
+  "frozen_call_graph": true,
+  "language": "en",
+  "source_count": 60,
+  "search_backend": "bing_html_search",
+  "visit_backend": "r.jina.ai",
+  "description": "Untouched replacement formal held-out sources for the frozen live tool/LLM experiment. These sources were frozen offline before any v3 run and are disjoint from every development, tuning, frozen-development, and formal-v2 source. Each authoritative Wikipedia visit URL was committed before execution; this split must not be inspected for tuning, load selection, or parameter selection.",
+  "excluded_workloads": [
+    "live_joint_wikipedia_v1.json",
+    "live_joint_wikipedia_tune_v1.json",
+    "live_joint_wikipedia_frozen_dev_v1.json",
+    "live_joint_wikipedia_frozen_formal_v2.json"
+  ],
+  "sources": [
+    {
+      "source_id": "formal-v3-001",
+      "question": "Which major urban sites belonged to the Indus Valley Civilisation, and during which millennia did it flourish?",
+      "search_query": "Indus Valley Civilisation",
+      "expected_url": "https://en.wikipedia.org/wiki/Indus_Valley_Civilisation"
+    },
+    {
+      "source_id": "formal-v3-002",
+      "question": "Who founded the Achaemenid Empire, and how far did its territory eventually extend?",
+      "search_query": "Achaemenid Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Achaemenid_Empire"
+    },
+    {
+      "source_id": "formal-v3-003",
+      "question": "Which Greek alliances fought the Peloponnesian War, and how did the conflict end?",
+      "search_query": "Peloponnesian War",
+      "expected_url": "https://en.wikipedia.org/wiki/Peloponnesian_War"
+    },
+    {
+      "source_id": "formal-v3-004",
+      "question": "When did the Black Death reach Europe, and which disease caused the pandemic?",
+      "search_query": "Black Death",
+      "expected_url": "https://en.wikipedia.org/wiki/Black_Death"
+    },
+    {
+      "source_id": "formal-v3-005",
+      "question": "Where did the Renaissance begin, and which intellectual traditions did it revive?",
+      "search_query": "Renaissance",
+      "expected_url": "https://en.wikipedia.org/wiki/Renaissance"
+    },
+    {
+      "source_id": "formal-v3-006",
+      "question": "Which event conventionally began the Protestant Reformation, and who initiated it?",
+      "search_query": "Protestant Reformation",
+      "expected_url": "https://en.wikipedia.org/wiki/Protestant_Reformation"
+    },
+    {
+      "source_id": "formal-v3-007",
+      "question": "When was the Thirty Years' War fought, and which peace settlement ended it?",
+      "search_query": "Thirty Years' War",
+      "expected_url": "https://en.wikipedia.org/wiki/Thirty_Years%27_War"
+    },
+    {
+      "source_id": "formal-v3-008",
+      "question": "Who founded the Tokugawa shogunate, and how long did it govern Japan?",
+      "search_query": "Tokugawa shogunate",
+      "expected_url": "https://en.wikipedia.org/wiki/Tokugawa_shogunate"
+    },
+    {
+      "source_id": "formal-v3-009",
+      "question": "Which countries fought the Opium Wars, and what trade dispute helped cause them?",
+      "search_query": "Opium Wars",
+      "expected_url": "https://en.wikipedia.org/wiki/Opium_Wars"
+    },
+    {
+      "source_id": "formal-v3-010",
+      "question": "When did the Mexican Revolution begin, and which long-serving ruler was forced from power?",
+      "search_query": "Mexican Revolution",
+      "expected_url": "https://en.wikipedia.org/wiki/Mexican_Revolution"
+    },
+    {
+      "source_id": "formal-v3-011",
+      "question": "During which period did the Scramble for Africa occur, and which powers partitioned most of the continent?",
+      "search_query": "Scramble for Africa",
+      "expected_url": "https://en.wikipedia.org/wiki/Scramble_for_Africa"
+    },
+    {
+      "source_id": "formal-v3-012",
+      "question": "When did the Spanish Civil War take place, and which factions fought for control?",
+      "search_query": "Spanish Civil War",
+      "expected_url": "https://en.wikipedia.org/wiki/Spanish_Civil_War"
+    },
+    {
+      "source_id": "formal-v3-013",
+      "question": "Along which continent's western edge do the Andes run, and what is their highest peak?",
+      "search_query": "Andes",
+      "expected_url": "https://en.wikipedia.org/wiki/Andes"
+    },
+    {
+      "source_id": "formal-v3-014",
+      "question": "Across which countries does the Gobi Desert extend, and what type of desert is it?",
+      "search_query": "Gobi Desert",
+      "expected_url": "https://en.wikipedia.org/wiki/Gobi_Desert"
+    },
+    {
+      "source_id": "formal-v3-015",
+      "question": "Through which countries does the Mekong flow, and where does its delta reach the sea?",
+      "search_query": "Mekong",
+      "expected_url": "https://en.wikipedia.org/wiki/Mekong"
+    },
+    {
+      "source_id": "formal-v3-016",
+      "question": "Which countries share Lake Titicaca, and what elevation distinction does the lake hold?",
+      "search_query": "Lake Titicaca",
+      "expected_url": "https://en.wikipedia.org/wiki/Lake_Titicaca"
+    },
+    {
+      "source_id": "formal-v3-017",
+      "question": "Which three countries administer territory on Borneo, and where is the island located?",
+      "search_query": "Borneo",
+      "expected_url": "https://en.wikipedia.org/wiki/Borneo"
+    },
+    {
+      "source_id": "formal-v3-018",
+      "question": "Which tectonic boundary crosses Iceland, and why is the island volcanically active?",
+      "search_query": "Iceland",
+      "expected_url": "https://en.wikipedia.org/wiki/Iceland"
+    },
+    {
+      "source_id": "formal-v3-019",
+      "question": "Which two main islands make up New Zealand, and what is its capital?",
+      "search_query": "New Zealand",
+      "expected_url": "https://en.wikipedia.org/wiki/New_Zealand"
+    },
+    {
+      "source_id": "formal-v3-020",
+      "question": "In which country is the Okavango Delta, and why do its waters rarely reach an ocean?",
+      "search_query": "Okavango Delta",
+      "expected_url": "https://en.wikipedia.org/wiki/Okavango_Delta"
+    },
+    {
+      "source_id": "formal-v3-021",
+      "question": "Between which countries did the Aral Sea lie, and what caused its dramatic shrinkage?",
+      "search_query": "Aral Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Aral_Sea"
+    },
+    {
+      "source_id": "formal-v3-022",
+      "question": "Which landmasses border the Strait of Malacca, and why is it important for shipping?",
+      "search_query": "Strait of Malacca",
+      "expected_url": "https://en.wikipedia.org/wiki/Strait_of_Malacca"
+    },
+    {
+      "source_id": "formal-v3-023",
+      "question": "Where does the Great Dividing Range extend, and how does it affect eastern Australia's rivers?",
+      "search_query": "Great Dividing Range",
+      "expected_url": "https://en.wikipedia.org/wiki/Great_Dividing_Range"
+    },
+    {
+      "source_id": "formal-v3-024",
+      "question": "Across which countries does the Kalahari Desert spread, and what climate characterizes it?",
+      "search_query": "Kalahari Desert",
+      "expected_url": "https://en.wikipedia.org/wiki/Kalahari_Desert"
+    },
+    {
+      "source_id": "formal-v3-025",
+      "question": "What fields do Maxwell's equations relate, and who formulated their classical form?",
+      "search_query": "Maxwell's equations",
+      "expected_url": "https://en.wikipedia.org/wiki/Maxwell%27s_equations"
+    },
+    {
+      "source_id": "formal-v3-026",
+      "question": "What happens to an atomic nucleus during nuclear fission, and what can initiate the process?",
+      "search_query": "Nuclear fission",
+      "expected_url": "https://en.wikipedia.org/wiki/Nuclear_fission"
+    },
+    {
+      "source_id": "formal-v3-027",
+      "question": "Which particles and interactions does the Standard Model describe, and which force does it omit?",
+      "search_query": "Standard Model",
+      "expected_url": "https://en.wikipedia.org/wiki/Standard_Model"
+    },
+    {
+      "source_id": "formal-v3-028",
+      "question": "What role does the Higgs boson play in particle physics, and when was it discovered?",
+      "search_query": "Higgs boson",
+      "expected_url": "https://en.wikipedia.org/wiki/Higgs_boson"
+    },
+    {
+      "source_id": "formal-v3-029",
+      "question": "What is an exoplanet, and which principal methods are used to detect one?",
+      "search_query": "Exoplanet",
+      "expected_url": "https://en.wikipedia.org/wiki/Exoplanet"
+    },
+    {
+      "source_id": "formal-v3-030",
+      "question": "What cellular process occurs in a ribosome, and which molecules form its main components?",
+      "search_query": "Ribosome",
+      "expected_url": "https://en.wikipedia.org/wiki/Ribosome"
+    },
+    {
+      "source_id": "formal-v3-031",
+      "question": "How does the immune system distinguish threats, and which major defense layers does it use?",
+      "search_query": "Immune system",
+      "expected_url": "https://en.wikipedia.org/wiki/Immune_system"
+    },
+    {
+      "source_id": "formal-v3-032",
+      "question": "How does antibiotic resistance arise, and why does it make bacterial infections harder to treat?",
+      "search_query": "Antibiotic resistance",
+      "expected_url": "https://en.wikipedia.org/wiki/Antibiotic_resistance"
+    },
+    {
+      "source_id": "formal-v3-033",
+      "question": "How does the polymerase chain reaction amplify genetic material, and what stages repeat in each cycle?",
+      "search_query": "Polymerase chain reaction",
+      "expected_url": "https://en.wikipedia.org/wiki/Polymerase_chain_reaction"
+    },
+    {
+      "source_id": "formal-v3-034",
+      "question": "What roles can RNA perform in cells, and which chemical building blocks compose it?",
+      "search_query": "RNA",
+      "expected_url": "https://en.wikipedia.org/wiki/RNA"
+    },
+    {
+      "source_id": "formal-v3-035",
+      "question": "How does an enzyme accelerate a chemical reaction, and what determines its substrate specificity?",
+      "search_query": "Enzyme",
+      "expected_url": "https://en.wikipedia.org/wiki/Enzyme"
+    },
+    {
+      "source_id": "formal-v3-036",
+      "question": "What spectrum does black-body radiation produce, and how does temperature change its peak wavelength?",
+      "search_query": "Black-body radiation",
+      "expected_url": "https://en.wikipedia.org/wiki/Black-body_radiation"
+    },
+    {
+      "source_id": "formal-v3-037",
+      "question": "What stellar events can produce a supernova, and what remains after the explosion?",
+      "search_query": "Supernova",
+      "expected_url": "https://en.wikipedia.org/wiki/Supernova"
+    },
+    {
+      "source_id": "formal-v3-038",
+      "question": "Where does a hydrothermal vent form, and which energy source supports its ecosystems?",
+      "search_query": "Hydrothermal vent",
+      "expected_url": "https://en.wikipedia.org/wiki/Hydrothermal_vent"
+    },
+    {
+      "source_id": "formal-v3-039",
+      "question": "What is a continental shelf, and where does its outer boundary normally end?",
+      "search_query": "Continental shelf",
+      "expected_url": "https://en.wikipedia.org/wiki/Continental_shelf"
+    },
+    {
+      "source_id": "formal-v3-040",
+      "question": "What regulates a circadian rhythm, and how closely does its cycle match one day?",
+      "search_query": "Circadian rhythm",
+      "expected_url": "https://en.wikipedia.org/wiki/Circadian_rhythm"
+    },
+    {
+      "source_id": "formal-v3-041",
+      "question": "How does the Euclidean algorithm find a greatest common divisor, and why does it terminate?",
+      "search_query": "Euclidean algorithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Euclidean_algorithm"
+    },
+    {
+      "source_id": "formal-v3-042",
+      "question": "What does the prime number theorem say about how prime numbers are distributed?",
+      "search_query": "Prime number theorem",
+      "expected_url": "https://en.wikipedia.org/wiki/Prime_number_theorem"
+    },
+    {
+      "source_id": "formal-v3-043",
+      "question": "What problem does Dijkstra's algorithm solve, and which edge-weight condition does it require?",
+      "search_query": "Dijkstra's algorithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm"
+    },
+    {
+      "source_id": "formal-v3-044",
+      "question": "How does a relational database organize records, and what connects rows across tables?",
+      "search_query": "Relational database",
+      "expected_url": "https://en.wikipedia.org/wiki/Relational_database"
+    },
+    {
+      "source_id": "formal-v3-045",
+      "question": "What addressing and delivery functions does the Internet Protocol provide across networks?",
+      "search_query": "Internet Protocol",
+      "expected_url": "https://en.wikipedia.org/wiki/Internet_Protocol"
+    },
+    {
+      "source_id": "formal-v3-046",
+      "question": "How does a blockchain link transaction records, and what makes prior blocks difficult to alter?",
+      "search_query": "Blockchain",
+      "expected_url": "https://en.wikipedia.org/wiki/Blockchain"
+    },
+    {
+      "source_id": "formal-v3-047",
+      "question": "What transformations does a compiler perform between source code and an executable program?",
+      "search_query": "Compiler",
+      "expected_url": "https://en.wikipedia.org/wiki/Compiler"
+    },
+    {
+      "source_id": "formal-v3-048",
+      "question": "Which resources does an operating system manage, and how does it serve application programs?",
+      "search_query": "Operating system",
+      "expected_url": "https://en.wikipedia.org/wiki/Operating_system"
+    },
+    {
+      "source_id": "formal-v3-049",
+      "question": "How does the Monte Carlo method use random sampling to estimate numerical results?",
+      "search_query": "Monte Carlo method",
+      "expected_url": "https://en.wikipedia.org/wiki/Monte_Carlo_method"
+    },
+    {
+      "source_id": "formal-v3-050",
+      "question": "What mathematical structures does graph theory study, and what do vertices and edges represent?",
+      "search_query": "Graph theory",
+      "expected_url": "https://en.wikipedia.org/wiki/Graph_theory"
+    },
+    {
+      "source_id": "formal-v3-051",
+      "question": "How does an internal combustion engine turn fuel combustion into mechanical motion?",
+      "search_query": "Internal combustion engine",
+      "expected_url": "https://en.wikipedia.org/wiki/Internal_combustion_engine"
+    },
+    {
+      "source_id": "formal-v3-052",
+      "question": "How can a transistor amplify or switch an electrical signal, and which terminals does it use?",
+      "search_query": "Transistor",
+      "expected_url": "https://en.wikipedia.org/wiki/Transistor"
+    },
+    {
+      "source_id": "formal-v3-053",
+      "question": "What components can an integrated circuit contain, and on what substrate are they fabricated?",
+      "search_query": "Integrated circuit",
+      "expected_url": "https://en.wikipedia.org/wiki/Integrated_circuit"
+    },
+    {
+      "source_id": "formal-v3-054",
+      "question": "How does a solar cell convert sunlight directly into electricity, and which effect enables this?",
+      "search_query": "Solar cell",
+      "expected_url": "https://en.wikipedia.org/wiki/Solar_cell"
+    },
+    {
+      "source_id": "formal-v3-055",
+      "question": "How does fiber-optic communication carry information, and why can it span long distances?",
+      "search_query": "Fiber-optic communication",
+      "expected_url": "https://en.wikipedia.org/wiki/Fiber-optic_communication"
+    },
+    {
+      "source_id": "formal-v3-056",
+      "question": "Who wrote Ulysses, and on which date does the novel's action take place?",
+      "search_query": "Ulysses (novel)",
+      "expected_url": "https://en.wikipedia.org/wiki/Ulysses_(novel)"
+    },
+    {
+      "source_id": "formal-v3-057",
+      "question": "Who wrote War and Peace, and during which historical invasion is the novel set?",
+      "search_query": "War and Peace",
+      "expected_url": "https://en.wikipedia.org/wiki/War_and_Peace"
+    },
+    {
+      "source_id": "formal-v3-058",
+      "question": "Who painted The Persistence of Memory, and which unusual objects dominate the scene?",
+      "search_query": "The Persistence of Memory",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Persistence_of_Memory"
+    },
+    {
+      "source_id": "formal-v3-059",
+      "question": "Where did Gothic architecture develop, and which structural features distinguish its cathedrals?",
+      "search_query": "Gothic architecture",
+      "expected_url": "https://en.wikipedia.org/wiki/Gothic_architecture"
+    },
+    {
+      "source_id": "formal-v3-060",
+      "question": "Who wrote The Canterbury Tales, and what journey provides the collection's narrative frame?",
+      "search_query": "The Canterbury Tales",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Canterbury_Tales"
+    }
+  ]
+}

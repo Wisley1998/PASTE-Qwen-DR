@@ -1,0 +1,148 @@
+{
+  "schema": "paste_repro.queued_stress180_reference_summary",
+  "version": 1,
+  "status": "paired_stress180_ad_load_sensitivity_not_independent_not_final",
+  "date": "2026-08-15",
+  "comparison": {
+    "A": {
+      "scheduler": "fcfs",
+      "tool_overlap_mode": "none"
+    },
+    "D": {
+      "scheduler": "online_joint_pacer_v2",
+      "tool_overlap_mode": "learned",
+      "stage_aware_lanes": true
+    }
+  },
+  "protocol": {
+    "replicates": 3,
+    "fresh_server_per_cell": true,
+    "load_instances_per_cell": 180,
+    "logical_requests_per_cell": 1557,
+    "independent_source_sessions": 60,
+    "instances_per_source": 3,
+    "full_drain": true,
+    "tool_wait_mode": "recorded_sleep_replay",
+    "tool_wait_speedup": 10,
+    "live_tool_queue_or_broker": false,
+    "max_num_seqs": 64,
+    "decode_target_running": 64,
+    "decode_max_running": 64
+  },
+  "aggregate": {
+    "aggregation": "Each cell metric is the mean of three replicate-level metrics; relative reductions are computed after aggregation.",
+    "A": {
+      "task_flow_time_s": {
+        "mean": 548.0799315301455,
+        "p50": 571.969877690081,
+        "p95": 651.8911413374723,
+        "max": 656.6480409456767
+      },
+      "task_makespan_s": 658.0543598333994,
+      "request_latency_s": {
+        "mean": 61.90665527238398,
+        "p50": 59.09413329760233,
+        "p95": 106.17980213165282,
+        "max": 117.60104727745056
+      },
+      "mean_queue_time_s": 35.62585695241601,
+      "instrumentation_wall_time_s": 658.5810933113098
+    },
+    "D": {
+      "task_flow_time_s": {
+        "mean": 375.87837992852366,
+        "p50": 380.61405499449694,
+        "p95": 576.9417737649896,
+        "max": 607.3526689599945
+      },
+      "task_makespan_s": 608.5537753899893,
+      "request_latency_s": {
+        "mean": 42.005728719423836,
+        "p50": 22.656432231267292,
+        "p95": 171.51807832717813,
+        "max": 352.0363209247589
+      },
+      "mean_queue_time_s": 20.287763542687586,
+      "instrumentation_wall_time_s": 609.0852267742157
+    },
+    "relative_reduction": {
+      "definition": "A minus D divided by A; positive means D is lower or faster.",
+      "task_flow_time": {
+        "mean": 0.31419058005073186,
+        "p50": 0.3345557697345546,
+        "p95": 0.11497221364093164,
+        "max": 0.0750712237177912
+      },
+      "task_makespan": 0.0752226373151639,
+      "request_latency": {
+        "mean": 0.3214666737428758,
+        "p50": 0.6166043739542153,
+        "p95": -0.6153550381880735,
+        "max": -1.9934794721191245
+      },
+      "mean_queue_time": 0.43053261652666724,
+      "instrumentation_wall_time": 0.07515531046940871
+    }
+  },
+  "per_replicate_relative_reduction": [
+    {
+      "replicate": 1,
+      "task_mean": 0.32075492070573797,
+      "task_p50": 0.33634081753305706,
+      "task_p95": 0.10911264313191645,
+      "task_makespan": 0.07455554747019567
+    },
+    {
+      "replicate": 2,
+      "task_mean": 0.3016866402554758,
+      "task_p50": 0.3215320311262515,
+      "task_p95": 0.10925121476719396,
+      "task_makespan": 0.06540816212464427
+    },
+    {
+      "replicate": 3,
+      "task_mean": 0.32015387732884937,
+      "task_p50": 0.3456265953435507,
+      "task_p95": 0.12642217685528662,
+      "task_makespan": 0.08565187105182707
+    }
+  ],
+  "paired_source_analysis": {
+    "sampling_unit": "independent_source_session_mean",
+    "effective_sample_size": 60,
+    "duplicate_instances_and_replicates_do_not_increase_sample_size": true,
+    "mean_A_minus_D_task_flow_s": 172.20155160162184,
+    "joint_faster": 58,
+    "joint_slower": 2,
+    "ties": 0,
+    "bootstrap_95_ci_s": {
+      "method": "nonparametric_percentile_bootstrap",
+      "seed": 20260815,
+      "resamples": 10000,
+      "lower": 151.3659852605727,
+      "upper": 191.6727333362787
+    }
+  },
+  "execution_integrity": {
+    "logical_requests_total": 9342,
+    "request_attempts_total": 9342,
+    "requests_success": 9342,
+    "requests_failed": 0,
+    "retries": 0,
+    "preemptions": 0,
+    "swap_events": 0,
+    "all_requests_succeeded_exactly_once": true,
+    "completion_tokens_mean_per_replicate": {
+      "A": 496318.3333333333,
+      "D": 497368.3333333333,
+      "D_minus_A_relative_to_A": 0.0021155777038258375
+    }
+  },
+  "provenance": {
+    "full_aggregate": "reproduction/artifacts/stress180_u86_stage_formal/paired_stress180_stage_3x.json",
+    "fixed_workload_manifest_sha256": "9dc47fe8fe0134cfbbe762165592f5b9852feb959cd1597425fdf230e9a46c91",
+    "frozen_config_sha256": "e4417bdd8e609feeb576f1c277be942dcffbb4e5b2572f0572b212611eac2551",
+    "bootstrap_seed": 20260815
+  },
+  "claim_boundary": "Tuned queued load-sensitivity evidence over 60 independent held-out sources; not an untouched final benchmark and not a live tool/LLM serving system."
+}

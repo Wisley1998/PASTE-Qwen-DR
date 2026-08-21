@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "split_id": "live-joint-wikipedia-frozen-development-v1",
+  "split_role": "development",
+  "formal_eligible": false,
+  "description": "Development-only frozen-call-graph sources. Search and visit are still live HTTP executions, but the authoritative visit URL is fixed before each cell so scheduler/speculation comparisons have identical tool invocations.",
+  "sources": [
+    {
+      "source_id": "fdev001",
+      "question": "When did Apollo 11 land on the Moon, and who walked on it?",
+      "search_query": "Apollo 11",
+      "expected_url": "https://en.wikipedia.org/wiki/Apollo_11"
+    },
+    {
+      "source_id": "fdev002",
+      "question": "Who created the Python programming language and when was it first released?",
+      "search_query": "Python programming language",
+      "expected_url": "https://en.wikipedia.org/wiki/Python_(programming_language)"
+    },
+    {
+      "source_id": "fdev003",
+      "question": "Where is the Eiffel Tower and how tall is it?",
+      "search_query": "Eiffel Tower",
+      "expected_url": "https://en.wikipedia.org/wiki/Eiffel_Tower"
+    },
+    {
+      "source_id": "fdev004",
+      "question": "When was the Hubble Space Telescope launched and what is its purpose?",
+      "search_query": "Hubble Space Telescope",
+      "expected_url": "https://en.wikipedia.org/wiki/Hubble_Space_Telescope"
+    },
+    {
+      "source_id": "fdev005",
+      "question": "Who discovered penicillin and in what year?",
+      "search_query": "Discovery of penicillin",
+      "expected_url": "https://en.wikipedia.org/wiki/Discovery_of_penicillin"
+    },
+    {
+      "source_id": "fdev006",
+      "question": "Where is the Great Barrier Reef located and why is it notable?",
+      "search_query": "Great Barrier Reef",
+      "expected_url": "https://en.wikipedia.org/wiki/Great_Barrier_Reef"
+    },
+    {
+      "source_id": "fdev007",
+      "question": "What is the exact defined speed of light in vacuum?",
+      "search_query": "Speed of light",
+      "expected_url": "https://en.wikipedia.org/wiki/Speed_of_light"
+    },
+    {
+      "source_id": "fdev008",
+      "question": "What is the commonly reported elevation of Mount Everest?",
+      "search_query": "Mount Everest",
+      "expected_url": "https://en.wikipedia.org/wiki/Mount_Everest"
+    },
+    {
+      "source_id": "fdev009",
+      "question": "When was the United Nations founded and where is its headquarters?",
+      "search_query": "United Nations",
+      "expected_url": "https://en.wikipedia.org/wiki/United_Nations"
+    },
+    {
+      "source_id": "fdev010",
+      "question": "Which scientists are credited with the double-helix model of DNA?",
+      "search_query": "Molecular structure of DNA",
+      "expected_url": "https://en.wikipedia.org/wiki/DNA"
+    },
+    {
+      "source_id": "fdev011",
+      "question": "When was Voyager 1 launched and what distinction does it hold?",
+      "search_query": "Voyager 1",
+      "expected_url": "https://en.wikipedia.org/wiki/Voyager_1"
+    },
+    {
+      "source_id": "fdev012",
+      "question": "Who painted The Starry Night and when?",
+      "search_query": "The Starry Night",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Starry_Night"
+    },
+    {
+      "source_id": "fdev013",
+      "question": "What causes auroras near Earth's polar regions?",
+      "search_query": "Aurora",
+      "expected_url": "https://en.wikipedia.org/wiki/Aurora"
+    },
+    {
+      "source_id": "fdev014",
+      "question": "What is photosynthesis and which organisms perform it?",
+      "search_query": "Photosynthesis",
+      "expected_url": "https://en.wikipedia.org/wiki/Photosynthesis"
+    },
+    {
+      "source_id": "fdev015",
+      "question": "Who developed the theory of general relativity and when was it published?",
+      "search_query": "General relativity",
+      "expected_url": "https://en.wikipedia.org/wiki/General_relativity"
+    },
+    {
+      "source_id": "fdev016",
+      "question": "What was the Rosetta Stone and why was it important?",
+      "search_query": "Rosetta Stone",
+      "expected_url": "https://en.wikipedia.org/wiki/Rosetta_Stone"
+    },
+    {
+      "source_id": "fdev017",
+      "question": "Where does the Amazon River flow and what is notable about its discharge?",
+      "search_query": "Amazon River",
+      "expected_url": "https://en.wikipedia.org/wiki/Amazon_River"
+    },
+    {
+      "source_id": "fdev018",
+      "question": "When did the Berlin Wall fall and what did it separate?",
+      "search_query": "Berlin Wall",
+      "expected_url": "https://en.wikipedia.org/wiki/Berlin_Wall"
+    },
+    {
+      "source_id": "fdev019",
+      "question": "What is CRISPR gene editing based on?",
+      "search_query": "CRISPR gene editing",
+      "expected_url": "https://en.wikipedia.org/wiki/CRISPR_gene_editing"
+    },
+    {
+      "source_id": "fdev020",
+      "question": "Who composed The Four Seasons and around when was it published?",
+      "search_query": "The Four Seasons Vivaldi",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Four_Seasons_(Vivaldi)"
+    },
+    {
+      "source_id": "fdev021",
+      "question": "What is the Mariana Trench and where is its deepest point?",
+      "search_query": "Mariana Trench",
+      "expected_url": "https://en.wikipedia.org/wiki/Mariana_Trench"
+    },
+    {
+      "source_id": "fdev022",
+      "question": "When did the first powered Wright Flyer flight occur?",
+      "search_query": "Wright Flyer",
+      "expected_url": "https://en.wikipedia.org/wiki/Wright_Flyer"
+    },
+    {
+      "source_id": "fdev023",
+      "question": "What is the Large Hadron Collider and where is it located?",
+      "search_query": "Large Hadron Collider",
+      "expected_url": "https://en.wikipedia.org/wiki/Large_Hadron_Collider"
+    },
+    {
+      "source_id": "fdev024",
+      "question": "Who wrote Pride and Prejudice and when was it published?",
+      "search_query": "Pride and Prejudice",
+      "expected_url": "https://en.wikipedia.org/wiki/Pride_and_Prejudice"
+    }
+  ]
+}

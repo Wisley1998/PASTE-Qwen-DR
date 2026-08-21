@@ -1,0 +1,174 @@
+{
+  "schema": "paste_repro.public_joint_summary",
+  "version": 2,
+  "status": "paired_stress120_load_sensitivity_not_independent_not_final",
+  "detailed_result": "paired_stress120_cap512_m64_t64.json",
+  "protocol": {
+    "comparison": {
+      "A": {
+        "scheduler": "fcfs",
+        "tool_overlap_mode": "none"
+      },
+      "D": {
+        "scheduler": "online_joint_pacer_v2",
+        "tool_overlap_mode": "learned",
+        "tool_prediction_top_k": 5
+      },
+      "effect_definition": "A - D; positive reduction means D is lower/faster",
+      "effect_scope": "combined scheduler-plus-learned-overlap treatment, not a component ablation"
+    },
+    "runtime": {
+      "model": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B",
+      "model_revision": "4b0ac5767427a55d08a254f0367e2934976598e0",
+      "vllm": "0.10.1",
+      "hardware": "4 x A100-SXM4-40GB, TP=4, BF16, 16K context"
+    },
+    "workload": {
+      "fixed_role": "stress",
+      "fixed_workload_manifest_sha256": "f3c179a2e5a84b928dc1ffd17254173e9363d5a0ab78bf70fdd21f85dccd3399",
+      "heldout_source_sessions": 60,
+      "instances_per_source": 2,
+      "load_instances_per_replicate": 120,
+      "duplicate_marker_mode": "break_prefix",
+      "duplicates_are_independent": false,
+      "independent_analysis_unit": "source_session",
+      "requests_per_cell_per_replicate": 1038,
+      "replicate_count": 3,
+      "cell_runs": 6,
+      "logical_requests_all_cell_runs": 6228
+    },
+    "timing": {
+      "tool_execution": "recorded_wait_sleep_replay",
+      "trace_speedup": 10,
+      "live_web_tools_executed": false,
+      "model_output_changes_recorded_next_call": false,
+      "scheduler_metadata_source": "online",
+      "oracle_metadata_exposed": false
+    },
+    "target64_configuration": {
+      "max_num_seqs": 64,
+      "joint_decode_target_running": 64,
+      "joint_decode_max_running": 64,
+      "decode_band_restricts_below_native_capacity": false,
+      "frozen_config": "../../configs/joint_stress.env.example"
+    },
+    "mapper_artifact_sha256": "d4ac5ee9cebcb328ec153192fe4d78508cafd9dcff09cea5d025fb35f5818394"
+  },
+  "comparison_invariants": {
+    "all_requests_finally_succeeded": true,
+    "all_requests_succeeded_exactly_once": false,
+    "final_failure_count": 0,
+    "retry_count": 2,
+    "retry_success_count": 2,
+    "request_attempts_total": 6230,
+    "retry_distribution": {
+      "A_fcfs_none": 1,
+      "D_joint_learned": 1
+    },
+    "preemption_count": 0,
+    "swap_count": 0,
+    "calibration_excluded_from_evaluation": true,
+    "joint_hook_install_and_runtime_verified": true
+  },
+  "aggregate": {
+    "aggregation": "Cell metrics are means of replicate-level metrics; relative effects are computed after aggregation.",
+    "cells": {
+      "A": {
+        "policy": "fcfs",
+        "tool_overlap_mode": "none",
+        "task_flow_time_s": {
+          "mean": 312.7900306377205,
+          "p50": 325.037212251383,
+          "p95": 388.3217315856796,
+          "max": 397.75555646913585
+        },
+        "task_makespan_s": 398.10976123809814,
+        "instrumentation_wall_time_s": 398.63594547907513,
+        "request_latency_s": {
+          "mean": 34.70995852376072,
+          "p50": 31.274679104487102,
+          "p95": 71.15039587815602,
+          "max": 84.56668782234192
+        },
+        "mean_queue_time_s": 12.601111823614616
+      },
+      "D": {
+        "policy": "online_joint_pacer_v2",
+        "tool_overlap_mode": "learned",
+        "task_flow_time_s": {
+          "mean": 281.3866774115357,
+          "p50": 292.7944453938914,
+          "p95": 374.3177522010987,
+          "max": 387.3504507988427
+        },
+        "task_makespan_s": 387.704655567805,
+        "instrumentation_wall_time_s": 388.22986094156903,
+        "request_latency_s": {
+          "mean": 31.086456235969532,
+          "p50": 27.957547704378765,
+          "p95": 60.92743091980616,
+          "max": 74.38840500513713
+        },
+        "mean_queue_time_s": 10.253193497081044,
+        "completion_tokens_relative_to_A": 0.00163
+      }
+    },
+    "relative_reduction": {
+      "task_flow_time_s": {
+        "mean": 0.10039755155290357,
+        "p50": 0.09919715540925542,
+        "p95": 0.036062826892012415,
+        "max": 0.026159548247820758
+      },
+      "task_makespan_s": 0.02613627366968818,
+      "instrumentation_wall_time_s": 0.026104230327248127,
+      "request_latency_s": {
+        "mean": 0.10439373718383202,
+        "p50": 0.1060644423888722,
+        "p95": 0.14368106926427407,
+        "max": 0.12035806390558149
+      },
+      "mean_queue_time_s": 0.1863262829025569
+    },
+    "source_level_pairing": {
+      "definition": "Average the original and deterministic duplicate A-D delta within each replicate, then average over replicates and summarize 60 source means.",
+      "independent_source_session_count": 60,
+      "joint_faster": 57,
+      "joint_slower": 3,
+      "ties": 0,
+      "mean_saving_s": 31.403353226184844,
+      "fixed_seed_nonparametric_bootstrap_95pct_ci_s": [
+        25.949,
+        37.104
+      ]
+    },
+    "replicate_relative_reduction": {
+      "task_flow_time_mean": [
+        0.09344936753388255,
+        0.0961819192998729,
+        0.11123722051313406
+      ],
+      "task_flow_time_p95": [
+        0.02817930942273171,
+        0.03501487237012269,
+        0.04487463824115725
+      ]
+    }
+  },
+  "interpretation": "At target64 the decode band does not constrain below native capacity. The observed A/D reduction is the combined effect of causal task-aware reordering, HBM/prefix-locality controls, and learned overlap; it is not evidence that pacing alone caused the gain.",
+  "limitations": [
+    "stress120 is a development/load-sensitivity workload, not a final evaluation",
+    "the two deterministic instances per source are not independent samples",
+    "recorded waits are replayed at 10x; no live web tool executes",
+    "generated model text does not determine the next recorded call",
+    "this is a minimal trace-replay implementation, not the paper's full PASTE system or its 32 x A100-80GB evaluation"
+  ],
+  "historical_development": {
+    "retained_negative_or_diagnostic_settings": [
+      "target32",
+      "target48",
+      "target56"
+    ],
+    "old_single_pair_30_session_result": "The old 10.29% mean-only functional smoke is not pooled with or presented as this reference result."
+  }
+}

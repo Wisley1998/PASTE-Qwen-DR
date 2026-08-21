@@ -1,0 +1,511 @@
+{
+  "schema_version": 2,
+  "split_id": "live-joint-wikipedia-frozen-formal-v9",
+  "split_role": "formal_heldout",
+  "formal_eligible": true,
+  "created_date_utc": "2026-08-16",
+  "used_for_tuning": false,
+  "used_for_parameter_selection": false,
+  "untouched_at_freeze": true,
+  "frozen_call_graph": true,
+  "language": "en",
+  "source_count": 80,
+  "search_backend": "bing_html_search",
+  "visit_backend": "r.jina.ai",
+  "description": "Prospective untouched formal held-out sources for a future frozen v9 live tool/LLM experiment. These 80 sources were selected and frozen offline before any v9 execution, without network access or inspection of performance artifacts, and are disjoint from every development, tuning, frozen-development, frozen-tuning, and formal-v2 through formal-v8 source. Each authoritative Wikipedia visit URL was committed before execution; this split must use exactly one replica per source and must not be inspected for tuning, load selection, or parameter selection.",
+  "excluded_workloads": [
+    "live_joint_wikipedia_v1.json",
+    "live_joint_wikipedia_tune_v1.json",
+    "live_joint_wikipedia_frozen_dev_v1.json",
+    "live_joint_wikipedia_frozen_tune_v1.json",
+    "live_joint_wikipedia_frozen_formal_v2.json",
+    "live_joint_wikipedia_frozen_formal_v3.json",
+    "live_joint_wikipedia_frozen_formal_v4.json",
+    "live_joint_wikipedia_frozen_formal_v5.json",
+    "live_joint_wikipedia_frozen_formal_v6.json",
+    "live_joint_wikipedia_frozen_formal_v7.json",
+    "live_joint_wikipedia_frozen_formal_v8.json"
+  ],
+  "sources": [
+    {
+      "source_id": "formal-v9-001",
+      "question": "Where did Mycenaean Greece develop, and what features defined its palace-centered society?",
+      "search_query": "Mycenaean Greece",
+      "expected_url": "https://en.wikipedia.org/wiki/Mycenaean_Greece"
+    },
+    {
+      "source_id": "formal-v9-002",
+      "question": "When did the Neo-Babylonian Empire rule, and which city anchored its power?",
+      "search_query": "Neo-Babylonian Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Neo-Babylonian_Empire"
+    },
+    {
+      "source_id": "formal-v9-003",
+      "question": "How did the Rashidun Caliphate form, and which territories did it conquer?",
+      "search_query": "Rashidun Caliphate",
+      "expected_url": "https://en.wikipedia.org/wiki/Rashidun_Caliphate"
+    },
+    {
+      "source_id": "formal-v9-004",
+      "question": "When did the Umayyad Caliphate rule, and how far did its territory extend?",
+      "search_query": "Umayyad Caliphate",
+      "expected_url": "https://en.wikipedia.org/wiki/Umayyad_Caliphate"
+    },
+    {
+      "source_id": "formal-v9-005",
+      "question": "Where was the Fatimid Caliphate centered, and which regions came under its control?",
+      "search_query": "Fatimid Caliphate",
+      "expected_url": "https://en.wikipedia.org/wiki/Fatimid_Caliphate"
+    },
+    {
+      "source_id": "formal-v9-006",
+      "question": "When did the Tang dynasty rule, and what supported its political and cultural influence?",
+      "search_query": "Tang dynasty",
+      "expected_url": "https://en.wikipedia.org/wiki/Tang_dynasty"
+    },
+    {
+      "source_id": "formal-v9-007",
+      "question": "How did the Sui dynasty reunify China, and which major projects did it undertake?",
+      "search_query": "Sui dynasty",
+      "expected_url": "https://en.wikipedia.org/wiki/Sui_dynasty"
+    },
+    {
+      "source_id": "formal-v9-008",
+      "question": "When was the Heian period, and how did court culture shape Japanese history?",
+      "search_query": "Heian period",
+      "expected_url": "https://en.wikipedia.org/wiki/Heian_period"
+    },
+    {
+      "source_id": "formal-v9-009",
+      "question": "Where was the Vijayanagara Empire based, and how did it become a regional power?",
+      "search_query": "Vijayanagara Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Vijayanagara_Empire"
+    },
+    {
+      "source_id": "formal-v9-010",
+      "question": "How did the Maratha Empire emerge, and across which regions did it expand?",
+      "search_query": "Maratha Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Maratha_Empire"
+    },
+    {
+      "source_id": "formal-v9-011",
+      "question": "How was the Polish-Lithuanian Commonwealth governed, and which lands did it encompass?",
+      "search_query": "Polish-Lithuanian Commonwealth",
+      "expected_url": "https://en.wikipedia.org/wiki/Polish%E2%80%93Lithuanian_Commonwealth"
+    },
+    {
+      "source_id": "formal-v9-012",
+      "question": "How did the Carolingian Empire form, and which territories did it encompass?",
+      "search_query": "Carolingian Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Carolingian_Empire"
+    },
+    {
+      "source_id": "formal-v9-013",
+      "question": "Why did the War of 1812 begin, and how did it end?",
+      "search_query": "War of 1812",
+      "expected_url": "https://en.wikipedia.org/wiki/War_of_1812"
+    },
+    {
+      "source_id": "formal-v9-014",
+      "question": "Why did the First Sino-Japanese War begin, and what settlement concluded it?",
+      "search_query": "First Sino-Japanese War",
+      "expected_url": "https://en.wikipedia.org/wiki/First_Sino-Japanese_War"
+    },
+    {
+      "source_id": "formal-v9-015",
+      "question": "What prompted the Mahdist War, and where was it fought?",
+      "search_query": "Mahdist War",
+      "expected_url": "https://en.wikipedia.org/wiki/Mahdist_War"
+    },
+    {
+      "source_id": "formal-v9-016",
+      "question": "Why did the Algerian War begin, and how did it lead to independence?",
+      "search_query": "Algerian War",
+      "expected_url": "https://en.wikipedia.org/wiki/Algerian_War"
+    },
+    {
+      "source_id": "formal-v9-017",
+      "question": "Where does the Ganges flow, and why is the river culturally significant?",
+      "search_query": "Ganges",
+      "expected_url": "https://en.wikipedia.org/wiki/Ganges"
+    },
+    {
+      "source_id": "formal-v9-018",
+      "question": "Where does the Indus River originate, and through which regions does it flow?",
+      "search_query": "Indus River",
+      "expected_url": "https://en.wikipedia.org/wiki/Indus_River"
+    },
+    {
+      "source_id": "formal-v9-019",
+      "question": "Where does the Yukon River flow, and which drainage basin does it form?",
+      "search_query": "Yukon River",
+      "expected_url": "https://en.wikipedia.org/wiki/Yukon_River"
+    },
+    {
+      "source_id": "formal-v9-020",
+      "question": "Where is Lake Tahoe, and which geographic features shape its basin?",
+      "search_query": "Lake Tahoe",
+      "expected_url": "https://en.wikipedia.org/wiki/Lake_Tahoe"
+    },
+    {
+      "source_id": "formal-v9-021",
+      "question": "Which lands surround the Mediterranean Sea, and how does it connect to the Atlantic?",
+      "search_query": "Mediterranean Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Mediterranean_Sea"
+    },
+    {
+      "source_id": "formal-v9-022",
+      "question": "Where is the Caribbean Sea, and which island groups and continents border it?",
+      "search_query": "Caribbean Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Caribbean_Sea"
+    },
+    {
+      "source_id": "formal-v9-023",
+      "question": "Which bodies of water does the Bosporus connect, and what city surrounds it?",
+      "search_query": "Bosporus",
+      "expected_url": "https://en.wikipedia.org/wiki/Bosporus"
+    },
+    {
+      "source_id": "formal-v9-024",
+      "question": "Where does the Euphrates originate, and through which countries does it flow?",
+      "search_query": "Euphrates",
+      "expected_url": "https://en.wikipedia.org/wiki/Euphrates"
+    },
+    {
+      "source_id": "formal-v9-025",
+      "question": "Where does the Tigris originate, and where does it join the Euphrates?",
+      "search_query": "Tigris",
+      "expected_url": "https://en.wikipedia.org/wiki/Tigris"
+    },
+    {
+      "source_id": "formal-v9-026",
+      "question": "Where does the Jordan River flow, and which lakes or seas mark its course?",
+      "search_query": "Jordan River",
+      "expected_url": "https://en.wikipedia.org/wiki/Jordan_River"
+    },
+    {
+      "source_id": "formal-v9-027",
+      "question": "Where does the Orange River flow, and into which ocean does it empty?",
+      "search_query": "Orange River",
+      "expected_url": "https://en.wikipedia.org/wiki/Orange_River"
+    },
+    {
+      "source_id": "formal-v9-028",
+      "question": "Where is Lake Superior, and which jurisdictions share its shoreline?",
+      "search_query": "Lake Superior",
+      "expected_url": "https://en.wikipedia.org/wiki/Lake_Superior"
+    },
+    {
+      "source_id": "formal-v9-029",
+      "question": "Which countries and islands border the South China Sea, and where does it connect outward?",
+      "search_query": "South China Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/South_China_Sea"
+    },
+    {
+      "source_id": "formal-v9-030",
+      "question": "Where is the Arabian Sea, and which surrounding regions define its boundaries?",
+      "search_query": "Arabian Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Arabian_Sea"
+    },
+    {
+      "source_id": "formal-v9-031",
+      "question": "Which lands does the English Channel separate, and which seas does it connect?",
+      "search_query": "English Channel",
+      "expected_url": "https://en.wikipedia.org/wiki/English_Channel"
+    },
+    {
+      "source_id": "formal-v9-032",
+      "question": "Where do the Himalayas extend, and which tectonic process formed them?",
+      "search_query": "Himalayas",
+      "expected_url": "https://en.wikipedia.org/wiki/Himalayas"
+    },
+    {
+      "source_id": "formal-v9-033",
+      "question": "What relationship does Faraday's law of induction establish between magnetic flux and voltage?",
+      "search_query": "Faraday's law of induction",
+      "expected_url": "https://en.wikipedia.org/wiki/Faraday%27s_law_of_induction"
+    },
+    {
+      "source_id": "formal-v9-034",
+      "question": "How does Planck's law relate emitted spectral density to temperature and frequency?",
+      "search_query": "Planck's law",
+      "expected_url": "https://en.wikipedia.org/wiki/Planck%27s_law"
+    },
+    {
+      "source_id": "formal-v9-035",
+      "question": "How does the Stefan-Boltzmann law relate temperature to radiated power?",
+      "search_query": "Stefan-Boltzmann law",
+      "expected_url": "https://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law"
+    },
+    {
+      "source_id": "formal-v9-036",
+      "question": "What does the Dirac equation describe, and which particles does it model?",
+      "search_query": "Dirac equation",
+      "expected_url": "https://en.wikipedia.org/wiki/Dirac_equation"
+    },
+    {
+      "source_id": "formal-v9-037",
+      "question": "Which physical principles define special relativity, and what consequences follow from them?",
+      "search_query": "Special relativity",
+      "expected_url": "https://en.wikipedia.org/wiki/Special_relativity"
+    },
+    {
+      "source_id": "formal-v9-038",
+      "question": "What causes the Raman effect, and what can its spectral shifts reveal?",
+      "search_query": "Raman effect",
+      "expected_url": "https://en.wikipedia.org/wiki/Raman_effect"
+    },
+    {
+      "source_id": "formal-v9-039",
+      "question": "How does the Zeeman effect change spectral lines in a magnetic field?",
+      "search_query": "Zeeman effect",
+      "expected_url": "https://en.wikipedia.org/wiki/Zeeman_effect"
+    },
+    {
+      "source_id": "formal-v9-040",
+      "question": "What causes magnetism, and how do magnetic fields act on materials?",
+      "search_query": "Magnetism",
+      "expected_url": "https://en.wikipedia.org/wiki/Magnetism"
+    },
+    {
+      "source_id": "formal-v9-041",
+      "question": "What does an atomic orbital represent, and how are orbitals classified?",
+      "search_query": "Atomic orbital",
+      "expected_url": "https://en.wikipedia.org/wiki/Atomic_orbital"
+    },
+    {
+      "source_id": "formal-v9-042",
+      "question": "What does chemical kinetics study, and which factors influence reaction rates?",
+      "search_query": "Chemical kinetics",
+      "expected_url": "https://en.wikipedia.org/wiki/Chemical_kinetics"
+    },
+    {
+      "source_id": "formal-v9-043",
+      "question": "What is an operon, and how does it coordinate the regulation of multiple genes?",
+      "search_query": "Operon",
+      "expected_url": "https://en.wikipedia.org/wiki/Operon"
+    },
+    {
+      "source_id": "formal-v9-044",
+      "question": "What is gene expression, and how does information in a gene produce a functional product?",
+      "search_query": "Gene expression",
+      "expected_url": "https://en.wikipedia.org/wiki/Gene_expression"
+    },
+    {
+      "source_id": "formal-v9-045",
+      "question": "What properties define a stem cell, and how can stem cells become specialized?",
+      "search_query": "Stem cell",
+      "expected_url": "https://en.wikipedia.org/wiki/Stem_cell"
+    },
+    {
+      "source_id": "formal-v9-046",
+      "question": "How does glycolysis break down glucose, and what energy-carrying products result?",
+      "search_query": "Glycolysis",
+      "expected_url": "https://en.wikipedia.org/wiki/Glycolysis"
+    },
+    {
+      "source_id": "formal-v9-047",
+      "question": "What role does the citric acid cycle play in cellular metabolism?",
+      "search_query": "Citric acid cycle",
+      "expected_url": "https://en.wikipedia.org/wiki/Citric_acid_cycle"
+    },
+    {
+      "source_id": "formal-v9-048",
+      "question": "What is epigenetics, and how can heritable regulation alter gene activity?",
+      "search_query": "Epigenetics",
+      "expected_url": "https://en.wikipedia.org/wiki/Epigenetics"
+    },
+    {
+      "source_id": "formal-v9-049",
+      "question": "How does selection sort order a collection, and what is its time complexity?",
+      "search_query": "Selection sort",
+      "expected_url": "https://en.wikipedia.org/wiki/Selection_sort"
+    },
+    {
+      "source_id": "formal-v9-050",
+      "question": "How does insertion sort build an ordered sequence, and when is it efficient?",
+      "search_query": "Insertion sort",
+      "expected_url": "https://en.wikipedia.org/wiki/Insertion_sort"
+    },
+    {
+      "source_id": "formal-v9-051",
+      "question": "How does radix sort order keys without directly comparing every pair?",
+      "search_query": "Radix sort",
+      "expected_url": "https://en.wikipedia.org/wiki/Radix_sort"
+    },
+    {
+      "source_id": "formal-v9-052",
+      "question": "What ordering property does a binary heap maintain, and which operations does it support?",
+      "search_query": "Binary heap",
+      "expected_url": "https://en.wikipedia.org/wiki/Binary_heap"
+    },
+    {
+      "source_id": "formal-v9-053",
+      "question": "How is a Fibonacci heap structured, and which operations achieve favorable amortized costs?",
+      "search_query": "Fibonacci heap",
+      "expected_url": "https://en.wikipedia.org/wiki/Fibonacci_heap"
+    },
+    {
+      "source_id": "formal-v9-054",
+      "question": "How does a segment tree answer range queries and process updates?",
+      "search_query": "Segment tree",
+      "expected_url": "https://en.wikipedia.org/wiki/Segment_tree"
+    },
+    {
+      "source_id": "formal-v9-055",
+      "question": "How does a k-d tree partition multidimensional space, and which searches does it support?",
+      "search_query": "K-d tree",
+      "expected_url": "https://en.wikipedia.org/wiki/K-d_tree"
+    },
+    {
+      "source_id": "formal-v9-056",
+      "question": "What is a minimum spanning tree, and how is it defined for a weighted graph?",
+      "search_query": "Minimum spanning tree",
+      "expected_url": "https://en.wikipedia.org/wiki/Minimum_spanning_tree"
+    },
+    {
+      "source_id": "formal-v9-057",
+      "question": "What makes a subgraph a strongly connected component in a directed graph?",
+      "search_query": "Strongly connected component",
+      "expected_url": "https://en.wikipedia.org/wiki/Strongly_connected_component"
+    },
+    {
+      "source_id": "formal-v9-058",
+      "question": "How does the Ford-Fulkerson algorithm compute maximum flow in a network?",
+      "search_query": "Ford-Fulkerson algorithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Ford%E2%80%93Fulkerson_algorithm"
+    },
+    {
+      "source_id": "formal-v9-059",
+      "question": "How does the Karatsuba algorithm multiply large numbers more efficiently?",
+      "search_query": "Karatsuba algorithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Karatsuba_algorithm"
+    },
+    {
+      "source_id": "formal-v9-060",
+      "question": "What is the discrete logarithm problem, and why is it useful in cryptography?",
+      "search_query": "Discrete logarithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Discrete_logarithm"
+    },
+    {
+      "source_id": "formal-v9-061",
+      "question": "What does mutual exclusion guarantee when concurrent processes share a resource?",
+      "search_query": "Mutual exclusion",
+      "expected_url": "https://en.wikipedia.org/wiki/Mutual_exclusion"
+    },
+    {
+      "source_id": "formal-v9-062",
+      "question": "What properties define a database transaction, and how do they protect data integrity?",
+      "search_query": "Database transaction",
+      "expected_url": "https://en.wikipedia.org/wiki/Database_transaction"
+    },
+    {
+      "source_id": "formal-v9-063",
+      "question": "How does a remote procedure call let one program invoke code on another system?",
+      "search_query": "Remote procedure call",
+      "expected_url": "https://en.wikipedia.org/wiki/Remote_procedure_call"
+    },
+    {
+      "source_id": "formal-v9-064",
+      "question": "What role does the Border Gateway Protocol play in routing traffic between autonomous systems?",
+      "search_query": "Border Gateway Protocol",
+      "expected_url": "https://en.wikipedia.org/wiki/Border_Gateway_Protocol"
+    },
+    {
+      "source_id": "formal-v9-065",
+      "question": "Who created the Water Lilies series, and what recurring subject does it depict?",
+      "search_query": "Water Lilies (Monet series)",
+      "expected_url": "https://en.wikipedia.org/wiki/Water_Lilies_(Monet_series)"
+    },
+    {
+      "source_id": "formal-v9-066",
+      "question": "Who painted The Creation of Adam, and where is the fresco located?",
+      "search_query": "The Creation of Adam",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Creation_of_Adam"
+    },
+    {
+      "source_id": "formal-v9-067",
+      "question": "Who painted The Death of Marat, and which revolutionary event does it portray?",
+      "search_query": "The Death of Marat",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Death_of_Marat"
+    },
+    {
+      "source_id": "formal-v9-068",
+      "question": "Who painted The Gleaners, and what rural labor does the work depict?",
+      "search_query": "The Gleaners",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Gleaners"
+    },
+    {
+      "source_id": "formal-v9-069",
+      "question": "Who painted Luncheon of the Boating Party, and what social gathering is shown?",
+      "search_query": "Luncheon of the Boating Party",
+      "expected_url": "https://en.wikipedia.org/wiki/Luncheon_of_the_Boating_Party"
+    },
+    {
+      "source_id": "formal-v9-070",
+      "question": "Who created The Card Players, and how does the series depict its subjects?",
+      "search_query": "The Card Players",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Card_Players"
+    },
+    {
+      "source_id": "formal-v9-071",
+      "question": "Who painted Christina's World, and what scene does the painting present?",
+      "search_query": "Christina's World",
+      "expected_url": "https://en.wikipedia.org/wiki/Christina%27s_World"
+    },
+    {
+      "source_id": "formal-v9-072",
+      "question": "Who painted The Treachery of Images, and what paradoxical text accompanies its subject?",
+      "search_query": "The Treachery of Images",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Treachery_of_Images"
+    },
+    {
+      "source_id": "formal-v9-073",
+      "question": "Who wrote The Name of the Rose, and where is its mystery set?",
+      "search_query": "The Name of the Rose",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Name_of_the_Rose"
+    },
+    {
+      "source_id": "formal-v9-074",
+      "question": "Who wrote Catch-22, and which wartime predicament gives the novel its title?",
+      "search_query": "Catch-22",
+      "expected_url": "https://en.wikipedia.org/wiki/Catch-22"
+    },
+    {
+      "source_id": "formal-v9-075",
+      "question": "Who wrote The Handmaid's Tale, and what kind of society does it portray?",
+      "search_query": "The Handmaid's Tale",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Handmaid%27s_Tale"
+    },
+    {
+      "source_id": "formal-v9-076",
+      "question": "Who wrote Midnight's Children, and which historical transition shapes its story?",
+      "search_query": "Midnight's Children",
+      "expected_url": "https://en.wikipedia.org/wiki/Midnight%27s_Children"
+    },
+    {
+      "source_id": "formal-v9-077",
+      "question": "Who wrote Brave New World, and what form of future society does it imagine?",
+      "search_query": "Brave New World",
+      "expected_url": "https://en.wikipedia.org/wiki/Brave_New_World"
+    },
+    {
+      "source_id": "formal-v9-078",
+      "question": "Who wrote The Grapes of Wrath, and what migration drives its story?",
+      "search_query": "The Grapes of Wrath",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Grapes_of_Wrath"
+    },
+    {
+      "source_id": "formal-v9-079",
+      "question": "Who wrote Slaughterhouse-Five, and how does its narrative treat time and war?",
+      "search_query": "Slaughterhouse-Five",
+      "expected_url": "https://en.wikipedia.org/wiki/Slaughterhouse-Five"
+    },
+    {
+      "source_id": "formal-v9-080",
+      "question": "Who wrote The Master and Margarita, and in which city is much of the novel set?",
+      "search_query": "The Master and Margarita",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Master_and_Margarita"
+    }
+  ]
+}

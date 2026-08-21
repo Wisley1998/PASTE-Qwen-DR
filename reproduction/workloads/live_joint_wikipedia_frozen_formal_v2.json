@@ -1,0 +1,383 @@
+{
+  "schema_version": 2,
+  "split_id": "live-joint-wikipedia-frozen-formal-v2",
+  "split_role": "formal_heldout",
+  "formal_eligible": true,
+  "created_date_utc": "2026-08-16",
+  "used_for_tuning": false,
+  "used_for_parameter_selection": false,
+  "untouched_at_freeze": true,
+  "frozen_call_graph": true,
+  "language": "en",
+  "source_count": 60,
+  "search_backend": "bing_html_search",
+  "visit_backend": "r.jina.ai",
+  "description": "Untouched formal held-out sources for the frozen live tool/LLM experiment. Each authoritative visit URL was committed before any formal run. This split must not be inspected for tuning, load selection, or parameter selection.",
+  "excluded_workloads": [
+    "live_joint_wikipedia_v1.json",
+    "live_joint_wikipedia_tune_v1.json",
+    "live_joint_wikipedia_frozen_dev_v1.json"
+  ],
+  "sources": [
+    {
+      "source_id": "formal-v2-001",
+      "question": "When did the French Revolution begin, and which monarchy did it overthrow?",
+      "search_query": "French Revolution",
+      "expected_url": "https://en.wikipedia.org/wiki/French_Revolution"
+    },
+    {
+      "source_id": "formal-v2-002",
+      "question": "Who became the first Roman emperor, and in what year did his rule begin?",
+      "search_query": "Roman Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Roman_Empire"
+    },
+    {
+      "source_id": "formal-v2-003",
+      "question": "What city was the capital of the Byzantine Empire, and when did the empire fall?",
+      "search_query": "Byzantine Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Byzantine_Empire"
+    },
+    {
+      "source_id": "formal-v2-004",
+      "question": "Where did the Ottoman Empire originate, and in what year was its sultanate abolished?",
+      "search_query": "Ottoman Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Ottoman_Empire"
+    },
+    {
+      "source_id": "formal-v2-005",
+      "question": "When did the Ming dynasty rule China, and which dynasty succeeded it?",
+      "search_query": "Ming dynasty",
+      "expected_url": "https://en.wikipedia.org/wiki/Ming_dynasty"
+    },
+    {
+      "source_id": "formal-v2-006",
+      "question": "What political authority was restored during the Meiji Restoration, and in what year?",
+      "search_query": "Meiji Restoration",
+      "expected_url": "https://en.wikipedia.org/wiki/Meiji_Restoration"
+    },
+    {
+      "source_id": "formal-v2-007",
+      "question": "When did the Haitian Revolution take place, and what independent state emerged from it?",
+      "search_query": "Haitian Revolution",
+      "expected_url": "https://en.wikipedia.org/wiki/Haitian_Revolution"
+    },
+    {
+      "source_id": "formal-v2-008",
+      "question": "Where was the Mali Empire located, and which ruler is famous for his pilgrimage to Mecca?",
+      "search_query": "Mali Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Mali_Empire"
+    },
+    {
+      "source_id": "formal-v2-009",
+      "question": "In what year did the United States complete the Louisiana Purchase, and which country sold the territory?",
+      "search_query": "Louisiana Purchase",
+      "expected_url": "https://en.wikipedia.org/wiki/Louisiana_Purchase"
+    },
+    {
+      "source_id": "formal-v2-010",
+      "question": "When did the Cuban Missile Crisis occur, and which two superpowers confronted each other?",
+      "search_query": "Cuban Missile Crisis",
+      "expected_url": "https://en.wikipedia.org/wiki/Cuban_Missile_Crisis"
+    },
+    {
+      "source_id": "formal-v2-011",
+      "question": "Which Babylonian king commissioned the Code of Hammurabi, and approximately when?",
+      "search_query": "Code of Hammurabi",
+      "expected_url": "https://en.wikipedia.org/wiki/Code_of_Hammurabi"
+    },
+    {
+      "source_id": "formal-v2-012",
+      "question": "When did the Korean War begin and end, and which two Korean states fought in it?",
+      "search_query": "Korean War",
+      "expected_url": "https://en.wikipedia.org/wiki/Korean_War"
+    },
+    {
+      "source_id": "formal-v2-013",
+      "question": "Where does the Nile empty, and which two major tributaries form its river system?",
+      "search_query": "Nile",
+      "expected_url": "https://en.wikipedia.org/wiki/Nile"
+    },
+    {
+      "source_id": "formal-v2-014",
+      "question": "On which continent is the Sahara located, and what size distinction does it hold?",
+      "search_query": "Sahara",
+      "expected_url": "https://en.wikipedia.org/wiki/Sahara"
+    },
+    {
+      "source_id": "formal-v2-015",
+      "question": "Which river carved the Grand Canyon, and in which U.S. state is it located?",
+      "search_query": "Grand Canyon",
+      "expected_url": "https://en.wikipedia.org/wiki/Grand_Canyon"
+    },
+    {
+      "source_id": "formal-v2-016",
+      "question": "In which country is Mount Kilimanjaro, and what continental height distinction does it hold?",
+      "search_query": "Mount Kilimanjaro",
+      "expected_url": "https://en.wikipedia.org/wiki/Mount_Kilimanjaro"
+    },
+    {
+      "source_id": "formal-v2-017",
+      "question": "On which river are Victoria Falls, and which two countries share the falls?",
+      "search_query": "Victoria Falls",
+      "expected_url": "https://en.wikipedia.org/wiki/Victoria_Falls"
+    },
+    {
+      "source_id": "formal-v2-018",
+      "question": "Why is the Caspian Sea classified as the world's largest inland body of water, and where is it?",
+      "search_query": "Caspian Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Caspian_Sea"
+    },
+    {
+      "source_id": "formal-v2-019",
+      "question": "Which kingdom includes Greenland as an autonomous territory, and what island-size distinction does it hold?",
+      "search_query": "Greenland",
+      "expected_url": "https://en.wikipedia.org/wiki/Greenland"
+    },
+    {
+      "source_id": "formal-v2-020",
+      "question": "Where is Madagascar located, and why is its native biodiversity unusual?",
+      "search_query": "Madagascar",
+      "expected_url": "https://en.wikipedia.org/wiki/Madagascar"
+    },
+    {
+      "source_id": "formal-v2-021",
+      "question": "Across which part of Europe do the Alps extend, and what is their highest mountain?",
+      "search_query": "Alps",
+      "expected_url": "https://en.wikipedia.org/wiki/Alps"
+    },
+    {
+      "source_id": "formal-v2-022",
+      "question": "Where does the Danube originate, and into which sea does it flow?",
+      "search_query": "Danube",
+      "expected_url": "https://en.wikipedia.org/wiki/Danube"
+    },
+    {
+      "source_id": "formal-v2-023",
+      "question": "When was Yellowstone National Park established, and what historical distinction is commonly attributed to it?",
+      "search_query": "Yellowstone National Park",
+      "expected_url": "https://en.wikipedia.org/wiki/Yellowstone_National_Park"
+    },
+    {
+      "source_id": "formal-v2-024",
+      "question": "Which five lakes make up the Great Lakes, and which river carries their water toward the Atlantic?",
+      "search_query": "Great Lakes",
+      "expected_url": "https://en.wikipedia.org/wiki/Great_Lakes"
+    },
+    {
+      "source_id": "formal-v2-025",
+      "question": "What does the germ theory of disease state, and which nineteenth-century scientists helped establish it?",
+      "search_query": "Germ theory of disease",
+      "expected_url": "https://en.wikipedia.org/wiki/Germ_theory_of_disease"
+    },
+    {
+      "source_id": "formal-v2-026",
+      "question": "What observable change does the Doppler effect describe, and what relative motion causes it?",
+      "search_query": "Doppler effect",
+      "expected_url": "https://en.wikipedia.org/wiki/Doppler_effect"
+    },
+    {
+      "source_id": "formal-v2-027",
+      "question": "What is Brownian motion, and after whom is the phenomenon named?",
+      "search_query": "Brownian motion",
+      "expected_url": "https://en.wikipedia.org/wiki/Brownian_motion"
+    },
+    {
+      "source_id": "formal-v2-028",
+      "question": "What does the second law of thermodynamics say about entropy in an isolated system?",
+      "search_query": "Second law of thermodynamics",
+      "expected_url": "https://en.wikipedia.org/wiki/Second_law_of_thermodynamics"
+    },
+    {
+      "source_id": "formal-v2-029",
+      "question": "What numerical value defines the Avogadro constant, and what does it count per mole?",
+      "search_query": "Avogadro constant",
+      "expected_url": "https://en.wikipedia.org/wiki/Avogadro_constant"
+    },
+    {
+      "source_id": "formal-v2-030",
+      "question": "What is the Coriolis force, and how does it influence large-scale winds and ocean currents?",
+      "search_query": "Coriolis force",
+      "expected_url": "https://en.wikipedia.org/wiki/Coriolis_force"
+    },
+    {
+      "source_id": "formal-v2-031",
+      "question": "Which reactants does the Haber process combine, and why is its product industrially important?",
+      "search_query": "Haber process",
+      "expected_url": "https://en.wikipedia.org/wiki/Haber_process"
+    },
+    {
+      "source_id": "formal-v2-032",
+      "question": "What does the word laser abbreviate, and what physical process produces its coherent light?",
+      "search_query": "Laser",
+      "expected_url": "https://en.wikipedia.org/wiki/Laser"
+    },
+    {
+      "source_id": "formal-v2-033",
+      "question": "What electric charge does a neutron have, and where is it normally found in an atom?",
+      "search_query": "Neutron",
+      "expected_url": "https://en.wikipedia.org/wiki/Neutron"
+    },
+    {
+      "source_id": "formal-v2-034",
+      "question": "What does the Big Bang theory describe, and approximately how old is the universe under this model?",
+      "search_query": "Big Bang",
+      "expected_url": "https://en.wikipedia.org/wiki/Big_Bang"
+    },
+    {
+      "source_id": "formal-v2-035",
+      "question": "What is dark matter, and through which gravitational effects is its presence inferred?",
+      "search_query": "Dark matter",
+      "expected_url": "https://en.wikipedia.org/wiki/Dark_matter"
+    },
+    {
+      "source_id": "formal-v2-036",
+      "question": "What is the basic structure of the cell membrane, and what does it regulate?",
+      "search_query": "Cell membrane",
+      "expected_url": "https://en.wikipedia.org/wiki/Cell_membrane"
+    },
+    {
+      "source_id": "formal-v2-037",
+      "question": "How does the RSA cryptosystem separate public and private keys, and which mathematical problem supports its security?",
+      "search_query": "RSA cryptosystem",
+      "expected_url": "https://en.wikipedia.org/wiki/RSA_cryptosystem"
+    },
+    {
+      "source_id": "formal-v2-038",
+      "question": "What does a Fourier transform convert a function into, and what information does the resulting representation show?",
+      "search_query": "Fourier transform",
+      "expected_url": "https://en.wikipedia.org/wiki/Fourier_transform"
+    },
+    {
+      "source_id": "formal-v2-039",
+      "question": "What relationship among a right triangle's sides is stated by the Pythagorean theorem?",
+      "search_query": "Pythagorean theorem",
+      "expected_url": "https://en.wikipedia.org/wiki/Pythagorean_theorem"
+    },
+    {
+      "source_id": "formal-v2-040",
+      "question": "What are the two main branches of calculus, and which quantities does each study?",
+      "search_query": "Calculus",
+      "expected_url": "https://en.wikipedia.org/wiki/Calculus"
+    },
+    {
+      "source_id": "formal-v2-041",
+      "question": "What kinds of strategic interactions does game theory model, and what is a payoff?",
+      "search_query": "Game theory",
+      "expected_url": "https://en.wikipedia.org/wiki/Game_theory"
+    },
+    {
+      "source_id": "formal-v2-042",
+      "question": "What conditional probabilities are related by Bayes' theorem, and what prior quantity does it update?",
+      "search_query": "Bayes' theorem",
+      "expected_url": "https://en.wikipedia.org/wiki/Bayes%27_theorem"
+    },
+    {
+      "source_id": "formal-v2-043",
+      "question": "Which truth values and operations form Boolean algebra, and where is it used in digital systems?",
+      "search_query": "Boolean algebra",
+      "expected_url": "https://en.wikipedia.org/wiki/Boolean_algebra"
+    },
+    {
+      "source_id": "formal-v2-044",
+      "question": "How does the Global Positioning System use satellites to determine a receiver's position?",
+      "search_query": "Global Positioning System",
+      "expected_url": "https://en.wikipedia.org/wiki/Global_Positioning_System"
+    },
+    {
+      "source_id": "formal-v2-045",
+      "question": "How does a steam engine convert thermal energy into mechanical work, and where was it historically important?",
+      "search_query": "Steam engine",
+      "expected_url": "https://en.wikipedia.org/wiki/Steam_engine"
+    },
+    {
+      "source_id": "formal-v2-046",
+      "question": "What does radar use radio waves to measure, and what does its name abbreviate?",
+      "search_query": "Radar",
+      "expected_url": "https://en.wikipedia.org/wiki/Radar"
+    },
+    {
+      "source_id": "formal-v2-047",
+      "question": "How does a barcode encode data, and what kind of device reads it?",
+      "search_query": "Barcode",
+      "expected_url": "https://en.wikipedia.org/wiki/Barcode"
+    },
+    {
+      "source_id": "formal-v2-048",
+      "question": "How do lithium ions move during the charging and discharging of a lithium-ion battery?",
+      "search_query": "Lithium-ion battery",
+      "expected_url": "https://en.wikipedia.org/wiki/Lithium-ion_battery"
+    },
+    {
+      "source_id": "formal-v2-049",
+      "question": "Who painted the Mona Lisa, and in which museum is it displayed?",
+      "search_query": "Mona Lisa",
+      "expected_url": "https://en.wikipedia.org/wiki/Mona_Lisa"
+    },
+    {
+      "source_id": "formal-v2-050",
+      "question": "Who painted Guernica, and which wartime event inspired the work?",
+      "search_query": "Guernica (Picasso)",
+      "expected_url": "https://en.wikipedia.org/wiki/Guernica_(Picasso)"
+    },
+    {
+      "source_id": "formal-v2-051",
+      "question": "Who wrote Hamlet, and in which kingdom is the tragedy primarily set?",
+      "search_query": "Hamlet",
+      "expected_url": "https://en.wikipedia.org/wiki/Hamlet"
+    },
+    {
+      "source_id": "formal-v2-052",
+      "question": "Who wrote Don Quixote, and in how many parts was the novel originally published?",
+      "search_query": "Don Quixote",
+      "expected_url": "https://en.wikipedia.org/wiki/Don_Quixote"
+    },
+    {
+      "source_id": "formal-v2-053",
+      "question": "Who wrote the Divine Comedy, and which three realms structure the poem?",
+      "search_query": "Divine Comedy",
+      "expected_url": "https://en.wikipedia.org/wiki/Divine_Comedy"
+    },
+    {
+      "source_id": "formal-v2-054",
+      "question": "Who wrote The Great Gatsby, and in what year was the novel first published?",
+      "search_query": "The Great Gatsby",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Great_Gatsby"
+    },
+    {
+      "source_id": "formal-v2-055",
+      "question": "Who is traditionally credited with writing The Tale of Genji, and during which Japanese period?",
+      "search_query": "The Tale of Genji",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Tale_of_Genji"
+    },
+    {
+      "source_id": "formal-v2-056",
+      "question": "Who created The Scream, and what artistic movement is the work commonly associated with?",
+      "search_query": "The Scream",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Scream"
+    },
+    {
+      "source_id": "formal-v2-057",
+      "question": "Who sculpted The Thinker, and for which larger work was the figure originally conceived?",
+      "search_query": "The Thinker",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Thinker"
+    },
+    {
+      "source_id": "formal-v2-058",
+      "question": "Who composed Swan Lake, and when and where was the ballet first performed?",
+      "search_query": "Swan Lake",
+      "expected_url": "https://en.wikipedia.org/wiki/Swan_Lake"
+    },
+    {
+      "source_id": "formal-v2-059",
+      "question": "Who composed The Magic Flute, and in which language was its original libretto written?",
+      "search_query": "The Magic Flute",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Magic_Flute"
+    },
+    {
+      "source_id": "formal-v2-060",
+      "question": "Where did Impressionism originate, and which visual characteristics distinguish the movement?",
+      "search_query": "Impressionism",
+      "expected_url": "https://en.wikipedia.org/wiki/Impressionism"
+    }
+  ]
+}

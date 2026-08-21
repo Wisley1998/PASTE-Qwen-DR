@@ -1,0 +1,33 @@
+__pycache__/
+*.py[cod]
+
+# Machine-local runtime state and large generated replay artifacts.  The small
+# SHA-bound inputs/results below are part of the final-v9 reproducibility chain;
+# all raw cell evidence, logs, metrics, and other runs remain ignored.
+artifacts/*
+!artifacts/live_joint/
+artifacts/live_joint/*
+!artifacts/live_joint/development/
+artifacts/live_joint/development/*
+!artifacts/live_joint/development/v9_screen/
+artifacts/live_joint/development/v9_screen/*
+!artifacts/live_joint/development/v9_screen/v9-screen-r1/
+artifacts/live_joint/development/v9_screen/v9-screen-r1/*
+!artifacts/live_joint/development/v9_screen/v9-screen-r1/completed_screen.json
+!artifacts/live_joint/development/v9_screen/v9-screen-r1/strict_development_selection.json
+!artifacts/live_joint/development/v9_screen/v9-screen-r1/stage-0/
+artifacts/live_joint/development/v9_screen/v9-screen-r1/stage-0/*
+!artifacts/live_joint/development/v9_screen/v9-screen-r1/stage-0/selected_transport.json
+!artifacts/live_joint/formal/
+artifacts/live_joint/formal/*
+!artifacts/live_joint/formal/formal-v9-context10k-live-r1/
+artifacts/live_joint/formal/formal-v9-context10k-live-r1/*
+!artifacts/live_joint/formal/formal-v9-context10k-live-r1/completed_matrix.json
+!artifacts/live_joint/formal/formal-v9-context10k-live-r1/strict_four_cell_aggregate.json
+!artifacts/live_joint/prefix_native_causal_dev_v2/
+artifacts/live_joint/prefix_native_causal_dev_v2/*
+!artifacts/live_joint/prefix_native_causal_dev_v2/native-prefix-v2-r1/
+artifacts/live_joint/prefix_native_causal_dev_v2/native-prefix-v2-r1/*
+!artifacts/live_joint/prefix_native_causal_dev_v2/native-prefix-v2-r1/strict_validation.json
+logs/
+run/

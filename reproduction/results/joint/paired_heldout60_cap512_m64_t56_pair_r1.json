@@ -1,0 +1,1653 @@
+{
+  "aggregate": {
+    "aggregation": "Cell metrics are means of replicate-level metrics. Relative effects are computed after aggregation, not averaged as percentages.",
+    "cells": {
+      "A": {
+        "instrumentation_wall_time_s": 223.14524912834167,
+        "mean_queue_time_s": 0.012420235836841632,
+        "policy": "fcfs",
+        "replicate_count": 1,
+        "request_count": 519,
+        "request_latency_s": {
+          "max": 31.25925874710083,
+          "mean": 15.671940241245865,
+          "p50": 14.080973625183105,
+          "p95": 30.176725602149965
+        },
+        "source_session_count": 60,
+        "task_flow_time_s": {
+          "max": 222.6199095249176,
+          "mean": 148.10396379232407,
+          "p50": 150.0915254354477,
+          "p95": 210.10013810396194
+        },
+        "task_makespan_s": 222.6199095249176,
+        "tool_overlap_mode": "none",
+        "trace_count": 60
+      },
+      "D": {
+        "instrumentation_wall_time_s": 226.6292073726654,
+        "mean_queue_time_s": 0.07937703675557707,
+        "policy": "online_joint_pacer_v2",
+        "replicate_count": 1,
+        "request_count": 519,
+        "request_latency_s": {
+          "max": 31.629013776779175,
+          "mean": 15.263868719626483,
+          "p50": 13.217731475830078,
+          "p95": 29.968794345855713
+        },
+        "source_session_count": 60,
+        "task_flow_time_s": {
+          "max": 226.10403323173523,
+          "mean": 144.51748169660567,
+          "p50": 147.8065962791443,
+          "p95": 207.9862848639488
+        },
+        "task_makespan_s": 226.10403323173523,
+        "tool_overlap_mode": "learned",
+        "trace_count": 60
+      }
+    },
+    "effects": {
+      "absolute_reduction": {
+        "instrumentation_wall_time_s": -3.4839582443237305,
+        "mean_queue_time_s": -0.06695680091873543,
+        "request_latency_s": {
+          "max": -0.3697550296783447,
+          "mean": 0.408071521619382,
+          "p50": 0.8632421493530273,
+          "p95": 0.2079312562942519
+        },
+        "task_flow_time_s": {
+          "max": -3.484123706817627,
+          "mean": 3.586482095718395,
+          "p50": 2.2849291563034058,
+          "p95": 2.1138532400131282
+        },
+        "task_makespan_s": -3.484123706817627
+      },
+      "definition": "A - D; positive means joint+learned is lower/faster",
+      "relative_reduction": {
+        "instrumentation_wall_time_s": -0.01561296177235634,
+        "mean_queue_time_s": -5.390944407039699,
+        "request_latency_s": {
+          "max": -0.011828656356499113,
+          "mean": 0.026038353601260396,
+          "p50": 0.06130557249316643,
+          "p95": 0.006890451238335735
+        },
+        "task_flow_time_s": {
+          "max": -0.015650548570668846,
+          "mean": 0.024215976425502498,
+          "p50": 0.015223572081597121,
+          "p95": 0.01006117015957005
+        },
+        "task_makespan_s": -0.015650548570668846
+      }
+    },
+    "paired_task_flow": {
+      "definition": "For each identical evaluation session, average its A-D delta across replicates; summarize only those per-session means.",
+      "delta_s": {
+        "max": 32.2165207862854,
+        "mean": 3.5864820957183836,
+        "min": -10.487626314163208,
+        "p05": -6.317884576320648,
+        "p50": 1.7304413318634033,
+        "p95": 21.943624436855313
+      },
+      "independent_session_count": 60,
+      "outcomes": {
+        "joint_faster": 38,
+        "joint_faster_fraction": 0.6333333333333333,
+        "joint_slower": 22,
+        "tie": 0
+      },
+      "raw_paired_observation_count": 60,
+      "repeated_sessions_are_not_counted_as_independent": true,
+      "replicate_count": 1,
+      "sessions": [
+        {
+          "a_task_flow_mean_s": 110.04000949859619,
+          "d_task_flow_mean_s": 109.77158164978027,
+          "delta_mean_s": 0.26842784881591797,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            0.26842784881591797
+          ],
+          "source_session": "trace_20260129_125406_task1_收集整理目前中国9阶层实际收入和财务状况_特别研究得出中国的.jsonl",
+          "trace_id": "heldout_000"
+        },
+        {
+          "a_task_flow_mean_s": 135.47208857536316,
+          "d_task_flow_mean_s": 113.58501648902893,
+          "delta_mean_s": 21.88707208633423,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            21.88707208633423
+          ],
+          "source_session": "trace_20260129_130834_task6_请帮我整理下目前全球具身智能发展的技术路线_以及各个路线的代.jsonl",
+          "trace_id": "heldout_001"
+        },
+        {
+          "a_task_flow_mean_s": 148.38014388084412,
+          "d_task_flow_mean_s": 133.2160713672638,
+          "delta_mean_s": 15.164072513580322,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            15.164072513580322
+          ],
+          "source_session": "trace_20260129_152650_task12_收集整理近10年来国际上自来水生产及销售企业在技术创新且已经.jsonl",
+          "trace_id": "heldout_002"
+        },
+        {
+          "a_task_flow_mean_s": 171.81773972511292,
+          "d_task_flow_mean_s": 175.9038701057434,
+          "delta_mean_s": -4.086130380630493,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -4.086130380630493
+          ],
+          "source_session": "trace_20260129_153229_task15_收集整理目前世界上关于量子网络的研究_横向比较各课题组的相关.jsonl",
+          "trace_id": "heldout_003"
+        },
+        {
+          "a_task_flow_mean_s": 114.84108877182007,
+          "d_task_flow_mean_s": 115.06974124908447,
+          "delta_mean_s": -0.2286524772644043,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -0.2286524772644043
+          ],
+          "source_session": "trace_20260129_153605_task17___在当今软件开发行业中_低代码_无代码平台对传统开发流程的.jsonl",
+          "trace_id": "heldout_004"
+        },
+        {
+          "a_task_flow_mean_s": 134.4777319431305,
+          "d_task_flow_mean_s": 125.52632570266724,
+          "delta_mean_s": 8.951406240463257,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            8.951406240463257
+          ],
+          "source_session": "trace_20260129_153747_task18_请你学习一下GCS算法的原理_目前的GCS算法主要是用于安全.jsonl",
+          "trace_id": "heldout_005"
+        },
+        {
+          "a_task_flow_mean_s": 88.56120896339417,
+          "d_task_flow_mean_s": 91.96622824668884,
+          "delta_mean_s": -3.4050192832946777,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -3.4050192832946777
+          ],
+          "source_session": "trace_20260129_154633_task20_研究下Anthropic最新发布的Streamable_HT.jsonl",
+          "trace_id": "heldout_006"
+        },
+        {
+          "a_task_flow_mean_s": 176.25369882583618,
+          "d_task_flow_mean_s": 180.41613221168518,
+          "delta_mean_s": -4.162433385848999,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -4.162433385848999
+          ],
+          "source_session": "trace_20260129_154807_task21_现在AI这么热门_我最感兴趣的就是人工智能在教育领域应用现状.jsonl",
+          "trace_id": "heldout_007"
+        },
+        {
+          "a_task_flow_mean_s": 92.72306180000305,
+          "d_task_flow_mean_s": 89.08059501647949,
+          "delta_mean_s": 3.6424667835235596,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            3.6424667835235596
+          ],
+          "source_session": "trace_20260129_163011_task27_如何将AI心理咨询和人类心理咨询有机结合_以便为人类心理健康.jsonl",
+          "trace_id": "heldout_008"
+        },
+        {
+          "a_task_flow_mean_s": 150.35343837738037,
+          "d_task_flow_mean_s": 145.32385873794556,
+          "delta_mean_s": 5.0295796394348145,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            5.0295796394348145
+          ],
+          "source_session": "trace_20260129_170942_task36_制造业离散制造_单件小批_基本上靠人的技能才能完成的_为我调.jsonl",
+          "trace_id": "heldout_009"
+        },
+        {
+          "a_task_flow_mean_s": 102.88568067550659,
+          "d_task_flow_mean_s": 101.39546656608582,
+          "delta_mean_s": 1.4902141094207764,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            1.4902141094207764
+          ],
+          "source_session": "trace_20260129_171332_task37_调研问题_爵士钢琴在现代音乐创作中的创新与风格演变研究__背.jsonl",
+          "trace_id": "heldout_010"
+        },
+        {
+          "a_task_flow_mean_s": 210.04932117462158,
+          "d_task_flow_mean_s": 199.7916510105133,
+          "delta_mean_s": 10.257670164108276,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            10.257670164108276
+          ],
+          "source_session": "trace_20260129_171620_task38_收集针对近三年内珠宝设计流行趋势变化_如高奢类品牌珠宝以及高.jsonl",
+          "trace_id": "heldout_011"
+        },
+        {
+          "a_task_flow_mean_s": 158.46807885169983,
+          "d_task_flow_mean_s": 146.78196382522583,
+          "delta_mean_s": 11.686115026473999,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            11.686115026473999
+          ],
+          "source_session": "trace_20260129_172730_task41_收集整理目前中国电影票房前十的电影的相关资料_横向比较各电影.jsonl",
+          "trace_id": "heldout_012"
+        },
+        {
+          "a_task_flow_mean_s": 160.35631728172302,
+          "d_task_flow_mean_s": 135.57173871994019,
+          "delta_mean_s": 24.784578561782837,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            24.784578561782837
+          ],
+          "source_session": "trace_20260129_175319_task46_房地产行业可持续发展的动力是什么_未来10年国家在政策_资金.jsonl",
+          "trace_id": "heldout_013"
+        },
+        {
+          "a_task_flow_mean_s": 197.04540014266968,
+          "d_task_flow_mean_s": 189.39007472991943,
+          "delta_mean_s": 7.655325412750244,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            7.655325412750244
+          ],
+          "source_session": "trace_20260129_182104_task52_What_are_the_investment_philos.jsonl",
+          "trace_id": "heldout_014"
+        },
+        {
+          "a_task_flow_mean_s": 132.32936906814575,
+          "d_task_flow_mean_s": 142.81699538230896,
+          "delta_mean_s": -10.487626314163208,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -10.487626314163208
+          ],
+          "source_session": "trace_20260129_184959_task59_In_ecology__how_do_birds_achie.jsonl",
+          "trace_id": "heldout_015"
+        },
+        {
+          "a_task_flow_mean_s": 196.5217878818512,
+          "d_task_flow_mean_s": 173.50366878509521,
+          "delta_mean_s": 23.01811909675598,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            23.01811909675598
+          ],
+          "source_session": "trace_20260129_190100_task62_What_are_the_most_effective_ap.jsonl",
+          "trace_id": "heldout_016"
+        },
+        {
+          "a_task_flow_mean_s": 183.34391570091248,
+          "d_task_flow_mean_s": 173.80970191955566,
+          "delta_mean_s": 9.534213781356812,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            9.534213781356812
+          ],
+          "source_session": "trace_20260129_190724_task64_Regarding_the_attitude_control.jsonl",
+          "trace_id": "heldout_017"
+        },
+        {
+          "a_task_flow_mean_s": 184.6466109752655,
+          "d_task_flow_mean_s": 152.4300901889801,
+          "delta_mean_s": 32.2165207862854,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            32.2165207862854
+          ],
+          "source_session": "trace_20260129_192137_task67_Summarize_recent_research_prog.jsonl",
+          "trace_id": "heldout_018"
+        },
+        {
+          "a_task_flow_mean_s": 178.82056665420532,
+          "d_task_flow_mean_s": 161.85427331924438,
+          "delta_mean_s": 16.966293334960938,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            16.966293334960938
+          ],
+          "source_session": "trace_20260129_192805_task68_I_need_to_dynamically_adjust_K.jsonl",
+          "trace_id": "heldout_019"
+        },
+        {
+          "a_task_flow_mean_s": 178.16847562789917,
+          "d_task_flow_mean_s": 179.051504611969,
+          "delta_mean_s": -0.8830289840698242,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -0.8830289840698242
+          ],
+          "source_session": "trace_20260129_193541_task71_Acting_as_an_expert_in_K-12_ed.jsonl",
+          "trace_id": "heldout_020"
+        },
+        {
+          "a_task_flow_mean_s": 198.0813970565796,
+          "d_task_flow_mean_s": 195.3678379058838,
+          "delta_mean_s": 2.713559150695801,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            2.713559150695801
+          ],
+          "source_session": "trace_20260129_193742_task72_Please_write_a_literature_revi.jsonl",
+          "trace_id": "heldout_021"
+        },
+        {
+          "a_task_flow_mean_s": 86.35852479934692,
+          "d_task_flow_mean_s": 81.59163403511047,
+          "delta_mean_s": 4.76689076423645,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            4.76689076423645
+          ],
+          "source_session": "trace_20260129_193957_task73_As_a_senior_elementary_school.jsonl",
+          "trace_id": "heldout_022"
+        },
+        {
+          "a_task_flow_mean_s": 93.27862691879272,
+          "d_task_flow_mean_s": 98.35798716545105,
+          "delta_mean_s": -5.079360246658325,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -5.079360246658325
+          ],
+          "source_session": "trace_20260129_194507_task77_What_is_the_role_of_need_for_c.jsonl",
+          "trace_id": "heldout_023"
+        },
+        {
+          "a_task_flow_mean_s": 153.5330581665039,
+          "d_task_flow_mean_s": 155.1679322719574,
+          "delta_mean_s": -1.6348741054534912,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -1.6348741054534912
+          ],
+          "source_session": "trace_20260129_195211_task81_Write_an_analysis_exploring_ho.jsonl",
+          "trace_id": "heldout_024"
+        },
+        {
+          "a_task_flow_mean_s": 199.9946630001068,
+          "d_task_flow_mean_s": 183.58955597877502,
+          "delta_mean_s": 16.405107021331787,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            16.405107021331787
+          ],
+          "source_session": "trace_20260129_203546_task91_I_would_like_a_detailed_analys.jsonl",
+          "trace_id": "heldout_025"
+        },
+        {
+          "a_task_flow_mean_s": 203.87101984024048,
+          "d_task_flow_mean_s": 208.91018676757812,
+          "delta_mean_s": -5.0391669273376465,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -5.0391669273376465
+          ],
+          "source_session": "trace_20260129_204609_task92_For_a_research_project_titled.jsonl",
+          "trace_id": "heldout_026"
+        },
+        {
+          "a_task_flow_mean_s": 148.4601035118103,
+          "d_task_flow_mean_s": 143.05576062202454,
+          "delta_mean_s": 5.404342889785767,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            5.404342889785767
+          ],
+          "source_session": "trace_20260129_211023_task97_Find_data_and_evidence_to_supp.jsonl",
+          "trace_id": "heldout_027"
+        },
+        {
+          "a_task_flow_mean_s": 209.40211486816406,
+          "d_task_flow_mean_s": 206.5002896785736,
+          "delta_mean_s": 2.901825189590454,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            2.901825189590454
+          ],
+          "source_session": "trace_20260129_212736_task99_Research_the_current_applicati.jsonl",
+          "trace_id": "heldout_028"
+        },
+        {
+          "a_task_flow_mean_s": 211.53514552116394,
+          "d_task_flow_mean_s": 208.45303559303284,
+          "delta_mean_s": 3.0821099281311035,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            3.0821099281311035
+          ],
+          "source_session": "trace_20260129_213057_task100_Write_a_paper_to_discuss_the_i.jsonl",
+          "trace_id": "heldout_029"
+        },
+        {
+          "a_task_flow_mean_s": 87.46316361427307,
+          "d_task_flow_mean_s": 93.77686476707458,
+          "delta_mean_s": -6.313701152801514,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -6.313701152801514
+          ],
+          "source_session": "trace_20260129_125841_task4_分析_2010_年至今的黄金走势_用思维导图告诉我黄金未来有.jsonl",
+          "trace_id": "heldout_030"
+        },
+        {
+          "a_task_flow_mean_s": 97.62841200828552,
+          "d_task_flow_mean_s": 100.06595349311829,
+          "delta_mean_s": -2.4375414848327637,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -2.4375414848327637
+          ],
+          "source_session": "trace_20260129_125922_task5_调研国内金融机构之间的投资借贷关系与系统性风险的联系_对不同.jsonl",
+          "trace_id": "heldout_031"
+        },
+        {
+          "a_task_flow_mean_s": 160.527934551239,
+          "d_task_flow_mean_s": 154.01360177993774,
+          "delta_mean_s": 6.5143327713012695,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            6.5143327713012695
+          ],
+          "source_session": "trace_20260129_131103_task8_能否给我提供一份详尽的报告_分析机器学习或者深度学习在优化材.jsonl",
+          "trace_id": "heldout_032"
+        },
+        {
+          "a_task_flow_mean_s": 86.81812930107117,
+          "d_task_flow_mean_s": 83.44607543945312,
+          "delta_mean_s": 3.372053861618042,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            3.372053861618042
+          ],
+          "source_session": "trace_20260129_152515_task11_请总结碳钢常用缓蚀剂种类_并分析每种缓蚀剂是具有拉曼活性还是.jsonl",
+          "trace_id": "heldout_033"
+        },
+        {
+          "a_task_flow_mean_s": 121.06672477722168,
+          "d_task_flow_mean_s": 116.10739469528198,
+          "delta_mean_s": 4.959330081939697,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            4.959330081939697
+          ],
+          "source_session": "trace_20260129_152828_task13_为我调研AI算法能否提升现有电子学读出时幅修正方法.jsonl",
+          "trace_id": "heldout_034"
+        },
+        {
+          "a_task_flow_mean_s": 149.1434416770935,
+          "d_task_flow_mean_s": 148.83122873306274,
+          "delta_mean_s": 0.3122129440307617,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            0.3122129440307617
+          ],
+          "source_session": "trace_20260129_153000_task14_收集整理全球数学与量子计算交叉领域的主要研究团队及其成果_横.jsonl",
+          "trace_id": "heldout_035"
+        },
+        {
+          "a_task_flow_mean_s": 39.68232774734497,
+          "d_task_flow_mean_s": 43.42496943473816,
+          "delta_mean_s": -3.7426416873931885,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -3.7426416873931885
+          ],
+          "source_session": "trace_20260129_160324_task24_如何增强自闭症学生课堂参与度_有哪些有效的策略可供选择_.jsonl",
+          "trace_id": "heldout_036"
+        },
+        {
+          "a_task_flow_mean_s": 112.66941380500793,
+          "d_task_flow_mean_s": 112.84277725219727,
+          "delta_mean_s": -0.17336344718933105,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -0.17336344718933105
+          ],
+          "source_session": "trace_20260129_162304_task25_请为我整合近几年有关_中性粒细胞在脑缺血急性期和慢性期的功能.jsonl",
+          "trace_id": "heldout_037"
+        },
+        {
+          "a_task_flow_mean_s": 133.02970623970032,
+          "d_task_flow_mean_s": 131.3555235862732,
+          "delta_mean_s": 1.674182653427124,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            1.674182653427124
+          ],
+          "source_session": "trace_20260129_162605_task26_为我调研在慢性抗原刺激下_如肿瘤微环境或HIV潜伏感染__C.jsonl",
+          "trace_id": "heldout_038"
+        },
+        {
+          "a_task_flow_mean_s": 124.07414865493774,
+          "d_task_flow_mean_s": 122.28744864463806,
+          "delta_mean_s": 1.7867000102996826,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            1.7867000102996826
+          ],
+          "source_session": "trace_20260129_164054_task30_全球南方合作如何推动文明交流互鉴_从理论角度给出深入的学术分.jsonl",
+          "trace_id": "heldout_039"
+        },
+        {
+          "a_task_flow_mean_s": 119.57257270812988,
+          "d_task_flow_mean_s": 123.56380534172058,
+          "delta_mean_s": -3.9912326335906982,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -3.9912326335906982
+          ],
+          "source_session": "trace_20260129_164342_task31_选题_中外博物馆教育的现状与未来趋势_要求1_分别总结国内外.jsonl",
+          "trace_id": "heldout_040"
+        },
+        {
+          "a_task_flow_mean_s": 156.67375254631042,
+          "d_task_flow_mean_s": 156.615092754364,
+          "delta_mean_s": 0.05865979194641113,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            0.05865979194641113
+          ],
+          "source_session": "trace_20260129_170520_task35_市政污水收集和处理大部分城市采取的模式是核拨制_但这种机制造.jsonl",
+          "trace_id": "heldout_041"
+        },
+        {
+          "a_task_flow_mean_s": 142.53174018859863,
+          "d_task_flow_mean_s": 141.95701146125793,
+          "delta_mean_s": 0.5747287273406982,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            0.5747287273406982
+          ],
+          "source_session": "trace_20260129_173840_task44_国内城市轨道交通行业_主要指地铁_每年的碳滑板用量是多少_主.jsonl",
+          "trace_id": "heldout_042"
+        },
+        {
+          "a_task_flow_mean_s": 89.94900631904602,
+          "d_task_flow_mean_s": 86.96173763275146,
+          "delta_mean_s": 2.9872686862945557,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            2.9872686862945557
+          ],
+          "source_session": "trace_20260129_175815_task48_我今年五十三岁_体重一百六十斤_为我提供一份两周的食谱_包含.jsonl",
+          "trace_id": "heldout_043"
+        },
+        {
+          "a_task_flow_mean_s": 82.28623008728027,
+          "d_task_flow_mean_s": 86.26515436172485,
+          "delta_mean_s": -3.97892427444458,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -3.97892427444458
+          ],
+          "source_session": "trace_20260129_180023_task49_为我调研全球范围内_20-30岁的女性对口腔正畸和医美的共同.jsonl",
+          "trace_id": "heldout_044"
+        },
+        {
+          "a_task_flow_mean_s": 163.05657577514648,
+          "d_task_flow_mean_s": 151.17218160629272,
+          "delta_mean_s": 11.88439416885376,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            11.88439416885376
+          ],
+          "source_session": "trace_20260129_181716_task51_From_2020_to_2050__how_many_el.jsonl",
+          "trace_id": "heldout_045"
+        },
+        {
+          "a_task_flow_mean_s": 155.850590467453,
+          "d_task_flow_mean_s": 159.0307638645172,
+          "delta_mean_s": -3.180173397064209,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -3.180173397064209
+          ],
+          "source_session": "trace_20260129_182252_task53_Researching_how_the_world_s_we.jsonl",
+          "trace_id": "heldout_046"
+        },
+        {
+          "a_task_flow_mean_s": 168.48045349121094,
+          "d_task_flow_mean_s": 164.515230178833,
+          "delta_mean_s": 3.9652233123779297,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            3.9652233123779297
+          ],
+          "source_session": "trace_20260129_185333_task60_How_to_conduct_comprehensive_a.jsonl",
+          "trace_id": "heldout_047"
+        },
+        {
+          "a_task_flow_mean_s": 183.34348034858704,
+          "d_task_flow_mean_s": 182.00974297523499,
+          "delta_mean_s": 1.3337373733520508,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            1.3337373733520508
+          ],
+          "source_session": "trace_20260129_185704_task61_Research_on_the_price_dynamics.jsonl",
+          "trace_id": "heldout_048"
+        },
+        {
+          "a_task_flow_mean_s": 70.26589918136597,
+          "d_task_flow_mean_s": 70.59095525741577,
+          "delta_mean_s": -0.3250560760498047,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -0.3250560760498047
+          ],
+          "source_session": "trace_20260129_193436_task70_Trace_the_evolution_from_Java.jsonl",
+          "trace_id": "heldout_049"
+        },
+        {
+          "a_task_flow_mean_s": 112.66975855827332,
+          "d_task_flow_mean_s": 108.75097274780273,
+          "delta_mean_s": 3.918785810470581,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            3.918785810470581
+          ],
+          "source_session": "trace_20260129_194149_task75_Could_the_rapeutic_interventio.jsonl",
+          "trace_id": "heldout_050"
+        },
+        {
+          "a_task_flow_mean_s": 179.3192481994629,
+          "d_task_flow_mean_s": 163.1011254787445,
+          "delta_mean_s": 16.218122720718384,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            16.218122720718384
+          ],
+          "source_session": "trace_20260129_194249_task76_The_significance_of_the_gut_mi.jsonl",
+          "trace_id": "heldout_051"
+        },
+        {
+          "a_task_flow_mean_s": 148.48718285560608,
+          "d_task_flow_mean_s": 154.88455247879028,
+          "delta_mean_s": -6.397369623184204,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -6.397369623184204
+          ],
+          "source_session": "trace_20260129_194634_task78_Parkinson_s_disease_has_a_prof.jsonl",
+          "trace_id": "heldout_052"
+        },
+        {
+          "a_task_flow_mean_s": 112.3498797416687,
+          "d_task_flow_mean_s": 112.60412311553955,
+          "delta_mean_s": -0.2542433738708496,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -0.2542433738708496
+          ],
+          "source_session": "trace_20260129_195638_task82_Research_and_analyze_the_diver.jsonl",
+          "trace_id": "heldout_053"
+        },
+        {
+          "a_task_flow_mean_s": 187.80367922782898,
+          "d_task_flow_mean_s": 191.26832056045532,
+          "delta_mean_s": -3.4646413326263428,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -3.4646413326263428
+          ],
+          "source_session": "trace_20260129_195857_task83_Acting_as_a_senior_hardware_pr.jsonl",
+          "trace_id": "heldout_054"
+        },
+        {
+          "a_task_flow_mean_s": 206.94726610183716,
+          "d_task_flow_mean_s": 202.35287809371948,
+          "delta_mean_s": 4.594388008117676,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            4.594388008117676
+          ],
+          "source_session": "trace_20260129_200910_task86_Conduct_a_research_report_on_t.jsonl",
+          "trace_id": "heldout_055"
+        },
+        {
+          "a_task_flow_mean_s": 211.06565976142883,
+          "d_task_flow_mean_s": 207.9617190361023,
+          "delta_mean_s": 3.103940725326538,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            3.103940725326538
+          ],
+          "source_session": "trace_20260129_201743_task87_Are_AI_fashion_design_tools_le.jsonl",
+          "trace_id": "heldout_056"
+        },
+        {
+          "a_task_flow_mean_s": 149.82961249351501,
+          "d_task_flow_mean_s": 157.0823040008545,
+          "delta_mean_s": -7.2526915073394775,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -7.2526915073394775
+          ],
+          "source_session": "trace_20260129_202117_task88_How_did_Netflix_manage_to_succ.jsonl",
+          "trace_id": "heldout_057"
+        },
+        {
+          "a_task_flow_mean_s": 222.6199095249176,
+          "d_task_flow_mean_s": 226.10403323173523,
+          "delta_mean_s": -3.484123706817627,
+          "outcome": "joint_slower",
+          "replicate_delta_s": [
+            -3.484123706817627
+          ],
+          "source_session": "trace_20260129_202616_task90_Analyze_the_complex_issue_of_l.jsonl",
+          "trace_id": "heldout_058"
+        },
+        {
+          "a_task_flow_mean_s": 200.96153950691223,
+          "d_task_flow_mean_s": 200.85458993911743,
+          "delta_mean_s": 0.1069495677947998,
+          "outcome": "joint_faster",
+          "replicate_delta_s": [
+            0.1069495677947998
+          ],
+          "source_session": "trace_20260129_205929_task95_Create_comprehensive__in-depth.jsonl",
+          "trace_id": "heldout_059"
+        }
+      ],
+      "tie_epsilon_s": 1e-09
+    }
+  },
+  "comparison_invariants": {
+    "all_requests_succeeded_exactly_once": true,
+    "evidence_role": "heldout_load_sensitivity_not_untouched_final",
+    "fixed_role": "heldout",
+    "fixed_split_manifest_sha256": "1ff2b2e2feb596447f54c80ca82edc70602b8da1a4f9e0b5b3a01c0586398c19",
+    "fixed_workload_manifest": "/home/aiscuser/Qwen-DeepResearch-PASTE/reproduction/artifacts/workloads/fixed_three_way_cap512_floor64/manifest_heldout60.json",
+    "fixed_workload_manifest_sha256": "a8e78b605c57b52ed5d02364f22808536d5ed66feab574282d7afe94d250ba5d",
+    "heldout_parent_manifest_sha256": "297cd45c916a79d007442aee26db4261f5c8cc69769b37635c4fb4f66f3ac0ee",
+    "joint_hook_install_and_runtime_verified": true,
+    "mapper_artifact_sha256": "d4ac5ee9cebcb328ec153192fe4d78508cafd9dcff09cea5d025fb35f5818394",
+    "metadata_source": "online",
+    "positive_delta_means_joint_learned_faster": true,
+    "replicate_count": 1,
+    "request_count": 519,
+    "request_identity_sha256": "5d1fbd0783770c7c3b77b3faa706e50af543a4ef97c6814085c1c450f470a46c",
+    "source_session_count": 60,
+    "source_sessions_sha256": "85d500a61481d8eed9c58f466f3f6f59b111bb568aff1107f17f9f692753905e",
+    "tool_prediction_top_k": 5,
+    "trace_count": 60
+  },
+  "interpretation": "Paired delta is A-D, so positive is faster under joint+learned. Delta p05 describes the harmed tail and delta p95 the strongly improved tail; neither is the same as A task-p95 minus D task-p95. Heldout is the tuning+previously-inspected-final union and is only load-sensitivity evidence, not a new untouched final set.",
+  "replicates": [
+    {
+      "cells": {
+        "A": {
+          "fixed_role": "heldout",
+          "instrumentation_overhang_s": 0.5253396034240723,
+          "instrumentation_wall_time_s": 223.14524912834167,
+          "max_active_traces": 60,
+          "mean_queue_time_s": 0.012420235836841632,
+          "policy": "fcfs",
+          "prepared_workload_sha256": "b6bbc045049e6882a967a8ad7a068b6d8d275e097c69a6e5e313d7b9d2b0790a",
+          "request_count": 519,
+          "request_latency_s": {
+            "max": 31.25925874710083,
+            "mean": 15.671940241245865,
+            "p50": 14.080973625183105,
+            "p95": 30.176725602149965
+          },
+          "run_name": "heldout60_c512_m64_t56_pair_r1_fcfs_none",
+          "run_path": "/home/aiscuser/Qwen-DeepResearch-PASTE/reproduction/artifacts/heldout60_cap512_m64_t56_pair_r1/heldout60_c512_m64_t56_pair_r1_fcfs_none",
+          "scheduler_calibration_workload_sha256": "5c06924b5b828e00539dfdb28053c5710229dbf04f9fdadbac31113a1df3bc31",
+          "scheduler_configuration": {
+            "VLLM_MAX_NUM_BATCHED_TOKENS": "8192",
+            "VLLM_MAX_NUM_SEQS": "64",
+            "VLLM_SCHED_AVG_CALL_SERVICE_S": "3.3",
+            "VLLM_SCHED_DEFAULT_PRED_OUT": "357",
+            "VLLM_SCHED_HBM_LONG_CONTEXT_TOKENS": "16000",
+            "VLLM_SCHED_HBM_MAX_ADMIT_PER_STEP": "16",
+            "VLLM_SCHED_HBM_MAX_CONTEXT_TOKENS": "1048576",
+            "VLLM_SCHED_HBM_MAX_LONG_RUNNING": "16",
+            "VLLM_SCHED_HBM_MIN_CONTEXT_TOKENS": "524288",
+            "VLLM_SCHED_HBM_MIN_RUNNING_REQS": "24",
+            "VLLM_SCHED_HBM_TARGET_CONTEXT_TOKENS": "786432",
+            "VLLM_SCHED_JOINT_V2_DECODE_MAX_RUNNING": "57",
+            "VLLM_SCHED_JOINT_V2_DECODE_TARGET_RUNNING": "56",
+            "VLLM_SCHED_JOINT_V2_FINAL_BONUS_S": "10",
+            "VLLM_SCHED_JOINT_V2_FOREGROUND_MAX_SESSIONS": "56",
+            "VLLM_SCHED_JOINT_V2_GATE_MAX_WAIT_S": "6",
+            "VLLM_SCHED_JOINT_V2_GATE_MIN_RUNNING": "42",
+            "VLLM_SCHED_JOINT_V2_NEW_SESSION_PENALTY_S": "0",
+            "VLLM_SCHED_JOINT_V2_PROGRESS_BONUS_S": "5",
+            "VLLM_SCHED_JOINT_V2_TAIL_BETA": "0.8",
+            "VLLM_SCHED_JOINT_V2_TOOL_BETA": "0.9",
+            "VLLM_SCHED_TIME_AGING_ALPHA": "1.2"
+          },
+          "scheduler_evidence": {
+            "install_lines": 0,
+            "install_v1_true_lines": 0,
+            "patch_error_lines": 0,
+            "runtime_joint_lines": 0,
+            "server_startup_lines": 1,
+            "unexpected_policy_install_lines": 0
+          },
+          "source_session_count": 60,
+          "speedup": 10.0,
+          "task_flow_time_s": {
+            "max": 222.6199095249176,
+            "mean": 148.10396379232407,
+            "p50": 150.0915254354477,
+            "p95": 210.10013810396194
+          },
+          "task_makespan_s": 222.6199095249176,
+          "tool_overlap_mode": "none",
+          "tool_wait_mode": "sleep",
+          "trace_count": 60
+        },
+        "D": {
+          "fixed_role": "heldout",
+          "instrumentation_overhang_s": 0.5251741409301758,
+          "instrumentation_wall_time_s": 226.6292073726654,
+          "max_active_traces": 60,
+          "mean_queue_time_s": 0.07937703675557707,
+          "policy": "online_joint_pacer_v2",
+          "prepared_workload_sha256": "f47d4753806a15c72d70022247df5df1360312940fb17873284a9e725e245e2e",
+          "request_count": 519,
+          "request_latency_s": {
+            "max": 31.629013776779175,
+            "mean": 15.263868719626483,
+            "p50": 13.217731475830078,
+            "p95": 29.968794345855713
+          },
+          "run_name": "heldout60_c512_m64_t56_pair_r1_joint_learned",
+          "run_path": "/home/aiscuser/Qwen-DeepResearch-PASTE/reproduction/artifacts/heldout60_cap512_m64_t56_pair_r1/heldout60_c512_m64_t56_pair_r1_joint_learned",
+          "scheduler_calibration_workload_sha256": "e42a96f469795dc8e023e8453afe95a0172a5300938441808a0415aff3394585",
+          "scheduler_configuration": {
+            "VLLM_MAX_NUM_BATCHED_TOKENS": "8192",
+            "VLLM_MAX_NUM_SEQS": "64",
+            "VLLM_SCHED_AVG_CALL_SERVICE_S": "3.3",
+            "VLLM_SCHED_DEFAULT_PRED_OUT": "357",
+            "VLLM_SCHED_HBM_LONG_CONTEXT_TOKENS": "16000",
+            "VLLM_SCHED_HBM_MAX_ADMIT_PER_STEP": "16",
+            "VLLM_SCHED_HBM_MAX_CONTEXT_TOKENS": "1048576",
+            "VLLM_SCHED_HBM_MAX_LONG_RUNNING": "16",
+            "VLLM_SCHED_HBM_MIN_CONTEXT_TOKENS": "524288",
+            "VLLM_SCHED_HBM_MIN_RUNNING_REQS": "24",
+            "VLLM_SCHED_HBM_TARGET_CONTEXT_TOKENS": "786432",
+            "VLLM_SCHED_JOINT_V2_DECODE_MAX_RUNNING": "57",
+            "VLLM_SCHED_JOINT_V2_DECODE_TARGET_RUNNING": "56",
+            "VLLM_SCHED_JOINT_V2_FINAL_BONUS_S": "10",
+            "VLLM_SCHED_JOINT_V2_FOREGROUND_MAX_SESSIONS": "56",
+            "VLLM_SCHED_JOINT_V2_GATE_MAX_WAIT_S": "6",
+            "VLLM_SCHED_JOINT_V2_GATE_MIN_RUNNING": "42",
+            "VLLM_SCHED_JOINT_V2_NEW_SESSION_PENALTY_S": "0",
+            "VLLM_SCHED_JOINT_V2_PROGRESS_BONUS_S": "5",
+            "VLLM_SCHED_JOINT_V2_TAIL_BETA": "0.8",
+            "VLLM_SCHED_JOINT_V2_TOOL_BETA": "0.9",
+            "VLLM_SCHED_TIME_AGING_ALPHA": "1.2"
+          },
+          "scheduler_evidence": {
+            "install_lines": 7,
+            "install_v1_true_lines": 7,
+            "patch_error_lines": 0,
+            "runtime_joint_lines": 38,
+            "server_startup_lines": 1,
+            "unexpected_policy_install_lines": 0
+          },
+          "source_session_count": 60,
+          "speedup": 10.0,
+          "task_flow_time_s": {
+            "max": 226.10403323173523,
+            "mean": 144.51748169660567,
+            "p50": 147.8065962791443,
+            "p95": 207.9862848639488
+          },
+          "task_makespan_s": 226.10403323173523,
+          "tool_overlap_mode": "learned",
+          "tool_wait_mode": "sleep",
+          "trace_count": 60
+        }
+      },
+      "effects": {
+        "absolute_reduction": {
+          "instrumentation_wall_time_s": -3.4839582443237305,
+          "mean_queue_time_s": -0.06695680091873543,
+          "request_latency_s": {
+            "max": -0.3697550296783447,
+            "mean": 0.408071521619382,
+            "p50": 0.8632421493530273,
+            "p95": 0.2079312562942519
+          },
+          "task_flow_time_s": {
+            "max": -3.484123706817627,
+            "mean": 3.586482095718395,
+            "p50": 2.2849291563034058,
+            "p95": 2.1138532400131282
+          },
+          "task_makespan_s": -3.484123706817627
+        },
+        "definition": "A - D; positive means joint+learned is lower/faster",
+        "relative_reduction": {
+          "instrumentation_wall_time_s": -0.01561296177235634,
+          "mean_queue_time_s": -5.390944407039699,
+          "request_latency_s": {
+            "max": -0.011828656356499113,
+            "mean": 0.026038353601260396,
+            "p50": 0.06130557249316643,
+            "p95": 0.006890451238335735
+          },
+          "task_flow_time_s": {
+            "max": -0.015650548570668846,
+            "mean": 0.024215976425502498,
+            "p50": 0.015223572081597121,
+            "p95": 0.01006117015957005
+          },
+          "task_makespan_s": -0.015650548570668846
+        }
+      },
+      "mapper_artifact_sha256": "d4ac5ee9cebcb328ec153192fe4d78508cafd9dcff09cea5d025fb35f5818394",
+      "paired_task_flow": {
+        "definition": "A task flow - D task flow; positive means joint+learned faster",
+        "delta_s": {
+          "max": 32.2165207862854,
+          "mean": 3.5864820957183836,
+          "min": -10.487626314163208,
+          "p05": -6.317884576320648,
+          "p50": 1.7304413318634033,
+          "p95": 21.943624436855313
+        },
+        "outcomes": {
+          "joint_faster": 38,
+          "joint_faster_fraction": 0.6333333333333333,
+          "joint_slower": 22,
+          "tie": 0
+        },
+        "session_count": 60,
+        "sessions": [
+          {
+            "a_completion_offset_s": 110.04000949859619,
+            "a_task_flow_s": 110.04000949859619,
+            "d_completion_offset_s": 109.77158164978027,
+            "d_task_flow_s": 109.77158164978027,
+            "delta_s": 0.26842784881591797,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_125406_task1_收集整理目前中国9阶层实际收入和财务状况_特别研究得出中国的.jsonl",
+            "trace_id": "heldout_000"
+          },
+          {
+            "a_completion_offset_s": 135.47208857536316,
+            "a_task_flow_s": 135.47208857536316,
+            "d_completion_offset_s": 113.58501648902893,
+            "d_task_flow_s": 113.58501648902893,
+            "delta_s": 21.88707208633423,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_130834_task6_请帮我整理下目前全球具身智能发展的技术路线_以及各个路线的代.jsonl",
+            "trace_id": "heldout_001"
+          },
+          {
+            "a_completion_offset_s": 148.38014388084412,
+            "a_task_flow_s": 148.38014388084412,
+            "d_completion_offset_s": 133.2160713672638,
+            "d_task_flow_s": 133.2160713672638,
+            "delta_s": 15.164072513580322,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_152650_task12_收集整理近10年来国际上自来水生产及销售企业在技术创新且已经.jsonl",
+            "trace_id": "heldout_002"
+          },
+          {
+            "a_completion_offset_s": 171.81773972511292,
+            "a_task_flow_s": 171.81773972511292,
+            "d_completion_offset_s": 175.9038701057434,
+            "d_task_flow_s": 175.9038701057434,
+            "delta_s": -4.086130380630493,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_153229_task15_收集整理目前世界上关于量子网络的研究_横向比较各课题组的相关.jsonl",
+            "trace_id": "heldout_003"
+          },
+          {
+            "a_completion_offset_s": 114.84108877182007,
+            "a_task_flow_s": 114.84108877182007,
+            "d_completion_offset_s": 115.06974124908447,
+            "d_task_flow_s": 115.06974124908447,
+            "delta_s": -0.2286524772644043,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_153605_task17___在当今软件开发行业中_低代码_无代码平台对传统开发流程的.jsonl",
+            "trace_id": "heldout_004"
+          },
+          {
+            "a_completion_offset_s": 134.4777319431305,
+            "a_task_flow_s": 134.4777319431305,
+            "d_completion_offset_s": 125.52632570266724,
+            "d_task_flow_s": 125.52632570266724,
+            "delta_s": 8.951406240463257,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_153747_task18_请你学习一下GCS算法的原理_目前的GCS算法主要是用于安全.jsonl",
+            "trace_id": "heldout_005"
+          },
+          {
+            "a_completion_offset_s": 88.56120896339417,
+            "a_task_flow_s": 88.56120896339417,
+            "d_completion_offset_s": 91.96622824668884,
+            "d_task_flow_s": 91.96622824668884,
+            "delta_s": -3.4050192832946777,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_154633_task20_研究下Anthropic最新发布的Streamable_HT.jsonl",
+            "trace_id": "heldout_006"
+          },
+          {
+            "a_completion_offset_s": 176.25369882583618,
+            "a_task_flow_s": 176.25369882583618,
+            "d_completion_offset_s": 180.41613221168518,
+            "d_task_flow_s": 180.41613221168518,
+            "delta_s": -4.162433385848999,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_154807_task21_现在AI这么热门_我最感兴趣的就是人工智能在教育领域应用现状.jsonl",
+            "trace_id": "heldout_007"
+          },
+          {
+            "a_completion_offset_s": 92.72306180000305,
+            "a_task_flow_s": 92.72306180000305,
+            "d_completion_offset_s": 89.08059501647949,
+            "d_task_flow_s": 89.08059501647949,
+            "delta_s": 3.6424667835235596,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_163011_task27_如何将AI心理咨询和人类心理咨询有机结合_以便为人类心理健康.jsonl",
+            "trace_id": "heldout_008"
+          },
+          {
+            "a_completion_offset_s": 150.35343837738037,
+            "a_task_flow_s": 150.35343837738037,
+            "d_completion_offset_s": 145.32385873794556,
+            "d_task_flow_s": 145.32385873794556,
+            "delta_s": 5.0295796394348145,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_170942_task36_制造业离散制造_单件小批_基本上靠人的技能才能完成的_为我调.jsonl",
+            "trace_id": "heldout_009"
+          },
+          {
+            "a_completion_offset_s": 102.88568067550659,
+            "a_task_flow_s": 102.88568067550659,
+            "d_completion_offset_s": 101.39546656608582,
+            "d_task_flow_s": 101.39546656608582,
+            "delta_s": 1.4902141094207764,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_171332_task37_调研问题_爵士钢琴在现代音乐创作中的创新与风格演变研究__背.jsonl",
+            "trace_id": "heldout_010"
+          },
+          {
+            "a_completion_offset_s": 210.04932117462158,
+            "a_task_flow_s": 210.04932117462158,
+            "d_completion_offset_s": 199.7916510105133,
+            "d_task_flow_s": 199.7916510105133,
+            "delta_s": 10.257670164108276,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_171620_task38_收集针对近三年内珠宝设计流行趋势变化_如高奢类品牌珠宝以及高.jsonl",
+            "trace_id": "heldout_011"
+          },
+          {
+            "a_completion_offset_s": 158.46807885169983,
+            "a_task_flow_s": 158.46807885169983,
+            "d_completion_offset_s": 146.78196382522583,
+            "d_task_flow_s": 146.78196382522583,
+            "delta_s": 11.686115026473999,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_172730_task41_收集整理目前中国电影票房前十的电影的相关资料_横向比较各电影.jsonl",
+            "trace_id": "heldout_012"
+          },
+          {
+            "a_completion_offset_s": 160.35631728172302,
+            "a_task_flow_s": 160.35631728172302,
+            "d_completion_offset_s": 135.57173871994019,
+            "d_task_flow_s": 135.57173871994019,
+            "delta_s": 24.784578561782837,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_175319_task46_房地产行业可持续发展的动力是什么_未来10年国家在政策_资金.jsonl",
+            "trace_id": "heldout_013"
+          },
+          {
+            "a_completion_offset_s": 197.04540014266968,
+            "a_task_flow_s": 197.04540014266968,
+            "d_completion_offset_s": 189.39007472991943,
+            "d_task_flow_s": 189.39007472991943,
+            "delta_s": 7.655325412750244,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_182104_task52_What_are_the_investment_philos.jsonl",
+            "trace_id": "heldout_014"
+          },
+          {
+            "a_completion_offset_s": 132.32936906814575,
+            "a_task_flow_s": 132.32936906814575,
+            "d_completion_offset_s": 142.81699538230896,
+            "d_task_flow_s": 142.81699538230896,
+            "delta_s": -10.487626314163208,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_184959_task59_In_ecology__how_do_birds_achie.jsonl",
+            "trace_id": "heldout_015"
+          },
+          {
+            "a_completion_offset_s": 196.5217878818512,
+            "a_task_flow_s": 196.5217878818512,
+            "d_completion_offset_s": 173.50366878509521,
+            "d_task_flow_s": 173.50366878509521,
+            "delta_s": 23.01811909675598,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_190100_task62_What_are_the_most_effective_ap.jsonl",
+            "trace_id": "heldout_016"
+          },
+          {
+            "a_completion_offset_s": 183.34391570091248,
+            "a_task_flow_s": 183.34391570091248,
+            "d_completion_offset_s": 173.80970191955566,
+            "d_task_flow_s": 173.80970191955566,
+            "delta_s": 9.534213781356812,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_190724_task64_Regarding_the_attitude_control.jsonl",
+            "trace_id": "heldout_017"
+          },
+          {
+            "a_completion_offset_s": 184.6466109752655,
+            "a_task_flow_s": 184.6466109752655,
+            "d_completion_offset_s": 152.4300901889801,
+            "d_task_flow_s": 152.4300901889801,
+            "delta_s": 32.2165207862854,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_192137_task67_Summarize_recent_research_prog.jsonl",
+            "trace_id": "heldout_018"
+          },
+          {
+            "a_completion_offset_s": 178.82056665420532,
+            "a_task_flow_s": 178.82056665420532,
+            "d_completion_offset_s": 161.85427331924438,
+            "d_task_flow_s": 161.85427331924438,
+            "delta_s": 16.966293334960938,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_192805_task68_I_need_to_dynamically_adjust_K.jsonl",
+            "trace_id": "heldout_019"
+          },
+          {
+            "a_completion_offset_s": 178.16847562789917,
+            "a_task_flow_s": 178.16847562789917,
+            "d_completion_offset_s": 179.051504611969,
+            "d_task_flow_s": 179.051504611969,
+            "delta_s": -0.8830289840698242,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_193541_task71_Acting_as_an_expert_in_K-12_ed.jsonl",
+            "trace_id": "heldout_020"
+          },
+          {
+            "a_completion_offset_s": 198.0813970565796,
+            "a_task_flow_s": 198.0813970565796,
+            "d_completion_offset_s": 195.3678379058838,
+            "d_task_flow_s": 195.3678379058838,
+            "delta_s": 2.713559150695801,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_193742_task72_Please_write_a_literature_revi.jsonl",
+            "trace_id": "heldout_021"
+          },
+          {
+            "a_completion_offset_s": 86.35852479934692,
+            "a_task_flow_s": 86.35852479934692,
+            "d_completion_offset_s": 81.59163403511047,
+            "d_task_flow_s": 81.59163403511047,
+            "delta_s": 4.76689076423645,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_193957_task73_As_a_senior_elementary_school.jsonl",
+            "trace_id": "heldout_022"
+          },
+          {
+            "a_completion_offset_s": 93.27862691879272,
+            "a_task_flow_s": 93.27862691879272,
+            "d_completion_offset_s": 98.35798716545105,
+            "d_task_flow_s": 98.35798716545105,
+            "delta_s": -5.079360246658325,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_194507_task77_What_is_the_role_of_need_for_c.jsonl",
+            "trace_id": "heldout_023"
+          },
+          {
+            "a_completion_offset_s": 153.5330581665039,
+            "a_task_flow_s": 153.5330581665039,
+            "d_completion_offset_s": 155.1679322719574,
+            "d_task_flow_s": 155.1679322719574,
+            "delta_s": -1.6348741054534912,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_195211_task81_Write_an_analysis_exploring_ho.jsonl",
+            "trace_id": "heldout_024"
+          },
+          {
+            "a_completion_offset_s": 199.9946630001068,
+            "a_task_flow_s": 199.9946630001068,
+            "d_completion_offset_s": 183.58955597877502,
+            "d_task_flow_s": 183.58955597877502,
+            "delta_s": 16.405107021331787,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_203546_task91_I_would_like_a_detailed_analys.jsonl",
+            "trace_id": "heldout_025"
+          },
+          {
+            "a_completion_offset_s": 203.87101984024048,
+            "a_task_flow_s": 203.87101984024048,
+            "d_completion_offset_s": 208.91018676757812,
+            "d_task_flow_s": 208.91018676757812,
+            "delta_s": -5.0391669273376465,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_204609_task92_For_a_research_project_titled.jsonl",
+            "trace_id": "heldout_026"
+          },
+          {
+            "a_completion_offset_s": 148.4601035118103,
+            "a_task_flow_s": 148.4601035118103,
+            "d_completion_offset_s": 143.05576062202454,
+            "d_task_flow_s": 143.05576062202454,
+            "delta_s": 5.404342889785767,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_211023_task97_Find_data_and_evidence_to_supp.jsonl",
+            "trace_id": "heldout_027"
+          },
+          {
+            "a_completion_offset_s": 209.40211486816406,
+            "a_task_flow_s": 209.40211486816406,
+            "d_completion_offset_s": 206.5002896785736,
+            "d_task_flow_s": 206.5002896785736,
+            "delta_s": 2.901825189590454,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_212736_task99_Research_the_current_applicati.jsonl",
+            "trace_id": "heldout_028"
+          },
+          {
+            "a_completion_offset_s": 211.53514552116394,
+            "a_task_flow_s": 211.53514552116394,
+            "d_completion_offset_s": 208.45303559303284,
+            "d_task_flow_s": 208.45303559303284,
+            "delta_s": 3.0821099281311035,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_213057_task100_Write_a_paper_to_discuss_the_i.jsonl",
+            "trace_id": "heldout_029"
+          },
+          {
+            "a_completion_offset_s": 87.46316361427307,
+            "a_task_flow_s": 87.46316361427307,
+            "d_completion_offset_s": 93.77686476707458,
+            "d_task_flow_s": 93.77686476707458,
+            "delta_s": -6.313701152801514,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_125841_task4_分析_2010_年至今的黄金走势_用思维导图告诉我黄金未来有.jsonl",
+            "trace_id": "heldout_030"
+          },
+          {
+            "a_completion_offset_s": 97.62841200828552,
+            "a_task_flow_s": 97.62841200828552,
+            "d_completion_offset_s": 100.06595349311829,
+            "d_task_flow_s": 100.06595349311829,
+            "delta_s": -2.4375414848327637,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_125922_task5_调研国内金融机构之间的投资借贷关系与系统性风险的联系_对不同.jsonl",
+            "trace_id": "heldout_031"
+          },
+          {
+            "a_completion_offset_s": 160.527934551239,
+            "a_task_flow_s": 160.527934551239,
+            "d_completion_offset_s": 154.01360177993774,
+            "d_task_flow_s": 154.01360177993774,
+            "delta_s": 6.5143327713012695,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_131103_task8_能否给我提供一份详尽的报告_分析机器学习或者深度学习在优化材.jsonl",
+            "trace_id": "heldout_032"
+          },
+          {
+            "a_completion_offset_s": 86.81812930107117,
+            "a_task_flow_s": 86.81812930107117,
+            "d_completion_offset_s": 83.44607543945312,
+            "d_task_flow_s": 83.44607543945312,
+            "delta_s": 3.372053861618042,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_152515_task11_请总结碳钢常用缓蚀剂种类_并分析每种缓蚀剂是具有拉曼活性还是.jsonl",
+            "trace_id": "heldout_033"
+          },
+          {
+            "a_completion_offset_s": 121.06672477722168,
+            "a_task_flow_s": 121.06672477722168,
+            "d_completion_offset_s": 116.10739469528198,
+            "d_task_flow_s": 116.10739469528198,
+            "delta_s": 4.959330081939697,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_152828_task13_为我调研AI算法能否提升现有电子学读出时幅修正方法.jsonl",
+            "trace_id": "heldout_034"
+          },
+          {
+            "a_completion_offset_s": 149.1434416770935,
+            "a_task_flow_s": 149.1434416770935,
+            "d_completion_offset_s": 148.83122873306274,
+            "d_task_flow_s": 148.83122873306274,
+            "delta_s": 0.3122129440307617,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_153000_task14_收集整理全球数学与量子计算交叉领域的主要研究团队及其成果_横.jsonl",
+            "trace_id": "heldout_035"
+          },
+          {
+            "a_completion_offset_s": 39.68232774734497,
+            "a_task_flow_s": 39.68232774734497,
+            "d_completion_offset_s": 43.42496943473816,
+            "d_task_flow_s": 43.42496943473816,
+            "delta_s": -3.7426416873931885,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_160324_task24_如何增强自闭症学生课堂参与度_有哪些有效的策略可供选择_.jsonl",
+            "trace_id": "heldout_036"
+          },
+          {
+            "a_completion_offset_s": 112.66941380500793,
+            "a_task_flow_s": 112.66941380500793,
+            "d_completion_offset_s": 112.84277725219727,
+            "d_task_flow_s": 112.84277725219727,
+            "delta_s": -0.17336344718933105,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_162304_task25_请为我整合近几年有关_中性粒细胞在脑缺血急性期和慢性期的功能.jsonl",
+            "trace_id": "heldout_037"
+          },
+          {
+            "a_completion_offset_s": 133.02970623970032,
+            "a_task_flow_s": 133.02970623970032,
+            "d_completion_offset_s": 131.3555235862732,
+            "d_task_flow_s": 131.3555235862732,
+            "delta_s": 1.674182653427124,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_162605_task26_为我调研在慢性抗原刺激下_如肿瘤微环境或HIV潜伏感染__C.jsonl",
+            "trace_id": "heldout_038"
+          },
+          {
+            "a_completion_offset_s": 124.07414865493774,
+            "a_task_flow_s": 124.07414865493774,
+            "d_completion_offset_s": 122.28744864463806,
+            "d_task_flow_s": 122.28744864463806,
+            "delta_s": 1.7867000102996826,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_164054_task30_全球南方合作如何推动文明交流互鉴_从理论角度给出深入的学术分.jsonl",
+            "trace_id": "heldout_039"
+          },
+          {
+            "a_completion_offset_s": 119.57257270812988,
+            "a_task_flow_s": 119.57257270812988,
+            "d_completion_offset_s": 123.56380534172058,
+            "d_task_flow_s": 123.56380534172058,
+            "delta_s": -3.9912326335906982,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_164342_task31_选题_中外博物馆教育的现状与未来趋势_要求1_分别总结国内外.jsonl",
+            "trace_id": "heldout_040"
+          },
+          {
+            "a_completion_offset_s": 156.67375254631042,
+            "a_task_flow_s": 156.67375254631042,
+            "d_completion_offset_s": 156.615092754364,
+            "d_task_flow_s": 156.615092754364,
+            "delta_s": 0.05865979194641113,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_170520_task35_市政污水收集和处理大部分城市采取的模式是核拨制_但这种机制造.jsonl",
+            "trace_id": "heldout_041"
+          },
+          {
+            "a_completion_offset_s": 142.53174018859863,
+            "a_task_flow_s": 142.53174018859863,
+            "d_completion_offset_s": 141.95701146125793,
+            "d_task_flow_s": 141.95701146125793,
+            "delta_s": 0.5747287273406982,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_173840_task44_国内城市轨道交通行业_主要指地铁_每年的碳滑板用量是多少_主.jsonl",
+            "trace_id": "heldout_042"
+          },
+          {
+            "a_completion_offset_s": 89.94900631904602,
+            "a_task_flow_s": 89.94900631904602,
+            "d_completion_offset_s": 86.96173763275146,
+            "d_task_flow_s": 86.96173763275146,
+            "delta_s": 2.9872686862945557,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_175815_task48_我今年五十三岁_体重一百六十斤_为我提供一份两周的食谱_包含.jsonl",
+            "trace_id": "heldout_043"
+          },
+          {
+            "a_completion_offset_s": 82.28623008728027,
+            "a_task_flow_s": 82.28623008728027,
+            "d_completion_offset_s": 86.26515436172485,
+            "d_task_flow_s": 86.26515436172485,
+            "delta_s": -3.97892427444458,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_180023_task49_为我调研全球范围内_20-30岁的女性对口腔正畸和医美的共同.jsonl",
+            "trace_id": "heldout_044"
+          },
+          {
+            "a_completion_offset_s": 163.05657577514648,
+            "a_task_flow_s": 163.05657577514648,
+            "d_completion_offset_s": 151.17218160629272,
+            "d_task_flow_s": 151.17218160629272,
+            "delta_s": 11.88439416885376,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_181716_task51_From_2020_to_2050__how_many_el.jsonl",
+            "trace_id": "heldout_045"
+          },
+          {
+            "a_completion_offset_s": 155.850590467453,
+            "a_task_flow_s": 155.850590467453,
+            "d_completion_offset_s": 159.0307638645172,
+            "d_task_flow_s": 159.0307638645172,
+            "delta_s": -3.180173397064209,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_182252_task53_Researching_how_the_world_s_we.jsonl",
+            "trace_id": "heldout_046"
+          },
+          {
+            "a_completion_offset_s": 168.48045349121094,
+            "a_task_flow_s": 168.48045349121094,
+            "d_completion_offset_s": 164.515230178833,
+            "d_task_flow_s": 164.515230178833,
+            "delta_s": 3.9652233123779297,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_185333_task60_How_to_conduct_comprehensive_a.jsonl",
+            "trace_id": "heldout_047"
+          },
+          {
+            "a_completion_offset_s": 183.34348034858704,
+            "a_task_flow_s": 183.34348034858704,
+            "d_completion_offset_s": 182.00974297523499,
+            "d_task_flow_s": 182.00974297523499,
+            "delta_s": 1.3337373733520508,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_185704_task61_Research_on_the_price_dynamics.jsonl",
+            "trace_id": "heldout_048"
+          },
+          {
+            "a_completion_offset_s": 70.26589918136597,
+            "a_task_flow_s": 70.26589918136597,
+            "d_completion_offset_s": 70.59095525741577,
+            "d_task_flow_s": 70.59095525741577,
+            "delta_s": -0.3250560760498047,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_193436_task70_Trace_the_evolution_from_Java.jsonl",
+            "trace_id": "heldout_049"
+          },
+          {
+            "a_completion_offset_s": 112.66975855827332,
+            "a_task_flow_s": 112.66975855827332,
+            "d_completion_offset_s": 108.75097274780273,
+            "d_task_flow_s": 108.75097274780273,
+            "delta_s": 3.918785810470581,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_194149_task75_Could_the_rapeutic_interventio.jsonl",
+            "trace_id": "heldout_050"
+          },
+          {
+            "a_completion_offset_s": 179.3192481994629,
+            "a_task_flow_s": 179.3192481994629,
+            "d_completion_offset_s": 163.1011254787445,
+            "d_task_flow_s": 163.1011254787445,
+            "delta_s": 16.218122720718384,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_194249_task76_The_significance_of_the_gut_mi.jsonl",
+            "trace_id": "heldout_051"
+          },
+          {
+            "a_completion_offset_s": 148.48718285560608,
+            "a_task_flow_s": 148.48718285560608,
+            "d_completion_offset_s": 154.88455247879028,
+            "d_task_flow_s": 154.88455247879028,
+            "delta_s": -6.397369623184204,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_194634_task78_Parkinson_s_disease_has_a_prof.jsonl",
+            "trace_id": "heldout_052"
+          },
+          {
+            "a_completion_offset_s": 112.3498797416687,
+            "a_task_flow_s": 112.3498797416687,
+            "d_completion_offset_s": 112.60412311553955,
+            "d_task_flow_s": 112.60412311553955,
+            "delta_s": -0.2542433738708496,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_195638_task82_Research_and_analyze_the_diver.jsonl",
+            "trace_id": "heldout_053"
+          },
+          {
+            "a_completion_offset_s": 187.80367922782898,
+            "a_task_flow_s": 187.80367922782898,
+            "d_completion_offset_s": 191.26832056045532,
+            "d_task_flow_s": 191.26832056045532,
+            "delta_s": -3.4646413326263428,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_195857_task83_Acting_as_a_senior_hardware_pr.jsonl",
+            "trace_id": "heldout_054"
+          },
+          {
+            "a_completion_offset_s": 206.94726610183716,
+            "a_task_flow_s": 206.94726610183716,
+            "d_completion_offset_s": 202.35287809371948,
+            "d_task_flow_s": 202.35287809371948,
+            "delta_s": 4.594388008117676,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_200910_task86_Conduct_a_research_report_on_t.jsonl",
+            "trace_id": "heldout_055"
+          },
+          {
+            "a_completion_offset_s": 211.06565976142883,
+            "a_task_flow_s": 211.06565976142883,
+            "d_completion_offset_s": 207.9617190361023,
+            "d_task_flow_s": 207.9617190361023,
+            "delta_s": 3.103940725326538,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_201743_task87_Are_AI_fashion_design_tools_le.jsonl",
+            "trace_id": "heldout_056"
+          },
+          {
+            "a_completion_offset_s": 149.82961249351501,
+            "a_task_flow_s": 149.82961249351501,
+            "d_completion_offset_s": 157.0823040008545,
+            "d_task_flow_s": 157.0823040008545,
+            "delta_s": -7.2526915073394775,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_202117_task88_How_did_Netflix_manage_to_succ.jsonl",
+            "trace_id": "heldout_057"
+          },
+          {
+            "a_completion_offset_s": 222.6199095249176,
+            "a_task_flow_s": 222.6199095249176,
+            "d_completion_offset_s": 226.10403323173523,
+            "d_task_flow_s": 226.10403323173523,
+            "delta_s": -3.484123706817627,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_slower",
+            "source_session": "trace_20260129_202616_task90_Analyze_the_complex_issue_of_l.jsonl",
+            "trace_id": "heldout_058"
+          },
+          {
+            "a_completion_offset_s": 200.96153950691223,
+            "a_task_flow_s": 200.96153950691223,
+            "d_completion_offset_s": 200.85458993911743,
+            "d_task_flow_s": 200.85458993911743,
+            "delta_s": 0.1069495677947998,
+            "initial_delay_s": 0.0,
+            "outcome": "joint_faster",
+            "source_session": "trace_20260129_205929_task95_Create_comprehensive__in-depth.jsonl",
+            "trace_id": "heldout_059"
+          }
+        ],
+        "tie_epsilon_s": 1e-09
+      },
+      "replicate": 1,
+      "request_identity_sha256": "5d1fbd0783770c7c3b77b3faa706e50af543a4ef97c6814085c1c450f470a46c",
+      "source_sessions_sha256": "c99cd509600e7a3cd23637bc0c220dedc2d6037b5a7be6b8c1ba48bbd1321ad4",
+      "tool_prediction_top_k": 5
+    }
+  ],
+  "schema": "paste_repro.paired_ad_summary",
+  "status": "paired_heldout_ad_load_sensitivity",
+  "version": 1
+}

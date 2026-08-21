@@ -1,0 +1,386 @@
+{
+  "schema_version": 2,
+  "split_id": "live-joint-wikipedia-frozen-formal-v4",
+  "split_role": "formal_heldout",
+  "formal_eligible": true,
+  "created_date_utc": "2026-08-16",
+  "used_for_tuning": false,
+  "used_for_parameter_selection": false,
+  "untouched_at_freeze": true,
+  "frozen_call_graph": true,
+  "language": "en",
+  "source_count": 60,
+  "search_backend": "bing_html_search",
+  "visit_backend": "r.jina.ai",
+  "description": "Untouched formal held-out sources for the frozen v4 live tool/LLM experiment. These sources were selected and frozen offline before any v4 run, without inspecting performance artifacts, and are disjoint from every development, tuning, frozen-development, frozen-tuning, formal-v2, and formal-v3 source. Each authoritative Wikipedia visit URL was committed before execution; this split must not be inspected for tuning, load selection, or parameter selection.",
+  "excluded_workloads": [
+    "live_joint_wikipedia_v1.json",
+    "live_joint_wikipedia_tune_v1.json",
+    "live_joint_wikipedia_frozen_dev_v1.json",
+    "live_joint_wikipedia_frozen_tune_v1.json",
+    "live_joint_wikipedia_frozen_formal_v2.json",
+    "live_joint_wikipedia_frozen_formal_v3.json"
+  ],
+  "sources": [
+    {
+      "source_id": "formal-v4-001",
+      "question": "Where did Sumer develop, and which early cities formed its civilization?",
+      "search_query": "Sumer",
+      "expected_url": "https://en.wikipedia.org/wiki/Sumer"
+    },
+    {
+      "source_id": "formal-v4-002",
+      "question": "Who founded the Maurya Empire, and which ruler expanded it most widely?",
+      "search_query": "Maurya Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Maurya_Empire"
+    },
+    {
+      "source_id": "formal-v4-003",
+      "question": "Who established the Han dynasty, and how long did it rule China?",
+      "search_query": "Han dynasty",
+      "expected_url": "https://en.wikipedia.org/wiki/Han_dynasty"
+    },
+    {
+      "source_id": "formal-v4-004",
+      "question": "Which powers fought the Punic Wars, and what was their eventual outcome?",
+      "search_query": "Punic Wars",
+      "expected_url": "https://en.wikipedia.org/wiki/Punic_Wars"
+    },
+    {
+      "source_id": "formal-v4-005",
+      "question": "What motivated the Crusades, and where were their principal campaigns fought?",
+      "search_query": "Crusades",
+      "expected_url": "https://en.wikipedia.org/wiki/Crusades"
+    },
+    {
+      "source_id": "formal-v4-006",
+      "question": "Who created the Mongol Empire, and how broadly did it eventually extend?",
+      "search_query": "Mongol Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Mongol_Empire"
+    },
+    {
+      "source_id": "formal-v4-007",
+      "question": "Where did the Inca Empire arise, and how was its territory organized?",
+      "search_query": "Inca Empire",
+      "expected_url": "https://en.wikipedia.org/wiki/Inca_Empire"
+    },
+    {
+      "source_id": "formal-v4-008",
+      "question": "When was the American Civil War fought, and what issues drove it?",
+      "search_query": "American Civil War",
+      "expected_url": "https://en.wikipedia.org/wiki/American_Civil_War"
+    },
+    {
+      "source_id": "formal-v4-009",
+      "question": "Which events drove the Russian Revolution, and what government emerged afterward?",
+      "search_query": "Russian Revolution",
+      "expected_url": "https://en.wikipedia.org/wiki/Russian_Revolution"
+    },
+    {
+      "source_id": "formal-v4-010",
+      "question": "Why was the Congress of Vienna convened, and what order did it create?",
+      "search_query": "Congress of Vienna",
+      "expected_url": "https://en.wikipedia.org/wiki/Congress_of_Vienna"
+    },
+    {
+      "source_id": "formal-v4-011",
+      "question": "When did the Abbasid Caliphate begin, and where was its capital established?",
+      "search_query": "Abbasid Caliphate",
+      "expected_url": "https://en.wikipedia.org/wiki/Abbasid_Caliphate"
+    },
+    {
+      "source_id": "formal-v4-012",
+      "question": "Which achievements distinguished the Song dynasty, and when did it govern China?",
+      "search_query": "Song dynasty",
+      "expected_url": "https://en.wikipedia.org/wiki/Song_dynasty"
+    },
+    {
+      "source_id": "formal-v4-013",
+      "question": "Where do the Rocky Mountains extend, and which forces formed the range?",
+      "search_query": "Rocky Mountains",
+      "expected_url": "https://en.wikipedia.org/wiki/Rocky_Mountains"
+    },
+    {
+      "source_id": "formal-v4-014",
+      "question": "Where is the Great Rift Valley, and which geological processes created it?",
+      "search_query": "Great Rift Valley",
+      "expected_url": "https://en.wikipedia.org/wiki/Great_Rift_Valley"
+    },
+    {
+      "source_id": "formal-v4-015",
+      "question": "Through which region does the Congo River flow, and where does it end?",
+      "search_query": "Congo River",
+      "expected_url": "https://en.wikipedia.org/wiki/Congo_River"
+    },
+    {
+      "source_id": "formal-v4-016",
+      "question": "Which countries border Lake Victoria, and what feeds and drains the lake?",
+      "search_query": "Lake Victoria",
+      "expected_url": "https://en.wikipedia.org/wiki/Lake_Victoria"
+    },
+    {
+      "source_id": "formal-v4-017",
+      "question": "Which countries occupy the Arabian Peninsula, and which waters surround it?",
+      "search_query": "Arabian Peninsula",
+      "expected_url": "https://en.wikipedia.org/wiki/Arabian_Peninsula"
+    },
+    {
+      "source_id": "formal-v4-018",
+      "question": "Which landmasses does the Bering Strait separate, and which seas does it connect?",
+      "search_query": "Bering Strait",
+      "expected_url": "https://en.wikipedia.org/wiki/Bering_Strait"
+    },
+    {
+      "source_id": "formal-v4-019",
+      "question": "Where are the Great Plains located, and what landscape characterizes them?",
+      "search_query": "Great Plains",
+      "expected_url": "https://en.wikipedia.org/wiki/Great_Plains"
+    },
+    {
+      "source_id": "formal-v4-020",
+      "question": "Where is Patagonia located, and which major landscapes define the region?",
+      "search_query": "Patagonia",
+      "expected_url": "https://en.wikipedia.org/wiki/Patagonia"
+    },
+    {
+      "source_id": "formal-v4-021",
+      "question": "Where does the Mississippi River begin, and into which gulf does it flow?",
+      "search_query": "Mississippi River",
+      "expected_url": "https://en.wikipedia.org/wiki/Mississippi_River"
+    },
+    {
+      "source_id": "formal-v4-022",
+      "question": "Along which coast is the Namib Desert, and what produces its aridity?",
+      "search_query": "Namib Desert",
+      "expected_url": "https://en.wikipedia.org/wiki/Namib_Desert"
+    },
+    {
+      "source_id": "formal-v4-023",
+      "question": "Which countries surround the Baltic Sea, and how does it connect outward?",
+      "search_query": "Baltic Sea",
+      "expected_url": "https://en.wikipedia.org/wiki/Baltic_Sea"
+    },
+    {
+      "source_id": "formal-v4-024",
+      "question": "Where are the Sundarbans located, and which ecosystem makes them distinctive?",
+      "search_query": "Sundarbans",
+      "expected_url": "https://en.wikipedia.org/wiki/Sundarbans"
+    },
+    {
+      "source_id": "formal-v4-025",
+      "question": "What does quantum mechanics describe, and how are its predictions expressed?",
+      "search_query": "Quantum mechanics",
+      "expected_url": "https://en.wikipedia.org/wiki/Quantum_mechanics"
+    },
+    {
+      "source_id": "formal-v4-026",
+      "question": "What is wave-particle duality, and which experiments demonstrate the concept?",
+      "search_query": "Wave-particle duality",
+      "expected_url": "https://en.wikipedia.org/wiki/Wave%E2%80%93particle_duality"
+    },
+    {
+      "source_id": "formal-v4-027",
+      "question": "What produces a gravitational wave, and how can detectors observe one?",
+      "search_query": "Gravitational wave",
+      "expected_url": "https://en.wikipedia.org/wiki/Gravitational_wave"
+    },
+    {
+      "source_id": "formal-v4-028",
+      "question": "What is the cosmic microwave background, and what does it reveal about cosmology?",
+      "search_query": "Cosmic microwave background",
+      "expected_url": "https://en.wikipedia.org/wiki/Cosmic_microwave_background"
+    },
+    {
+      "source_id": "formal-v4-029",
+      "question": "What creates a chemical bond, and which principal bond types occur?",
+      "search_query": "Chemical bond",
+      "expected_url": "https://en.wikipedia.org/wiki/Chemical_bond"
+    },
+    {
+      "source_id": "formal-v4-030",
+      "question": "What defines an acid-base reaction, and how are its reactants transformed?",
+      "search_query": "Acid-base reaction",
+      "expected_url": "https://en.wikipedia.org/wiki/Acid%E2%80%93base_reaction"
+    },
+    {
+      "source_id": "formal-v4-031",
+      "question": "How does electrolysis drive a chemical change, and what equipment does it require?",
+      "search_query": "Electrolysis",
+      "expected_url": "https://en.wikipedia.org/wiki/Electrolysis"
+    },
+    {
+      "source_id": "formal-v4-032",
+      "question": "How does catalysis alter a reaction, and what happens to the catalyst?",
+      "search_query": "Catalysis",
+      "expected_url": "https://en.wikipedia.org/wiki/Catalysis"
+    },
+    {
+      "source_id": "formal-v4-033",
+      "question": "What occurs during mitosis, and which stages organize chromosome separation?",
+      "search_query": "Mitosis",
+      "expected_url": "https://en.wikipedia.org/wiki/Mitosis"
+    },
+    {
+      "source_id": "formal-v4-034",
+      "question": "What is a neuron, and how does it transmit information to other cells?",
+      "search_query": "Neuron",
+      "expected_url": "https://en.wikipedia.org/wiki/Neuron"
+    },
+    {
+      "source_id": "formal-v4-035",
+      "question": "What organs form the endocrine system, and how do their signals travel?",
+      "search_query": "Endocrine system",
+      "expected_url": "https://en.wikipedia.org/wiki/Endocrine_system"
+    },
+    {
+      "source_id": "formal-v4-036",
+      "question": "How does cellular respiration release energy, and where do its stages occur?",
+      "search_query": "Cellular respiration",
+      "expected_url": "https://en.wikipedia.org/wiki/Cellular_respiration"
+    },
+    {
+      "source_id": "formal-v4-037",
+      "question": "How does natural selection change populations, and which conditions enable it?",
+      "search_query": "Natural selection",
+      "expected_url": "https://en.wikipedia.org/wiki/Natural_selection"
+    },
+    {
+      "source_id": "formal-v4-038",
+      "question": "What relationships does a food web represent, and how are energy paths linked?",
+      "search_query": "Food web",
+      "expected_url": "https://en.wikipedia.org/wiki/Food_web"
+    },
+    {
+      "source_id": "formal-v4-039",
+      "question": "What drives an ocean current, and how can currents affect regional climates?",
+      "search_query": "Ocean current",
+      "expected_url": "https://en.wikipedia.org/wiki/Ocean_current"
+    },
+    {
+      "source_id": "formal-v4-040",
+      "question": "What does seismology study, and how are internal Earth structures inferred?",
+      "search_query": "Seismology",
+      "expected_url": "https://en.wikipedia.org/wiki/Seismology"
+    },
+    {
+      "source_id": "formal-v4-041",
+      "question": "What does the Transmission Control Protocol provide, and how does it ensure delivery?",
+      "search_query": "Transmission Control Protocol",
+      "expected_url": "https://en.wikipedia.org/wiki/Transmission_Control_Protocol"
+    },
+    {
+      "source_id": "formal-v4-042",
+      "question": "What is machine learning, and how does a model improve from data?",
+      "search_query": "Machine learning",
+      "expected_url": "https://en.wikipedia.org/wiki/Machine_learning"
+    },
+    {
+      "source_id": "formal-v4-043",
+      "question": "How does a binary search algorithm locate an item, and what ordering does it require?",
+      "search_query": "Binary search algorithm",
+      "expected_url": "https://en.wikipedia.org/wiki/Binary_search_algorithm"
+    },
+    {
+      "source_id": "formal-v4-044",
+      "question": "How does a hash table store records, and how are collisions handled?",
+      "search_query": "Hash table",
+      "expected_url": "https://en.wikipedia.org/wiki/Hash_table"
+    },
+    {
+      "source_id": "formal-v4-045",
+      "question": "How does data compression reduce representation size, and which approaches preserve information?",
+      "search_query": "Data compression",
+      "expected_url": "https://en.wikipedia.org/wiki/Data_compression"
+    },
+    {
+      "source_id": "formal-v4-046",
+      "question": "What is cloud computing, and how are its resources delivered to users?",
+      "search_query": "Cloud computing",
+      "expected_url": "https://en.wikipedia.org/wiki/Cloud_computing"
+    },
+    {
+      "source_id": "formal-v4-047",
+      "question": "What is Ethernet, and how does it carry frames across a local network?",
+      "search_query": "Ethernet",
+      "expected_url": "https://en.wikipedia.org/wiki/Ethernet"
+    },
+    {
+      "source_id": "formal-v4-048",
+      "question": "What is Wi-Fi, and which standards govern its wireless network communication?",
+      "search_query": "Wi-Fi",
+      "expected_url": "https://en.wikipedia.org/wiki/Wi-Fi"
+    },
+    {
+      "source_id": "formal-v4-049",
+      "question": "What does information theory quantify, and which measure represents uncertainty?",
+      "search_query": "Information theory",
+      "expected_url": "https://en.wikipedia.org/wiki/Information_theory"
+    },
+    {
+      "source_id": "formal-v4-050",
+      "question": "What is a finite-state machine, and how do transitions determine its behavior?",
+      "search_query": "Finite-state machine",
+      "expected_url": "https://en.wikipedia.org/wiki/Finite-state_machine"
+    },
+    {
+      "source_id": "formal-v4-051",
+      "question": "Why was the Parthenon built, and which architectural order shapes its design?",
+      "search_query": "Parthenon",
+      "expected_url": "https://en.wikipedia.org/wiki/Parthenon"
+    },
+    {
+      "source_id": "formal-v4-052",
+      "question": "Why was the Terracotta Army created, and where was it discovered?",
+      "search_query": "Terracotta Army",
+      "expected_url": "https://en.wikipedia.org/wiki/Terracotta_Army"
+    },
+    {
+      "source_id": "formal-v4-053",
+      "question": "Who created The Great Wave off Kanagawa, and what scene does it depict?",
+      "search_query": "The Great Wave off Kanagawa",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Great_Wave_off_Kanagawa"
+    },
+    {
+      "source_id": "formal-v4-054",
+      "question": "Who painted Girl with a Pearl Earring, and when was it produced?",
+      "search_query": "Girl with a Pearl Earring",
+      "expected_url": "https://en.wikipedia.org/wiki/Girl_with_a_Pearl_Earring"
+    },
+    {
+      "source_id": "formal-v4-055",
+      "question": "Who composed The Rite of Spring, and why was its premiere notable?",
+      "search_query": "The Rite of Spring",
+      "expected_url": "https://en.wikipedia.org/wiki/The_Rite_of_Spring"
+    },
+    {
+      "source_id": "formal-v4-056",
+      "question": "Who wrote Crime and Punishment, and which moral conflict drives the novel?",
+      "search_query": "Crime and Punishment",
+      "expected_url": "https://en.wikipedia.org/wiki/Crime_and_Punishment"
+    },
+    {
+      "source_id": "formal-v4-057",
+      "question": "Who wrote Moby-Dick, and what pursuit structures the novel's narrative?",
+      "search_query": "Moby-Dick",
+      "expected_url": "https://en.wikipedia.org/wiki/Moby-Dick"
+    },
+    {
+      "source_id": "formal-v4-058",
+      "question": "Who wrote Jane Eyre, and how does its narrator describe her life?",
+      "search_query": "Jane Eyre",
+      "expected_url": "https://en.wikipedia.org/wiki/Jane_Eyre"
+    },
+    {
+      "source_id": "formal-v4-059",
+      "question": "How did Cubism transform visual representation, and which artists pioneered it?",
+      "search_query": "Cubism",
+      "expected_url": "https://en.wikipedia.org/wiki/Cubism"
+    },
+    {
+      "source_id": "formal-v4-060",
+      "question": "What is Kabuki, and which performance conventions distinguish the theatrical form?",
+      "search_query": "Kabuki",
+      "expected_url": "https://en.wikipedia.org/wiki/Kabuki"
+    }
+  ]
+}
