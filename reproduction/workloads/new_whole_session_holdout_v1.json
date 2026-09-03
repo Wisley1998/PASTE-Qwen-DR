@@ -1,0 +1,966 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Drug Discovery",
+          "databases": [
+            "DrugBank",
+            "SIDER",
+            "FAERS"
+          ],
+          "description": "Screen 15 drugs for potential interactions in polypharmacy regimen. Query interaction databases for each drug pair, assess CYP450 metabolism conflicts, retrieve adverse event reports, predict pharmacokinetic interactions, and assess clinical severity.",
+          "estimated_tool_calls": 70,
+          "expected_speedup": "2.5x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Drug Safety",
+          "task_id": "TASK_044",
+          "title": "Drug-Drug Interaction Screening"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 1,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 44,
+        "source_row_sha256": "57ae9a498c62b10fc404bcf1d0eab7fe1f8e8e36abfac03ee77573e5520a2c74"
+      },
+      "question": "Drug-Drug Interaction Screening\n\nScreen 15 drugs for potential interactions in polypharmacy regimen. Query interaction databases for each drug pair, assess CYP450 metabolism conflicts, retrieve adverse event reports, predict pharmacokinetic interactions, and assess clinical severity.",
+      "source_id": "scientific_task_044"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Structural Biology",
+          "databases": [
+            "UniProt",
+            "Human Protein Atlas",
+            "LocTree"
+          ],
+          "description": "Predict subcellular localization for 35 proteins. Query experimental localization data, predict using sequence-based tools, retrieve imaging data from databases, assess multi-localization possibilities, and correlate with protein function.",
+          "estimated_tool_calls": 60,
+          "expected_speedup": "2.3x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Protein Annotation",
+          "task_id": "TASK_038",
+          "title": "Protein Subcellular Localization Prediction"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 2,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 38,
+        "source_row_sha256": "6844c77be5366a5296affb155c0e60e6688da55425d353823e5c421808c231d0"
+      },
+      "question": "Protein Subcellular Localization Prediction\n\nPredict subcellular localization for 35 proteins. Query experimental localization data, predict using sequence-based tools, retrieve imaging data from databases, assess multi-localization possibilities, and correlate with protein function.",
+      "source_id": "scientific_task_038"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "DisGeNET",
+            "OMIM",
+            "ClinVar"
+          ],
+          "description": "For 30 candidate genes, systematically query disease associations from DisGeNET, OMIM for Mendelian disorders, ClinVar for clinical variants, and integrate evidence scores across databases. Identify genes with strong disease associations and therapeutic implications.",
+          "estimated_tool_calls": 60,
+          "expected_speedup": "2.3x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Disease Association",
+          "task_id": "TASK_005",
+          "title": "Disease-Gene Association Mining"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 3,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 5,
+        "source_row_sha256": "3aefa4795b9ca48e76976de04bbb6872fd85eff3744b308735c31367cf7530b9"
+      },
+      "question": "Disease-Gene Association Mining\n\nFor 30 candidate genes, systematically query disease associations from DisGeNET, OMIM for Mendelian disorders, ClinVar for clinical variants, and integrate evidence scores across databases. Identify genes with strong disease associations and therapeutic implications.",
+      "source_id": "scientific_task_005"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Literature Mining",
+          "databases": [
+            "PubMed",
+            "Retraction Watch",
+            "ClinicalTrials.gov"
+          ],
+          "description": "Identify contradictory findings in COVID-19 treatment literature. Analyze 40 papers with conflicting conclusions, extract study methodologies, query retraction databases, assess evidence quality, identify sources of disagreement, and synthesize current consensus.",
+          "estimated_tool_calls": 55,
+          "expected_speedup": "2.1x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "SciNetBench"
+          ],
+          "subcategory": "Cross-document Reasoning",
+          "task_id": "TASK_025",
+          "title": "Scientific Controversy Detection and Analysis"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 4,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 25,
+        "source_row_sha256": "56fcc0af5c4928122552ed971ab56836ea5730ac6f349c579fe35a5f87218670"
+      },
+      "question": "Scientific Controversy Detection and Analysis\n\nIdentify contradictory findings in COVID-19 treatment literature. Analyze 40 papers with conflicting conclusions, extract study methodologies, query retraction databases, assess evidence quality, identify sources of disagreement, and synthesize current consensus.",
+      "source_id": "scientific_task_025"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "NCBI Gene",
+            "TFLink",
+            "PubMed"
+          ],
+          "description": "Analyze developmental trajectory in single-cell data across 20 cell states. Query marker genes for each state, retrieve temporal expression patterns from databases, identify key transcription factors driving state transitions, and validate findings against published differentiation studies.",
+          "estimated_tool_calls": 50,
+          "expected_speedup": "2.1x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Single-cell Analysis",
+          "task_id": "TASK_007",
+          "title": "Single-cell Trajectory and Pseudotime Analysis"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 5,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 7,
+        "source_row_sha256": "93c813115c18c9fdec578125538f78a293daa2522121a2eceb816e5133493e0d"
+      },
+      "question": "Single-cell Trajectory and Pseudotime Analysis\n\nAnalyze developmental trajectory in single-cell data across 20 cell states. Query marker genes for each state, retrieve temporal expression patterns from databases, identify key transcription factors driving state transitions, and validate findings against published differentiation studies.",
+      "source_id": "scientific_task_007"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Literature Mining",
+          "databases": [
+            "NIH RePORTER",
+            "PubMed",
+            "ClinicalTrials.gov"
+          ],
+          "description": "Analyze correlation between NIH funding and research productivity. Query 45 funded projects, retrieve publication outputs, calculate ROI metrics, identify high-impact grants, compare across disease areas, and track translational outcomes.",
+          "estimated_tool_calls": 60,
+          "expected_speedup": "2.3x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "SciNetBench"
+          ],
+          "subcategory": "Scientometrics",
+          "task_id": "TASK_027",
+          "title": "Funding and Research Output Correlation"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 6,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 27,
+        "source_row_sha256": "5f8939cbd4ba40e6edfb9cf0a0801936b86cdf17ac211eb59cf36e5c7a854839"
+      },
+      "question": "Funding and Research Output Correlation\n\nAnalyze correlation between NIH funding and research productivity. Query 45 funded projects, retrieve publication outputs, calculate ROI metrics, identify high-impact grants, compare across disease areas, and track translational outcomes.",
+      "source_id": "scientific_task_027"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Structural Biology",
+          "databases": [
+            "STRING",
+            "BioGRID",
+            "IntAct"
+          ],
+          "description": "Build protein interaction network from seed protein TP53. Query STRING database for direct interactors (layer 1), retrieve interactions for each partner (layer 2), extract interaction confidence scores, identify hub proteins, detect functional modules.",
+          "estimated_tool_calls": 50,
+          "expected_speedup": "1.8x",
+          "parallel_potential": "medium",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Protein Interactions",
+          "task_id": "TASK_032",
+          "title": "Protein-Protein Interaction Network Construction"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 7,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 32,
+        "source_row_sha256": "f7bb046f7d92461c5458eac22ccbc4a8726beae037ab73ddb1fc397ff95d8647"
+      },
+      "question": "Protein-Protein Interaction Network Construction\n\nBuild protein interaction network from seed protein TP53. Query STRING database for direct interactors (layer 1), retrieve interactions for each partner (layer 2), extract interaction confidence scores, identify hub proteins, detect functional modules.",
+      "source_id": "scientific_task_032"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "Ensembl",
+            "NCBI Gene",
+            "UniProt"
+          ],
+          "description": "Analyze RNA-seq data from cancer vs normal tissue samples. Identify significantly differentially expressed genes (DEGs), perform statistical testing using edgeR/DESeq2, filter by fold change >2 and FDR <0.05, and retrieve functional annotations for all significant DEGs from multiple databases.",
+          "estimated_tool_calls": 65,
+          "expected_speedup": "2.4x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "RNA-seq Analysis",
+          "task_id": "TASK_001",
+          "title": "Differential Gene Expression Analysis from RNA-seq"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 8,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 1,
+        "source_row_sha256": "5b8498d3c88f608b8204681390559c3218781c71998129446697b736b307e0bf"
+      },
+      "question": "Differential Gene Expression Analysis from RNA-seq\n\nAnalyze RNA-seq data from cancer vs normal tissue samples. Identify significantly differentially expressed genes (DEGs), perform statistical testing using edgeR/DESeq2, filter by fold change >2 and FDR <0.05, and retrieve functional annotations for all significant DEGs from multiple databases.",
+      "source_id": "scientific_task_001"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "ENCODE",
+            "Roadmap Epigenomics"
+          ],
+          "description": "Analyze histone modification patterns (H3K4me3, H3K27ac, H3K27me3) across 50 genomic regions. Query ChIP-seq databases, retrieve known modification patterns for each region, classify regions as active promoters/enhancers or repressed, and integrate with gene expression data.",
+          "estimated_tool_calls": 70,
+          "expected_speedup": "2.5x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Epigenomics",
+          "task_id": "TASK_010",
+          "title": "Histone Modification Landscape Analysis"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 9,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 10,
+        "source_row_sha256": "9515679dfdf3e3c6257093f3b22c723869d351819f0ef7b3b4cb4e31804de65c"
+      },
+      "question": "Histone Modification Landscape Analysis\n\nAnalyze histone modification patterns (H3K4me3, H3K27ac, H3K27me3) across 50 genomic regions. Query ChIP-seq databases, retrieve known modification patterns for each region, classify regions as active promoters/enhancers or repressed, and integrate with gene expression data.",
+      "source_id": "scientific_task_010"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Structural Biology",
+          "databases": [
+            "PDB",
+            "TMHMM",
+            "Membranome"
+          ],
+          "description": "Predict topology for 25 membrane proteins. Query known structures from PDB, predict transmembrane helices, identify re-entrant loops, determine orientation (Nin/Nout), validate against experimental topology, and assess functional implications.",
+          "estimated_tool_calls": 55,
+          "expected_speedup": "2.1x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Structure Prediction",
+          "task_id": "TASK_039",
+          "title": "Membrane Protein Topology Prediction"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 10,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 39,
+        "source_row_sha256": "83f79b60251654f0eab779b0078ca611e31905f54ea8a8bd07c5b8cee93101f0"
+      },
+      "question": "Membrane Protein Topology Prediction\n\nPredict topology for 25 membrane proteins. Query known structures from PDB, predict transmembrane helices, identify re-entrant loops, determine orientation (Nin/Nout), validate against experimental topology, and assess functional implications.",
+      "source_id": "scientific_task_039"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "dbSNP",
+            "ClinVar",
+            "gnomAD",
+            "COSMIC"
+          ],
+          "description": "Annotate 40 genomic variants identified from whole-exome sequencing. Query dbSNP for known variants, ClinVar for clinical significance, predict functional impact using SIFT/PolyPhen, retrieve population frequencies from gnomAD, and assess pathogenicity using ACMG guidelines.",
+          "estimated_tool_calls": 80,
+          "expected_speedup": "2.7x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Variant Calling",
+          "task_id": "TASK_004",
+          "title": "Variant Annotation and Pathogenicity Prediction"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 11,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 4,
+        "source_row_sha256": "0e70567a46ae12d59b563dee61e98d6fa3b92c19390a24ac55f71a9cd2eaa91c"
+      },
+      "question": "Variant Annotation and Pathogenicity Prediction\n\nAnnotate 40 genomic variants identified from whole-exome sequencing. Query dbSNP for known variants, ClinVar for clinical significance, predict functional impact using SIFT/PolyPhen, retrieve population frequencies from gnomAD, and assess pathogenicity using ACMG guidelines.",
+      "source_id": "scientific_task_004"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "ENCODE",
+            "Roadmap Epigenomics",
+            "GeneHancer"
+          ],
+          "description": "Analyze 80 ATAC-seq peaks representing open chromatin regions. Annotate genomic features, query enhancer databases, retrieve associated regulatory elements, identify cell-type specific accessibility patterns, and correlate with gene expression changes.",
+          "estimated_tool_calls": 75,
+          "expected_speedup": "2.6x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Epigenomics",
+          "task_id": "TASK_009",
+          "title": "ATAC-seq Open Chromatin Region Analysis"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 12,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 9,
+        "source_row_sha256": "5cf1157cc94493223caa97c00c79d0a4f6163a09d3bf684ea76e8c8b183e2e31"
+      },
+      "question": "ATAC-seq Open Chromatin Region Analysis\n\nAnalyze 80 ATAC-seq peaks representing open chromatin regions. Annotate genomic features, query enhancer databases, retrieve associated regulatory elements, identify cell-type specific accessibility patterns, and correlate with gene expression changes.",
+      "source_id": "scientific_task_009"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Structural Biology",
+          "databases": [
+            "ProTherm",
+            "PDB",
+            "SWISS-MODEL"
+          ],
+          "description": "Assess impact of 50 mutations on protein stability. Query experimental ΔΔG values from databases, predict stability changes using multiple tools, retrieve structural context from PDB, assess conservation scores, and classify as stabilizing/destabilizing.",
+          "estimated_tool_calls": 75,
+          "expected_speedup": "2.6x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Mutation Effects",
+          "task_id": "TASK_036",
+          "title": "Protein Stability Mutation Analysis"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 13,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 36,
+        "source_row_sha256": "1b4cbf735924b466ccc93fc5c80359dd3a514002341df788d7e39d3c7f8a0c24"
+      },
+      "question": "Protein Stability Mutation Analysis\n\nAssess impact of 50 mutations on protein stability. Query experimental ΔΔG values from databases, predict stability changes using multiple tools, retrieve structural context from PDB, assess conservation scores, and classify as stabilizing/destabilizing.",
+      "source_id": "scientific_task_036"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Structural Biology",
+          "databases": [
+            "UniProt",
+            "PRIDE",
+            "PeptideAtlas"
+          ],
+          "description": "Identify proteins from MS/MS spectra dataset with 60 peptides. Query peptide sequences against UniProt, retrieve protein annotations, assess identification confidence, perform GO enrichment on identified proteins, and detect post-translational modifications.",
+          "estimated_tool_calls": 80,
+          "expected_speedup": "2.7x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Proteomics",
+          "task_id": "TASK_037",
+          "title": "Mass Spectrometry Protein Identification"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 14,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 37,
+        "source_row_sha256": "62626f7375e9175bbc892d744bd2ecd8829a666db453d798d9069a0599cb03cc"
+      },
+      "question": "Mass Spectrometry Protein Identification\n\nIdentify proteins from MS/MS spectra dataset with 60 peptides. Query peptide sequences against UniProt, retrieve protein annotations, assess identification confidence, perform GO enrichment on identified proteins, and detect post-translational modifications.",
+      "source_id": "scientific_task_037"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Structural Biology",
+          "databases": [
+            "PDB",
+            "AlphaFold DB",
+            "PDBe"
+          ],
+          "description": "Model 20 protein-protein complexes using multiple approaches. Query PDB for homologous complexes, predict structures using AlphaFold-Multimer, assess interface quality, identify key binding residues, and validate against experimental data.",
+          "estimated_tool_calls": 65,
+          "expected_speedup": "2.4x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Structure Prediction",
+          "task_id": "TASK_034",
+          "title": "Protein Complex Structure Modeling"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 15,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 34,
+        "source_row_sha256": "aba308ff9e83fad8dc7e1905f27e4a1d79c7d8352ce30727310182a3964cd1fa"
+      },
+      "question": "Protein Complex Structure Modeling\n\nModel 20 protein-protein complexes using multiple approaches. Query PDB for homologous complexes, predict structures using AlphaFold-Multimer, assess interface quality, identify key binding residues, and validate against experimental data.",
+      "source_id": "scientific_task_034"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "CARD",
+            "ResFinder",
+            "NCBI Pathogen"
+          ],
+          "description": "Screen metagenomic data for antibiotic resistance genes. Query 50 detected genes against CARD database, retrieve resistance mechanisms, identify mobile genetic elements, assess clinical significance, and trace transmission patterns from epidemiological databases.",
+          "estimated_tool_calls": 65,
+          "expected_speedup": "2.4x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Metagenomics",
+          "task_id": "TASK_013",
+          "title": "Microbial Antibiotic Resistance Gene Detection"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 16,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 13,
+        "source_row_sha256": "42bab11f5c603dc82372d23174e4e54064cf0d5c8072db62e0724250cd1c03e1"
+      },
+      "question": "Microbial Antibiotic Resistance Gene Detection\n\nScreen metagenomic data for antibiotic resistance genes. Query 50 detected genes against CARD database, retrieve resistance mechanisms, identify mobile genetic elements, assess clinical significance, and trace transmission patterns from epidemiological databases.",
+      "source_id": "scientific_task_013"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Drug Discovery",
+          "databases": [
+            "PDB",
+            "ChEMBL",
+            "ZINC Fragments"
+          ],
+          "description": "Optimize 35 fragment hits into lead compounds. Query fragment binding modes, identify linking strategies, predict combined binding affinity, assess synthesizability, retrieve similar compounds from databases, and design optimized molecules.",
+          "estimated_tool_calls": 75,
+          "expected_speedup": "2.6x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Lead Optimization",
+          "task_id": "TASK_049",
+          "title": "Fragment-based Drug Design Optimization"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 17,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 49,
+        "source_row_sha256": "b74ffb913c027c6c3a16a58ebf0f90d9303484a1f25b467d194bb2add2950ad7"
+      },
+      "question": "Fragment-based Drug Design Optimization\n\nOptimize 35 fragment hits into lead compounds. Query fragment binding modes, identify linking strategies, predict combined binding affinity, assess synthesizability, retrieve similar compounds from databases, and design optimized molecules.",
+      "source_id": "scientific_task_049"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Drug Discovery",
+          "databases": [
+            "ChEMBL",
+            "PubChem",
+            "SwissADME"
+          ],
+          "description": "Predict ADME properties for 50 candidate molecules. Calculate molecular descriptors, predict solubility, permeability, metabolic stability, assess blood-brain barrier penetration, predict half-life, and filter by developability criteria.",
+          "estimated_tool_calls": 85,
+          "expected_speedup": "2.7x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "ADME Prediction",
+          "task_id": "TASK_045",
+          "title": "ADME Properties Prediction for Drug Candidates"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 18,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 45,
+        "source_row_sha256": "016872f6ff92d258d1c2217a2886f4536dcd5ecc9172eb29839907756821de4a"
+      },
+      "question": "ADME Properties Prediction for Drug Candidates\n\nPredict ADME properties for 50 candidate molecules. Calculate molecular descriptors, predict solubility, permeability, metabolic stability, assess blood-brain barrier penetration, predict half-life, and filter by developability criteria.",
+      "source_id": "scientific_task_045"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "GDSC",
+            "CTRP",
+            "DrugBank"
+          ],
+          "description": "Integrate CRISPR knockout screen data with drug sensitivity profiles for 35 target genes. Query drug-target databases, retrieve chemical structures, predict drug response based on gene essentiality scores, and identify combination therapy opportunities.",
+          "estimated_tool_calls": 75,
+          "expected_speedup": "2.6x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "CRISPR Screening",
+          "task_id": "TASK_015",
+          "title": "Drug Response Prediction from CRISPR Data"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 19,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 15,
+        "source_row_sha256": "fbed29cd9281b7576cfbd1824073d36a1487b2e9109d973bb3c29439f1ff3f19"
+      },
+      "question": "Drug Response Prediction from CRISPR Data\n\nIntegrate CRISPR knockout screen data with drug sensitivity profiles for 35 target genes. Query drug-target databases, retrieve chemical structures, predict drug response based on gene essentiality scores, and identify combination therapy opportunities.",
+      "source_id": "scientific_task_015"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Structural Biology",
+          "databases": [
+            "InterPro",
+            "Pfam",
+            "PROSITE"
+          ],
+          "description": "Annotate domains and motifs in 40 protein sequences. Query InterPro for domain architecture, retrieve functional motifs from Pfam, identify signal peptides and transmembrane regions, predict post-translational modification sites, and infer protein function.",
+          "estimated_tool_calls": 70,
+          "expected_speedup": "2.5x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Protein Annotation",
+          "task_id": "TASK_033",
+          "title": "Protein Domain and Motif Annotation"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 20,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 33,
+        "source_row_sha256": "06f6f7efa030a06cd0ab4e5b0aabcb8ae985299986d04b4e4a57fb5f1d54e09a"
+      },
+      "question": "Protein Domain and Motif Annotation\n\nAnnotate domains and motifs in 40 protein sequences. Query InterPro for domain architecture, retrieve functional motifs from Pfam, identify signal peptides and transmembrane regions, predict post-translational modification sites, and infer protein function.",
+      "source_id": "scientific_task_033"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Drug Discovery",
+          "databases": [
+            "PubChem",
+            "ChEMBL",
+            "ZINC"
+          ],
+          "description": "Screen 100 compounds from virtual library against kinase target. Perform molecular docking for each compound, calculate binding affinity scores, predict ADME properties, filter by drug-likeness rules, and rank candidates for experimental validation.",
+          "estimated_tool_calls": 120,
+          "expected_speedup": "3.0x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Virtual Screening",
+          "task_id": "TASK_041",
+          "title": "Virtual Compound Library Screening"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 21,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 41,
+        "source_row_sha256": "eb76a638141c4d8e95bad30141592a611f1557e59be40219410a784a487d4caf"
+      },
+      "question": "Virtual Compound Library Screening\n\nScreen 100 compounds from virtual library against kinase target. Perform molecular docking for each compound, calculate binding affinity scores, predict ADME properties, filter by drug-likeness rules, and rank candidates for experimental validation.",
+      "source_id": "scientific_task_041"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Literature Mining",
+          "databases": [
+            "PubMed",
+            "ORCID",
+            "Scopus"
+          ],
+          "description": "Map collaboration networks in structural biology field. Analyze 50 highly cited papers, extract author affiliations, query co-authorship patterns, identify research hubs and bridges, detect emerging collaborations, and predict future partnerships.",
+          "estimated_tool_calls": 55,
+          "expected_speedup": "2.1x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "SciNetBench"
+          ],
+          "subcategory": "Social Network Analysis",
+          "task_id": "TASK_028",
+          "title": "Author Collaboration Network Analysis"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 22,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 28,
+        "source_row_sha256": "e673e6ea97b63aef13218f321f51e4c82410aaae195b10a86e158938d9f7bf3e"
+      },
+      "question": "Author Collaboration Network Analysis\n\nMap collaboration networks in structural biology field. Analyze 50 highly cited papers, extract author affiliations, query co-authorship patterns, identify research hubs and bridges, detect emerging collaborations, and predict future partnerships.",
+      "source_id": "scientific_task_028"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "MANE",
+            "RefSeq",
+            "Ensembl"
+          ],
+          "description": "Identify and quantify alternative splicing events from RNA-seq data. Analyze 40 genes with multiple isoforms, query known splice variants from databases, retrieve tissue-specific expression patterns, predict functional consequences of splice variants, and assess pathogenic potential.",
+          "estimated_tool_calls": 70,
+          "expected_speedup": "2.5x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "RNA-seq Analysis",
+          "task_id": "TASK_016",
+          "title": "Splice Variant Analysis and Isoform Quantification"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 23,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 16,
+        "source_row_sha256": "3dd0c14a914201a38ff083e9939d18682e61353e834ebce5e4c9bb49b063d163"
+      },
+      "question": "Splice Variant Analysis and Isoform Quantification\n\nIdentify and quantify alternative splicing events from RNA-seq data. Analyze 40 genes with multiple isoforms, query known splice variants from databases, retrieve tissue-specific expression patterns, predict functional consequences of splice variants, and assess pathogenic potential.",
+      "source_id": "scientific_task_016"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Structural Biology",
+          "databases": [
+            "AlphaFold DB",
+            "PDB",
+            "SWISS-MODEL"
+          ],
+          "description": "Predict structures for 25 protein sequences using multiple methods. Query AlphaFold database for existing predictions, assess model confidence scores, compare predictions across methods, identify disordered regions, and validate against experimental structures in PDB.",
+          "estimated_tool_calls": 60,
+          "expected_speedup": "2.3x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Structure Prediction",
+          "task_id": "TASK_031",
+          "title": "Protein Structure Prediction and Quality Assessment"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 24,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 31,
+        "source_row_sha256": "6b9a4f0057fdb835e991ccf78d8a8ab65dc8d94ad2fc1bade721362c3b7f1acb"
+      },
+      "question": "Protein Structure Prediction and Quality Assessment\n\nPredict structures for 25 protein sequences using multiple methods. Query AlphaFold database for existing predictions, assess model confidence scores, compare predictions across methods, identify disordered regions, and validate against experimental structures in PDB.",
+      "source_id": "scientific_task_031"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Drug Discovery",
+          "databases": [
+            "DrugBank",
+            "ChEMBL",
+            "BindingDB"
+          ],
+          "description": "Predict interactions between 40 drugs and 30 target proteins. Query known interactions from databases, calculate chemical similarity, assess target homology, predict binding likelihood, retrieve experimental validation data, and prioritize for experimental testing.",
+          "estimated_tool_calls": 90,
+          "expected_speedup": "2.8x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Target Prediction",
+          "task_id": "TASK_042",
+          "title": "Drug-Target Interaction Prediction"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 25,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 42,
+        "source_row_sha256": "986658868f48e99d7fad6b82d96fd5c16fd04a894bcb81d7d4266f4d3bf8a4cd"
+      },
+      "question": "Drug-Target Interaction Prediction\n\nPredict interactions between 40 drugs and 30 target proteins. Query known interactions from databases, calculate chemical similarity, assess target homology, predict binding likelihood, retrieve experimental validation data, and prioritize for experimental testing.",
+      "source_id": "scientific_task_042"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "NCBI Taxonomy",
+            "SILVA",
+            "GTDB"
+          ],
+          "description": "Perform taxonomic classification on metagenomic sequencing data with 100 bacterial contigs. Query against NCBI taxonomy database, SILVA for 16S rRNA genes, retrieve species-level classifications, estimate relative abundances, and identify potentially novel species.",
+          "estimated_tool_calls": 85,
+          "expected_speedup": "2.7x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Metagenomics",
+          "task_id": "TASK_011",
+          "title": "Metagenomics Taxonomic Classification"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 26,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 11,
+        "source_row_sha256": "a0204515170fd3cf1ae98bbb7fcffe7e1ef49281be219b8281b12b4337742682"
+      },
+      "question": "Metagenomics Taxonomic Classification\n\nPerform taxonomic classification on metagenomic sequencing data with 100 bacterial contigs. Query against NCBI taxonomy database, SILVA for 16S rRNA genes, retrieve species-level classifications, estimate relative abundances, and identify potentially novel species.",
+      "source_id": "scientific_task_011"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "LNCipedia",
+            "lncRNAdb",
+            "NONCODE"
+          ],
+          "description": "Characterize 25 differentially expressed lncRNAs from RNA-seq data. Query lncRNA databases for known functions, retrieve interacting proteins, identify associated miRNAs, predict regulatory mechanisms, and correlate with nearby gene expression.",
+          "estimated_tool_calls": 60,
+          "expected_speedup": "2.3x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "RNA-seq Analysis",
+          "task_id": "TASK_017",
+          "title": "Long Non-coding RNA Functional Characterization"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 27,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 17,
+        "source_row_sha256": "b2eece5fe8939a3b0ea8f8b9265c16fdde3ff3c5d89bd21792c04f32ad9bfbff"
+      },
+      "question": "Long Non-coding RNA Functional Characterization\n\nCharacterize 25 differentially expressed lncRNAs from RNA-seq data. Query lncRNA databases for known functions, retrieve interacting proteins, identify associated miRNAs, predict regulatory mechanisms, and correlate with nearby gene expression.",
+      "source_id": "scientific_task_017"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Literature Mining",
+          "databases": [
+            "PubMed",
+            "Semantic Scholar",
+            "CrossRef"
+          ],
+          "description": "Build citation network starting from a seed review paper. Retrieve all references (layer 1), query citations for each reference (layer 2), construct 3-level deep citation graph, identify highly cited papers, detect research clusters, and trace idea evolution over time.",
+          "estimated_tool_calls": 45,
+          "expected_speedup": "1.6x",
+          "parallel_potential": "medium",
+          "related_benchmarks": [
+            "SciNetBench"
+          ],
+          "subcategory": "Citation Network",
+          "task_id": "TASK_019",
+          "title": "Citation Network Construction and Analysis"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 28,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 19,
+        "source_row_sha256": "3aa005d0fdb2b43e6fe55801b0629948d33c7ec831d9d37e744a398e8b4e2ba3"
+      },
+      "question": "Citation Network Construction and Analysis\n\nBuild citation network starting from a seed review paper. Retrieve all references (layer 1), query citations for each reference (layer 2), construct 3-level deep citation graph, identify highly cited papers, detect research clusters, and trace idea evolution over time.",
+      "source_id": "scientific_task_019"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Literature Mining",
+          "databases": [
+            "PubMed",
+            "arXiv",
+            "IEEE Xplore"
+          ],
+          "description": "Identify connections between AI and drug discovery research. Query 30 papers from each field, extract methodologies and concepts, identify papers that bridge both domains, detect knowledge transfer patterns, and predict future convergence opportunities.",
+          "estimated_tool_calls": 55,
+          "expected_speedup": "2.1x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "SciNetBench"
+          ],
+          "subcategory": "Cross-domain Analysis",
+          "task_id": "TASK_021",
+          "title": "Cross-disciplinary Knowledge Integration"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 29,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 21,
+        "source_row_sha256": "eefb2b9b73237ff195d388a9bffa9ec772d1ad6f35a0ac2921af91c175203aa4"
+      },
+      "question": "Cross-disciplinary Knowledge Integration\n\nIdentify connections between AI and drug discovery research. Query 30 papers from each field, extract methodologies and concepts, identify papers that bridge both domains, detect knowledge transfer patterns, and predict future convergence opportunities.",
+      "source_id": "scientific_task_021"
+    },
+    {
+      "provenance": {
+        "old_trace_exact_question_overlap": 0,
+        "record": {
+          "category": "Genomics",
+          "databases": [
+            "GO",
+            "KEGG",
+            "Reactome"
+          ],
+          "description": "Given a list of 50 differentially expressed genes from RNA-seq experiment, systematically query GO annotations for Biological Process, Molecular Function, and Cellular Component terms. Calculate enrichment significance using hypergeometric test and identify overrepresented biological pathways.",
+          "estimated_tool_calls": 70,
+          "expected_speedup": "2.5x",
+          "parallel_potential": "high",
+          "related_benchmarks": [
+            "BixBench"
+          ],
+          "subcategory": "Functional Annotation",
+          "task_id": "TASK_002",
+          "title": "Gene Ontology Enrichment Analysis"
+        },
+        "selection_method": "first 30 by SHA256(seed NUL task_id), no replacement",
+        "selection_rank": 30,
+        "selection_seed": "new-whole-session-holdout-v1",
+        "source_dataset": "scientific_benchmark_50_tasks.jsonl",
+        "source_file_sha256": "79e288e1f6ab719512035d3a074ff96752130cac85539656f4113c4489e72c53",
+        "source_line": 2,
+        "source_row_sha256": "b96364e830ca5c24c066449cbd3a2f066a6a58d8ee60c7aa5b02a3eb42abc54b"
+      },
+      "question": "Gene Ontology Enrichment Analysis\n\nGiven a list of 50 differentially expressed genes from RNA-seq experiment, systematically query GO annotations for Biological Process, Molecular Function, and Cellular Component terms. Calculate enrichment significance using hypergeometric test and identify overrepresented biological pathways.",
+      "source_id": "scientific_task_002"
+    }
+  ],
+  "workload_id": "new-whole-session-holdout-v1"
+}

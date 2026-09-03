@@ -54,6 +54,7 @@ class ToolCall:
     tool_name: str
     tool_args: dict[str, Any]
     line_number: int
+    timing_correction: dict[str, Any] | None = None
 
     @property
     def invocation(self) -> Invocation:
@@ -87,6 +88,11 @@ class SearchResult:
     result_rank: int
     ordinal: int
     query_index: int
+    # These fields are already visible in the search response.  Defaults keep
+    # older artifacts and callers that only recorded URL/rank fully compatible.
+    title: str = ""
+    query: str = ""
+    snippet: str = ""
 
 
 @dataclass(frozen=True)
@@ -196,6 +202,11 @@ def load_trace(path: Union[str, Path]) -> SessionTrace:
                         tool_name=tool_name,
                         tool_args=dict(tool_args),
                         line_number=line_number,
+                        timing_correction=(
+                            dict(payload["timing_correction"])
+                            if isinstance(payload.get("timing_correction"), Mapping)
+                            else None
+                        ),
                     )
                 )
             else:
@@ -254,23 +265,45 @@ def latest_tool_response(call: LLMCall) -> str:
 
 
 _NUMBERED_LINK = re.compile(
-    r"^\s*(?P<rank>\d+)\.\s+.*\]\((?P<url>https?://.+)\)\s*$"
+    r"^\s*(?P<rank>\d+)\.\s+\[(?P<title>.*)\]\((?P<url>https?://.+)\)\s*$"
+)
+_SEARCH_QUERY_HEADER = re.compile(
+    r"^\s*A\s+.+?\s+search\s+for\s+(?P<query>.+?)\s+found\s+\d+\s+results?:\s*$",
+    flags=re.IGNORECASE,
 )
 _PLAIN_URL = re.compile(r"https?://[^\s<>\[\]\"'`]+")
 
 
-def parse_search_results(tool_response: str) -> tuple[SearchResult, ...]:
+def _unquote_search_query(value: str) -> str:
+    stripped = value.strip()
+    if len(stripped) >= 2 and stripped[0] == stripped[-1] and stripped[0] in "'\"":
+        return stripped[1:-1]
+    return stripped
+
+
+def parse_search_results(
+    tool_response: str,
+    *,
+    queries: Sequence[str] | None = None,
+) -> tuple[SearchResult, ...]:
     """Parse ranked Markdown links from a search tool response."""
 
     results: list[SearchResult] = []
     query_index = 0
     previous_rank = 0
     separator_seen = False
+    parsed_queries: dict[int, str] = {}
     for line in tool_response.splitlines():
         if line.strip().startswith("======="):
             query_index += 1
             previous_rank = 0
             separator_seen = True
+            continue
+        header_match = _SEARCH_QUERY_HEADER.match(line)
+        if header_match is not None:
+            parsed_queries[query_index] = _unquote_search_query(
+                header_match.group("query")
+            )
             continue
         match = _NUMBERED_LINK.match(line)
         if match is None:
@@ -279,12 +312,19 @@ def parse_search_results(tool_response: str) -> tuple[SearchResult, ...]:
         if rank <= previous_rank and not separator_seen:
             query_index += 1
         url = match.group("url").strip().rstrip(".,;:!?")
+        query = (
+            queries[query_index]
+            if queries is not None and query_index < len(queries)
+            else parsed_queries.get(query_index, "")
+        )
         results.append(
             SearchResult(
                 url=url,
                 result_rank=rank,
                 ordinal=len(results),
                 query_index=query_index,
+                title=match.group("title").strip(),
+                query=query,
             )
         )
         previous_rank = rank
@@ -306,6 +346,7 @@ def parse_search_results(tool_response: str) -> tuple[SearchResult, ...]:
                 result_rank=len(results) + 1,
                 ordinal=len(results),
                 query_index=0,
+                query=(queries[0] if queries else ""),
             )
         )
     return tuple(results)
@@ -353,6 +394,12 @@ def extract_search_visit_transitions(
             baseline_stall_s = max(
                 0.0, completion.start_timestamp_s - visit.timestamp_s
             )
+        raw_queries = search.tool_args.get("query")
+        search_queries = (
+            tuple(item for item in raw_queries if isinstance(item, str))
+            if isinstance(raw_queries, list)
+            else ((raw_queries,) if isinstance(raw_queries, str) else ())
+        )
         transitions.append(
             SearchVisitTransition(
                 session_id=session.session_id,
@@ -360,7 +407,9 @@ def extract_search_visit_transitions(
                 decision_llm=decision,
                 visit=visit,
                 completion_llm=completion,
-                search_results=parse_search_results(latest_tool_response(decision)),
+                search_results=parse_search_results(
+                    latest_tool_response(decision), queries=search_queries
+                ),
                 authoritative_urls=urls,
                 baseline_stall_s=baseline_stall_s,
                 overlap_window_s=max(0.0, decision.overlap_window_s),
@@ -385,4 +434,3 @@ def count_tool_calls(sessions: Iterable[SessionTrace], tool_name: str) -> int:
         for session in sessions
         for event in session.events
     )
-

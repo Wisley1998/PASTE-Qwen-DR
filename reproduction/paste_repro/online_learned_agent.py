@@ -33,7 +33,7 @@ import aiohttp
 
 from .invocation import Invocation
 from .live_broker import LiveAuthoritativeResult, LiveToolBroker
-from .tool_prediction import TraceLearnedVisitPredictor
+from .tool_prediction import VisitPredictor
 
 
 FINAL_ANSWER_MAX_CHARS = 480
@@ -1211,7 +1211,7 @@ class LiveClosedLoopExperiment:
         context_padding_tokens: int = 0,
         tool_signal_policy: str = "legacy",
         fixed_final_completion_tokens: int | None = None,
-        visit_predictor: TraceLearnedVisitPredictor | None = None,
+        visit_predictor: VisitPredictor | None = None,
     ) -> None:
         if speculation_mode not in {"off", "search", "visit", "search_visit"}:
             raise ValueError(f"unsupported speculation mode: {speculation_mode}")

@@ -228,6 +228,10 @@ class WikipediaLiveExecutor:
         return self._http_library_retry_disabled_effective
 
     @property
+    def http_library_retry_control_checked(self) -> bool:
+        return self._http_library_retry_control_checked
+
+    @property
     def http_library_name(self) -> str | None:
         return self._http_library_name
 
@@ -361,6 +365,68 @@ class WikipediaLiveExecutor:
             # Some third-party exception implementations may reject arbitrary
             # attributes.  Never replace the underlying transport exception.
             pass
+
+    async def _drain_batch(self, coroutines: list[Any]) -> list[Any]:
+        """Run a request batch without leaving unobserved child tasks.
+
+        ``asyncio.gather`` raises as soon as one default-gather child fails and
+        leaves the other children running.  A tool invocation is one physical
+        accounting unit here, so normal child failures are collected with
+        ``return_exceptions=True`` and every sibling is drained.  If the
+        enclosing invocation itself is cancelled, pending children are
+        cancelled and then awaited before cancellation propagates.
+        """
+
+        tasks = [asyncio.create_task(coroutine) for coroutine in coroutines]
+        try:
+            return list(await asyncio.gather(*tasks, return_exceptions=True))
+        except BaseException:
+            for task in tasks:
+                if not task.done():
+                    task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            raise
+
+    def _raise_batch_failure(self, outcomes: list[Any]) -> None:
+        """Raise the first child failure with every real attempt attached."""
+
+        failed_indexes = [
+            index
+            for index, outcome in enumerate(outcomes)
+            if isinstance(outcome, BaseException)
+        ]
+        if not failed_indexes:
+            return
+        chosen_index = failed_indexes[0]
+        chosen = outcomes[chosen_index]
+        assert isinstance(chosen, BaseException)
+
+        # Put the chosen failure last so existing consumers that derive the
+        # failure status from the final ledger row retain the raised request's
+        # status.  request_index and started_monotonic_s preserve the real
+        # batch identity and chronology without pretending this list is a
+        # serial execution order.
+        ledger_indexes = [
+            index for index in range(len(outcomes)) if index != chosen_index
+        ] + [chosen_index]
+        aggregate: list[dict[str, Any]] = []
+        for index in ledger_indexes:
+            outcome = outcomes[index]
+            if isinstance(outcome, BaseException):
+                raw_entries = getattr(outcome, "paste_http_attempt_log", ())
+            else:
+                raw_entries = outcome[-1]
+            if not isinstance(raw_entries, (list, tuple)):
+                continue
+            aggregate.extend(
+                dict(entry) for entry in raw_entries if isinstance(entry, Mapping)
+            )
+        self._attach_attempt_log(chosen, aggregate)
+        try:
+            setattr(chosen, "paste_http_batch_failure_indexes", tuple(failed_indexes))
+        except Exception:
+            pass
+        raise chosen
 
     async def _ensure_session(self) -> Any:
         if self._closed:
@@ -521,12 +587,13 @@ class WikipediaLiveExecutor:
             raise ValueError("search arguments require a string or string-list 'query'")
         if not queries or any(not query.strip() for query in queries):
             raise ValueError("search query must not be empty")
-        batches = await asyncio.gather(
-            *(
+        batches = await self._drain_batch(
+            [
                 self._search_one(query, query_index)
                 for query_index, query in enumerate(queries)
-            )
+            ]
         )
+        self._raise_batch_failure(batches)
         results = [entry for batch, _, _, _, _, _ in batches for entry in batch]
         statuses = [status for _, status, _, _, _, _ in batches]
         hosts = sorted({host for _, _, _, host, _, _ in batches})
@@ -650,15 +717,49 @@ class WikipediaLiveExecutor:
         else:  # pragma: no cover - every iteration either breaks or raises
             raise AssertionError("HTTP retry loop ended without a result")
 
-        decoded_body = body.decode(charset, errors="replace")
-        assert status is not None
-        if self._search_mode == "bing":
-            results = self._parse_bing_results(
-                decoded_body,
-                query=query,
-                query_index=query_index,
-                language=language,
+        try:
+            decoded_body = body.decode(charset, errors="replace")
+            assert status is not None
+            if self._search_mode == "bing":
+                results = self._parse_bing_results(
+                    decoded_body,
+                    query=query,
+                    query_index=query_index,
+                    language=language,
+                )
+                return (
+                    results,
+                    status,
+                    len(body),
+                    str(urlparse(endpoint).hostname or ""),
+                    len(attempt_log),
+                    attempt_log,
+                )
+
+            payload = json.loads(decoded_body)
+            entries = (
+                payload.get("pages", [])
+                if self._search_mode == "rest"
+                else payload.get("query", {}).get("search", [])
             )
+            results = []
+            for index, entry in enumerate(entries[: self._max_search_results], 1):
+                title = str(entry.get("title") or "Untitled")
+                snippet = self._plain_text(
+                    str(entry.get("excerpt") or entry.get("snippet") or "")
+                )
+                page_key = str(entry.get("key") or title.replace(" ", "_"))
+                url = f"https://{language}.wikipedia.org/wiki/{quote(page_key)}"
+                results.append(
+                    {
+                        "query": query,
+                        "query_index": query_index,
+                        "rank": index,
+                        "title": title,
+                        "url": url,
+                        "snippet": snippet,
+                    }
+                )
             return (
                 results,
                 status,
@@ -667,39 +768,9 @@ class WikipediaLiveExecutor:
                 len(attempt_log),
                 attempt_log,
             )
-
-        payload = json.loads(decoded_body)
-        entries = (
-            payload.get("pages", [])
-            if self._search_mode == "rest"
-            else payload.get("query", {}).get("search", [])
-        )
-        results = []
-        for index, entry in enumerate(entries[: self._max_search_results], 1):
-            title = str(entry.get("title") or "Untitled")
-            snippet = self._plain_text(
-                str(entry.get("excerpt") or entry.get("snippet") or "")
-            )
-            page_key = str(entry.get("key") or title.replace(" ", "_"))
-            url = f"https://{language}.wikipedia.org/wiki/{quote(page_key)}"
-            results.append(
-                {
-                    "query": query,
-                    "query_index": query_index,
-                    "rank": index,
-                    "title": title,
-                    "url": url,
-                    "snippet": snippet,
-                }
-            )
-        return (
-            results,
-            status,
-            len(body),
-            str(urlparse(endpoint).hostname or ""),
-            len(attempt_log),
-            attempt_log,
-        )
+        except Exception as exc:
+            self._attach_attempt_log(exc, attempt_log)
+            raise
 
     @staticmethod
     def _decode_bing_redirect(value: str) -> str:
@@ -778,12 +849,13 @@ class WikipediaLiveExecutor:
         if not urls or any(not url.strip() for url in urls):
             raise ValueError("visit URL must not be empty")
         selected = urls[: self._max_visit_urls]
-        fetched = await asyncio.gather(
-            *(
+        fetched = await self._drain_batch(
+            [
                 self._visit_one(url, url_index)
                 for url_index, url in enumerate(selected)
-            )
+            ]
         )
+        self._raise_batch_failure(fetched)
         pages = [page for page, _, _, _, _, _ in fetched]
         statuses = [status for _, status, _, _, _, _ in fetched]
         hosts = sorted({host for _, _, _, host, _, _ in fetched})
@@ -918,22 +990,28 @@ class WikipediaLiveExecutor:
         else:  # pragma: no cover - every iteration either breaks or raises
             raise AssertionError("HTTP retry loop ended without a result")
 
-        assert status is not None
-        raw = b"".join(chunks).decode(charset, errors="replace")
-        text = self._plain_text(raw) if "html" in content_type else raw.strip()
-        if len(text) > self._max_output_chars:
-            text = text[: self._max_output_chars] + "\n\n[Content truncated...]"
-        title_match = re.search(r"<title[^>]*>(.*?)</title>", raw, flags=re.I | re.S)
-        title = self._plain_text(title_match.group(1)) if title_match else ""
-        request_host = str(urlparse(target).hostname or "")
-        return (
-            {"url": url, "title": title, "content": text},
-            status,
-            received,
-            request_host,
-            len(attempt_log),
-            attempt_log,
-        )
+        try:
+            assert status is not None
+            raw = b"".join(chunks).decode(charset, errors="replace")
+            text = self._plain_text(raw) if "html" in content_type else raw.strip()
+            if len(text) > self._max_output_chars:
+                text = text[: self._max_output_chars] + "\n\n[Content truncated...]"
+            title_match = re.search(
+                r"<title[^>]*>(.*?)</title>", raw, flags=re.I | re.S
+            )
+            title = self._plain_text(title_match.group(1)) if title_match else ""
+            request_host = str(urlparse(target).hostname or "")
+            return (
+                {"url": url, "title": title, "content": text},
+                status,
+                received,
+                request_host,
+                len(attempt_log),
+                attempt_log,
+            )
+        except Exception as exc:
+            self._attach_attempt_log(exc, attempt_log)
+            raise
 
     @classmethod
     def _plain_text(cls, value: str) -> str:

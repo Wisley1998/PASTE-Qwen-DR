@@ -877,6 +877,9 @@ def summarize_workload(workload: Dict[str, Any]) -> Dict[str, Any]:
         ),
         "tool_overlap_mode": workload.get("meta", {}).get("tool_overlap_mode", "none"),
     }
+    arrival_process = workload.get("meta", {}).get("arrival_process")
+    if arrival_process:
+        summary["arrival_process"] = copy.deepcopy(arrival_process)
     if workload.get("meta", {}).get("tool_overlap_mode") == "learned":
         summary["tool_prediction"] = {
             "candidate_count": prediction_candidate_count,

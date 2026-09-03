@@ -13,3 +13,8 @@ reproduction/logs/
 reproduction/run/
 *.log
 *.pid
+
+# Large source traces and per-request experiment payloads
+/datasets/azure_llm_2024/*.csv
+/reproduction/results/**/metrics.json
+/reproduction/results/**/raw_repeat_vectors.json

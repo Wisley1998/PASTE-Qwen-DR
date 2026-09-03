@@ -99,6 +99,14 @@ class TraceParserTests(unittest.TestCase):
             ],
         )
         self.assertEqual([result.query_index for result in transition.search_results], [0, 0, 1])
+        self.assertEqual(
+            [result.title for result in transition.search_results],
+            ["first", "second", "third"],
+        )
+        self.assertEqual(
+            [result.query for result in transition.search_results],
+            ["topic", "topic", ""],
+        )
         self.assertEqual(transition.authoritative_urls, ("https://example.test/second",))
         # Completion LLM starts at t=9; visit was issued at t=5.
         self.assertAlmostEqual(transition.baseline_stall_s, 4.0)
@@ -135,4 +143,3 @@ class TraceParserTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

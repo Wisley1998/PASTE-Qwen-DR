@@ -10,14 +10,35 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
-from .mapper import Prediction, URLRankMapper, load_artifact
+from .contextual_mapper import (
+    CONTEXTUAL_ARTIFACT_SCHEMA,
+    CONTEXTUAL_POLICY_VERSION,
+    ContextualURLReranker,
+    load_contextual_artifact,
+)
+from .mapper import ARTIFACT_SCHEMA, Prediction, URLRankMapper, load_artifact
 from .traces import SearchResult, parse_search_results
 
 
 TRACE_LEARNED_VISIT_POLICY_VERSION = "visible-search-learned-rank-v1"
+
+
+class VisitPredictor(Protocol):
+    """Runtime interface shared by legacy and contextual visit predictors."""
+
+    top_k: int
+    artifact_sha256: str
+
+    @property
+    def policy(self) -> str: ...
+
+    def predict_structured_result(self, result: Any) -> tuple[str, ...]: ...
+
+    def metadata(self) -> dict[str, Any]: ...
 
 
 def structured_search_results(result: Any) -> tuple[SearchResult, ...]:
@@ -66,6 +87,9 @@ def structured_search_results(result: Any) -> tuple[SearchResult, ...]:
                 result_rank=result_rank,
                 ordinal=ordinal,
                 query_index=query_index,
+                title=str(row.get("title") or ""),
+                query=str(row.get("query") or ""),
+                snippet=str(row.get("snippet") or ""),
             )
         )
     return tuple(converted)
@@ -126,3 +150,78 @@ class TraceLearnedVisitPredictor:
             "artifact_sha256": self.artifact_sha256 or None,
             "mapper": self.mapper.summary(),
         }
+
+
+@dataclass(frozen=True)
+class ContextualTraceVisitPredictor:
+    """Artifact-backed adapter for the current-visible contextual reranker."""
+
+    reranker: ContextualURLReranker
+    top_k: int = 5
+    artifact_sha256: str = ""
+
+    def __post_init__(self) -> None:
+        if self.top_k <= 0:
+            raise ValueError("top_k must be positive")
+
+    @classmethod
+    def from_artifact(
+        cls, path: str | Path, *, top_k: int = 5
+    ) -> "ContextualTraceVisitPredictor":
+        reranker, artifact = load_contextual_artifact(path)
+        checksum = artifact.get("artifact_sha256")
+        if not isinstance(checksum, str) or not checksum:
+            raise ValueError("contextual model artifact is missing artifact_sha256")
+        return cls(
+            reranker=reranker,
+            top_k=top_k,
+            artifact_sha256=checksum,
+        )
+
+    @property
+    def policy(self) -> str:
+        return CONTEXTUAL_POLICY_VERSION
+
+    def predict(self, search_results: Sequence[SearchResult]) -> tuple[Prediction, ...]:
+        return self.reranker.predict(search_results, self.top_k)
+
+    def predict_urls(self, search_results: Sequence[SearchResult]) -> tuple[str, ...]:
+        return tuple(
+            str(prediction.invocation.arguments["url"])
+            for prediction in self.predict(search_results)
+        )
+
+    def predict_visible_response(self, tool_response: str) -> tuple[str, ...]:
+        return self.predict_urls(parse_search_results(tool_response))
+
+    def predict_structured_result(self, result: Any) -> tuple[str, ...]:
+        return self.predict_urls(structured_search_results(result))
+
+    def metadata(self) -> dict[str, Any]:
+        return {
+            "policy": self.policy,
+            "top_k": self.top_k,
+            "artifact_sha256": self.artifact_sha256 or None,
+            "reranker": self.reranker.summary(),
+        }
+
+
+def load_visit_predictor(
+    path: str | Path, *, top_k: int = 5
+) -> TraceLearnedVisitPredictor | ContextualTraceVisitPredictor:
+    """Load a checksummed predictor artifact by its explicit schema."""
+
+    artifact_path = Path(path)
+    raw = json.loads(artifact_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, Mapping):
+        raise ValueError("visit predictor artifact root must be an object")
+    schema = raw.get("schema")
+    if schema == ARTIFACT_SCHEMA:
+        return TraceLearnedVisitPredictor.from_artifact(
+            artifact_path, top_k=top_k
+        )
+    if schema == CONTEXTUAL_ARTIFACT_SCHEMA:
+        return ContextualTraceVisitPredictor.from_artifact(
+            artifact_path, top_k=top_k
+        )
+    raise ValueError(f"unsupported visit predictor artifact schema: {schema!r}")

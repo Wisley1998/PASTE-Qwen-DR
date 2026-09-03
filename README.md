@@ -1,13 +1,15 @@
 # PASTE-Qwen-DR
 
 Standalone reproduction of PASTE for Qwen DeepResearch. This repository keeps
-three supported paths under one auditable layout:
+five supported paths under one auditable layout:
 
 | Path | Purpose | Entry point |
 |---|---|---|
 | Trace-learned tool execution | CPU-only, held-out causal evaluation without LLM co-design | `reproduction/scripts/run_speculative_tool_execution.sh` |
+| Adaptive-width ablation | CPU-only profile-guided selection of PASTE speculation width; not a Murakkab system comparison | `reproduction/scripts/run_murakkab_paste_comparison.py` |
 | Online speculative execution | Live Qwen-DR + live search/visit with trace-learned visit prediction | `reproduction/scripts/run_online_speculative_execution.py` |
 | Full PASTE reproduction | Existing native-prefix and live A/B/E/F Joint experiments | `reproduction/README.md` |
+| Speculative Actions baseline | Fixed-trace, local Qwen3-8B next-tool prediction with exact verification | `reproduction/SPECULATIVE_ACTION_QWEN3_BASELINE.md` |
 
 The online and trace paths use the same checksummed learned-rank model. The
 model learns which displayed search-result ranks were historically selected,
@@ -31,7 +33,38 @@ The checked-in trace snapshot reproduces:
 - exposed tool stall: 38.514 s → 19.647 s;
 - stall reduction: 48.99%.
 
-## 2. Online Qwen-DR speculative execution
+A frozen contextual-reranker audit kept the legacy mapper as the deployed
+choice: the challenger met the local overhead gate (`p99=11.35 ms`, maximum
+`24.57 ms`) but changed exact Top-1/3/5 from
+`19.3% / 43.2% / 55.7%` to `18.2% / 40.9% / 56.8%`, failing the protected
+Top-1/3 criteria. See the
+[optimization report](reproduction/results/predictor_optimization/REPORT.md).
+
+To drive top-level Agent-session arrivals with the 2024 Azure LLM Inference
+Trace while preserving the native multi-turn Agent calls and tool waits, use
+the integrated adapter and follow the
+[Azure LLM 2024 Agent trace guide](docs/AZURE_LLM_2024_AGENT_TRACE_GUIDE.md).
+
+## 2. Murakkab-inspired adaptive-width ablation
+
+The Murakkab paper does not currently link a runnable official artifact. The
+repository therefore implements its directly testable ideas on the PASTE
+search/visit workflow: a typed declarative DAG, offline configuration profiles,
+SLO filtering, and resource-minimizing selection of PASTE's speculative
+`top_k` knob.
+
+```bash
+python reproduction/scripts/run_murakkab_paste_comparison.py
+```
+
+The checked-in result is now explicitly classified as an offline PASTE
+adaptive-`top_k` ablation. It is not a Murakkab-versus-PASTE comparison: the
+SLOs are synthetic, the resource value is an admission-count proxy, and no
+fixed Tongyi/vLLM/GPU deployment runs in this path. See the
+[superseded report](reproduction/results/murakkab_paste/REPORT.md) and its
+[replacement fixed-model protocol](reproduction/results/murakkab_paste/FIXED_MODEL_SAME_SETUP_PROTOCOL.md).
+
+## 3. Online Qwen-DR speculative execution
 
 Start an OpenAI-compatible Qwen DeepResearch server. The full pinned setup is:
 
@@ -63,7 +96,7 @@ python reproduction/scripts/run_online_speculative_execution.py \
   --dry-run
 ```
 
-## 3. Full reproduction
+## 4. Full reproduction
 
 The existing prefix-cache experiment, bounded live tool broker, Joint
 physical-KV scheduler, workloads, frozen protocols, validators, and A/B/E/F

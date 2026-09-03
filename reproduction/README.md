@@ -8,17 +8,34 @@ a shared tool queue.
 
 ## Supported Paths
 
-The reproduction keeps three complementary entry points:
+The reproduction keeps five complementary entry points:
 
 | Path | What it establishes | Entry point |
 |---|---|---|
 | Trace-learned speculative tools | Held-out prediction, exact confirmation, bounded overlap, no LLM co-design | `scripts/run_speculative_tool_execution.sh` |
+| Agent-oriented baseline boundary | Executed broker replay plus a conservative Murakkab/llm-d/Dynamo abstraction-boundary sensitivity | `scripts/run_agent_baseline_boundary_replay.py` |
+| Adaptive-width ablation | Profile-guided selection of PASTE speculation intensity; not a Murakkab system comparison | `scripts/run_murakkab_paste_comparison.py` |
 | Online speculative tools | Live Qwen-DR generation plus live search/visit using the same learned predictor | `scripts/run_online_speculative_execution.py` |
 | Existing full PASTE system | Native prefix plus live A/B/E/F tool and Joint scheduling experiments | `scripts/run_native_prefix_causal_dev.py`, `scripts/run_live_joint_formal_v9_matrix.py` |
 
-The trace path is the controlled component experiment; the online path shows
-that the component can execute causally in a live Qwen agent loop; the existing
-full-system path remains the end-to-end reproduction.
+The trace path is the controlled component experiment; the baseline-boundary
+path maps its event order to current agent-serving abstractions without
+pretending to benchmark those systems; the adaptive-width path is retained as
+a PASTE-only offline ablation and not as a Murakkab result; the online path
+shows that the component can execute causally in a live Qwen agent loop; the
+existing full-system path remains the end-to-end reproduction.
+
+## Reviewer Evidence Bundle
+
+The consolidated response to common comments 2, 3, and 5 is in
+[results/reviewer_comments_2_3_5/REPORT.md](results/reviewer_comments_2_3_5/REPORT.md).
+Its source audits are the
+[metric/load report](results/reviewer_comment2_load_sweep/REPORT.md),
+[scheduler robustness report](results/scheduler_robustness/REPORT.md),
+[Granite fail-closed portability audit](results/scheduler_cross_model_portability/FAILED_GRANITE_C5K_R1_AUDIT.md),
+and [agent-baseline boundary report](results/agent_baseline_boundary/REPORT.md).
+The Granite one-shot stopped in baseline A on six model-output contract
+failures, so it supplies no cross-model A/E latency result and is not rerunnable.
 
 ## System Design
 
@@ -65,6 +82,8 @@ native FCFS and a P0/P1 reverse-block design.
 | Native prefix experiment | `scripts/run_native_prefix_causal_dev.py` |
 | Four-cell experiment | `scripts/run_live_joint_formal_v9_matrix.py` |
 | Shared trace-learned visit predictor | `paste_repro/tool_prediction.py` |
+| Agent-baseline boundary replay | `paste_repro/baseline_boundary.py`, `scripts/run_agent_baseline_boundary_replay.py` |
+| Murakkab-inspired typed workflow and optimizer | `paste_repro/murakkab_optimizer.py`, `scripts/run_murakkab_paste_comparison.py` |
 | Online learned-speculation entry point | `scripts/run_online_speculative_execution.py` |
 | Isolated online learned agent/driver | `paste_repro/online_learned_agent.py`, `../scripts/run_online_trace_learned_experiment.py` |
 
@@ -105,6 +124,64 @@ The recorded stall reduction is a trace-timestamp counterfactual, bounded by
 the preceding LLM decision window; the scheduler replay itself performs no
 network requests. See the [standalone report](results/speculative_tool_execution/REPORT.md)
 for the interpretation boundary and exact counts.
+
+### Contextual predictor optimization audit
+
+An offline 49-feature linear pairwise reranker was also tested. It is not a
+neural network: inference is fixed string/position feature extraction, one
+linear score per visible URL, and a stable sort. Session-grouped training OOF
+improved, and the measured structured-result prediction path was well below the
+100 ms gate (`p99=11.35 ms`, observed maximum `24.57 ms`). On the unchanged
+outer sessions, however, Top-1/3/5 changed from
+`19.3% / 43.2% / 55.7%` to `18.2% / 40.9% / 56.8%`. The predeclared gate
+therefore rejected it and retained the legacy rank-only mapper. A deterministic
+slot-5 backoff also failed (`54.5%` Top-5).
+
+See the [frozen optimization report](results/predictor_optimization/REPORT.md)
+and [backoff diagnostic](results/predictor_hybrid_backoff/REPORT.md). The audit
+also identifies the next prospective direction: earlier causally visible
+search results raise the exact Top-5 oracle from `78.4%` to `89.8%`, but need a
+recency-aware matcher and a new whole-session holdout.
+
+For the agent-oriented baseline comparison, run
+`python reproduction/scripts/run_agent_baseline_boundary_replay.py`. It adds an
+idealized 1–2× inference-only sensitivity and an explicit capability/composition
+audit for Murakkab, llm-d, and NVIDIA Dynamo. It is a semantic boundary replay,
+not a throughput benchmark of those systems; see the
+[baseline report](results/agent_baseline_boundary/REPORT.md).
+
+### Murakkab-inspired adaptive-width ablation
+
+No runnable official Murakkab artifact is linked from the paper, USENIX page,
+or author publication pages as of 2026-08-31. The repository therefore includes
+an idea-level reproduction scoped to the configuration surface that can be
+tested fairly here:
+
+```bash
+python reproduction/scripts/run_murakkab_paste_comparison.py
+```
+
+The runner deterministically materializes disjoint 40/30/30 whole-session
+calibration, tuning, and final roles. It fits the URL-rank mapper on calibration,
+profiles `top_k=0..5` on calibration and tuning, then selects the minimum
+conservative admitted-tool request units that satisfy each latency SLO plus its
+declared margin. The final role is evaluated with exact-match isolated broker
+replays.
+
+| Equal-weight SLO mix | Stall reduction | Tool request units / authoritative call | Aggregate SLO tiers met |
+|---|---:|---:|---:|
+| Demand only (`k=0`) | `0.00%` | `1.000` | `1/4` |
+| Static PASTE (`k=5`) | `15.83%` | `3.188` | `4/4` |
+| Murakkab-inspired PASTE (`k=0/3/4/5`) | `10.10%` | `2.268` | `4/4` |
+
+These numbers are retained only as an adaptive-`top_k` PASTE ablation. They do
+not compare Murakkab with PASTE: the resource metric is an admission-count
+proxy, the SLO tiers and weights are synthetic, and this path does not run the
+fixed Tongyi/vLLM/4×A100 deployment. The prior system-comparison interpretation
+is superseded by the [fixed-model same-setup protocol](results/murakkab_paste/FIXED_MODEL_SAME_SETUP_PROTOCOL.md).
+See the [superseded report](results/murakkab_paste/REPORT.md),
+[machine-readable evidence](results/murakkab_paste/comparison.json), and
+[configuration](configs/murakkab_paste_trace.json).
 
 The same predictor drives the existing bounded live broker through the isolated
 online runner. First create the artifact above, then use these flags with

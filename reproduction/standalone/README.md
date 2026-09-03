@@ -31,6 +31,10 @@ The checked-in trace snapshot reproduces:
 - exposed tool stall: 38.514 s → 19.647 s;
 - stall reduction: 48.99%.
 
+To drive top-level Agent-session arrivals with the 2024 Azure LLM Inference
+Trace while preserving the native multi-turn Agent calls and tool waits, see
+the [Azure LLM 2024 Agent trace guide](docs/AZURE_LLM_2024_AGENT_TRACE_GUIDE.md).
+
 ## 2. Online Qwen-DR speculative execution
 
 Start an OpenAI-compatible Qwen DeepResearch server. The full pinned setup is:

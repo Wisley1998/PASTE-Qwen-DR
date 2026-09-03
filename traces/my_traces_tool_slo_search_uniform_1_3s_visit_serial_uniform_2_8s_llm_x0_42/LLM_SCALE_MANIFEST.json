@@ -1,0 +1,719 @@
+{
+  "composition": "0.70 * 0.60 = 0.42",
+  "created_at": "2026-09-02T10:46:34.844139+00:00",
+  "duration_scale": 0.42,
+  "file_count": 100,
+  "files": [
+    {
+      "filename": "trace_20260129_125406_task1_收集整理目前中国9阶层实际收入和财务状况_特别研究得出中国的.jsonl",
+      "input_sha256": "7a2b860979857a751940407089ed43d1f015371db00ce4fd4e196541a4b09cbd",
+      "llm_calls": 9,
+      "output_sha256": "a549142102247994fffbb500810d52ea3ed95b554d96c3022f699d82a5c4dbe9",
+      "removed_total_s": 18.795810852050785
+    },
+    {
+      "filename": "trace_20260129_125523_task2_收集整理目前国际综合实力前十的保险公司的相关资料_横向比较各.jsonl",
+      "input_sha256": "2c6628be0661ac748d9f24c7c4162708f31a6a6c115ee923062d3dd8167e5fba",
+      "llm_calls": 9,
+      "output_sha256": "7d93691ccd6c08c65e3af9ad108a539c9e3b34c6acd5dbca671c0ab5ae6dc18e",
+      "removed_total_s": 23.75765931129456
+    },
+    {
+      "filename": "trace_20260129_125632_task3_中国金融未来的发展趋势_未来哪一个细分领域_例如投行_pe_.jsonl",
+      "input_sha256": "544fb52227c7580cd19c460925d943ee80f759bdf32fccf95ae230ce28041ccc",
+      "llm_calls": 9,
+      "output_sha256": "718f17492d10de87cca9165fffd62eb4414d9d95ed5ceff7aa93eef3451f95cb",
+      "removed_total_s": 58.435214476585394
+    },
+    {
+      "filename": "trace_20260129_125841_task4_分析_2010_年至今的黄金走势_用思维导图告诉我黄金未来有.jsonl",
+      "input_sha256": "1da3f35b693fced2a32ab243a6b7b1d6aa83210b9fbb5863d83128d35c1f7ff3",
+      "llm_calls": 9,
+      "output_sha256": "d83662411165518e54b035190bdf852662f7bf34b37c0b0426a4fe584b0e46f1",
+      "removed_total_s": 10.916115202903747
+    },
+    {
+      "filename": "trace_20260129_125922_task5_调研国内金融机构之间的投资借贷关系与系统性风险的联系_对不同.jsonl",
+      "input_sha256": "8e29e166824bc8eea8db7c843bf1ff2019eba1c9bb1354de5c0e2f8e161d002e",
+      "llm_calls": 6,
+      "output_sha256": "6f585b3adf5c19972586e288c0c831bc1107124a0db3475c125ce7afdd938c40",
+      "removed_total_s": 16.632150869369504
+    },
+    {
+      "filename": "trace_20260129_130834_task6_请帮我整理下目前全球具身智能发展的技术路线_以及各个路线的代.jsonl",
+      "input_sha256": "7de0bdd56357baad08719fc0cba9c00571342f6933b63b0742150f026f4bc1cd",
+      "llm_calls": 9,
+      "output_sha256": "e2c99610b0d88bff152e69d78e16c006e766fb90b820bcf7cf132c1084f64fab",
+      "removed_total_s": 24.380136599540712
+    },
+    {
+      "filename": "trace_20260129_130942_task7_在当前中国房地产市场低迷的情况下_政府税收减少_这会多大程度.jsonl",
+      "input_sha256": "bd6ce77c56847d72319e31013804d8f01fb717cf62e9f5b3c1176521bf61d347",
+      "llm_calls": 9,
+      "output_sha256": "fc5cd8ba8273f211d965535d13172674f68e430e4db7d148571040c0f0093014",
+      "removed_total_s": 13.803142757415772
+    },
+    {
+      "filename": "trace_20260129_131103_task8_能否给我提供一份详尽的报告_分析机器学习或者深度学习在优化材.jsonl",
+      "input_sha256": "01a3d8af5c9137e55b1a6a13dfd14eedb17f56803fe82aa47853d13cde559716",
+      "llm_calls": 9,
+      "output_sha256": "394b9b1870aeea371ce3a5519fd714efb2448226e83ebd5614e8efd0ad4e2f6c",
+      "removed_total_s": 44.43897185325623
+    },
+    {
+      "filename": "trace_20260129_131409_task9_在计算化学这个领域_我们通常使用Gaussian软件模拟各种.jsonl",
+      "input_sha256": "cfd2eed0dc3fe2e7962ad5dad0a95998ee6fa135aa91948c39629277803a4393",
+      "llm_calls": 9,
+      "output_sha256": "647448e9671b3c69f375ea52b20cb3574d03d9b03f0499873fb9d7c64a6edbb4",
+      "removed_total_s": 273.44185267925263
+    },
+    {
+      "filename": "trace_20260129_152333_task10_在800V高压_碳化硅电驱_固态电池_分布式驱动等技术迭代加.jsonl",
+      "input_sha256": "d91a183f01119c7ed2a2170c98eb2ef22eacdf93bdabc7f2ae7983ffe39fe4ea",
+      "llm_calls": 9,
+      "output_sha256": "efb93fef68705e754869e55178cc5cef05445b6f4f75f5c932693c4717ed3c26",
+      "removed_total_s": 29.231830658912664
+    },
+    {
+      "filename": "trace_20260129_152515_task11_请总结碳钢常用缓蚀剂种类_并分析每种缓蚀剂是具有拉曼活性还是.jsonl",
+      "input_sha256": "6a9c70482defb235d9b68d4fe25125cc02a408dddff0b8cec11fcd24d9ae50b3",
+      "llm_calls": 9,
+      "output_sha256": "e31672e7b1613eda742152cb9e5e3918d5eb95a650d9c4b058c39682dd7bc252",
+      "removed_total_s": 16.212762579917907
+    },
+    {
+      "filename": "trace_20260129_152650_task12_收集整理近10年来国际上自来水生产及销售企业在技术创新且已经.jsonl",
+      "input_sha256": "1c22f68fe87237d075f722738e19ecba6aeab176cecdd95bd8b1900f4c333161",
+      "llm_calls": 9,
+      "output_sha256": "6605372f9235ffcd6d13d5d8ebbdc3c50ddbad5d4945cc7f2854e425ad15b1d3",
+      "removed_total_s": 16.666203417778014
+    },
+    {
+      "filename": "trace_20260129_152828_task13_为我调研AI算法能否提升现有电子学读出时幅修正方法.jsonl",
+      "input_sha256": "ed419c1d4342b5cb42ff190819d249d7ca3238fd61e2b38b693be0a252afd1b7",
+      "llm_calls": 9,
+      "output_sha256": "1d8d4183d5e0c0822aba4b05305ffaa1796b7f36546f1b7772a871d2ce6fd4f6",
+      "removed_total_s": 16.31982331752777
+    },
+    {
+      "filename": "trace_20260129_153000_task14_收集整理全球数学与量子计算交叉领域的主要研究团队及其成果_横.jsonl",
+      "input_sha256": "261ea11b2529a237ce7d5013c6133ece0e015a472b586a73d2adc043b867eb23",
+      "llm_calls": 9,
+      "output_sha256": "510faa1e96c61e9e9ba07d6ac4ccec6fe3ff9d9821fbe984fef4a39817e59115",
+      "removed_total_s": 39.733599085807796
+    },
+    {
+      "filename": "trace_20260129_153229_task15_收集整理目前世界上关于量子网络的研究_横向比较各课题组的相关.jsonl",
+      "input_sha256": "f8a5f0f9cf868f0e65d3b5090c2dc3d1195eedf2517fd141c2cc4482d3112e6c",
+      "llm_calls": 9,
+      "output_sha256": "62366594aa64ac58c2c570f8a3159e416c49efd83c6750a6c0175e21b88493fe",
+      "removed_total_s": 37.522364573478704
+    },
+    {
+      "filename": "trace_20260129_153419_task16_收集整理目前非接触式感知领域做的最好的算法策略_并为我评估他.jsonl",
+      "input_sha256": "d047d5868c6400cd34bb28d1221e795293ed473d97d43bbb91c5621ee7d8a1d5",
+      "llm_calls": 9,
+      "output_sha256": "ea40dad7874fbca3093f8ddbc1d7e7fa767cad2a375f696cdb771789aa5559a0",
+      "removed_total_s": 26.91137404918671
+    },
+    {
+      "filename": "trace_20260129_153605_task17___在当今软件开发行业中_低代码_无代码平台对传统开发流程的.jsonl",
+      "input_sha256": "0f8252779ffddc35b12412305e3e04627c25336cf93cc00336ca538b02badc4e",
+      "llm_calls": 9,
+      "output_sha256": "0c4453467487af318c74accb34d968278f548bbf94b763e5a36593c623e622cb",
+      "removed_total_s": 20.179378700256343
+    },
+    {
+      "filename": "trace_20260129_153747_task18_请你学习一下GCS算法的原理_目前的GCS算法主要是用于安全.jsonl",
+      "input_sha256": "7fa9574735bc81fafc244862f3408839ddae9ff153eed56c957f819cdf20ebed",
+      "llm_calls": 7,
+      "output_sha256": "8f589192308b90a6faa72728a62501e70352eada0a75ddbd0a0c6ce4a881008f",
+      "removed_total_s": 34.271918683052064
+    },
+    {
+      "filename": "trace_20260129_154409_task19_prometheus_的高流失率会造成什么影响_有什么系统的.jsonl",
+      "input_sha256": "1b7e2ed0a6f172b042d1800b3672fc3862cfc5b293aa7cec5f648683e7450b57",
+      "llm_calls": 9,
+      "output_sha256": "5be5fef91ecc5e479ff6719f002cf61b9f6ebef9895958139f56a0d2d91dc82a",
+      "removed_total_s": 61.83752665996552
+    },
+    {
+      "filename": "trace_20260129_154633_task20_研究下Anthropic最新发布的Streamable_HT.jsonl",
+      "input_sha256": "63d68b521ec4d692fe09b809fcb327c270baf74f2a4c447b7bc939daf984dcc3",
+      "llm_calls": 9,
+      "output_sha256": "fbf5b079815ed1037d3b8f0305e3aac623ad81ee71e578031d838407eea6ffe6",
+      "removed_total_s": 11.529564146995547
+    },
+    {
+      "filename": "trace_20260129_154807_task21_现在AI这么热门_我最感兴趣的就是人工智能在教育领域应用现状.jsonl",
+      "input_sha256": "0e139d35efe9384243db447f43263a25ae884173ca98d8e52f3e64dab1d2c0ac",
+      "llm_calls": 8,
+      "output_sha256": "cea9e7971302fea4fdc4a52b827c391962309f536c6115d3f30493420042b70e",
+      "removed_total_s": 49.919986815452575
+    },
+    {
+      "filename": "trace_20260129_155613_task22_中国的艺术生就业领域长期以来较为单一_主要集中在传统艺术机构.jsonl",
+      "input_sha256": "56b32a2ee8bbfd2705e2fc8eedc8970d9af2fbedfb0442126fcb33915d4cd773",
+      "llm_calls": 9,
+      "output_sha256": "4d1c650125d91e28c9373bfc6f8837ba15bc62febcb831029b8dbc4d372b6c66",
+      "removed_total_s": 41.189354691505436
+    },
+    {
+      "filename": "trace_20260129_160058_task23_我们部门正在辅导高校老师竞赛_比较想了解创新赛_青教赛的全国.jsonl",
+      "input_sha256": "9e22a75e77fbacd20cc04f0c6806160b44a32cd56cedbe8b31937a2e9d544d1f",
+      "llm_calls": 9,
+      "output_sha256": "8d7c5fb7e3a6a67f53514d8bde3beeff5b3da19e37442bdac2b6807704f0df72",
+      "removed_total_s": 9.359345550537109
+    },
+    {
+      "filename": "trace_20260129_160324_task24_如何增强自闭症学生课堂参与度_有哪些有效的策略可供选择_.jsonl",
+      "input_sha256": "899e1577c8a78977c24e650a1146cff33888e867d03df170603ef2e1ff7e4bc6",
+      "llm_calls": 2,
+      "output_sha256": "d74aed68450a0571f64a5b8cc56906f61102d286c44e6b03b2fafae1766d9d69",
+      "removed_total_s": 4.773200054168701
+    },
+    {
+      "filename": "trace_20260129_162304_task25_请为我整合近几年有关_中性粒细胞在脑缺血急性期和慢性期的功能.jsonl",
+      "input_sha256": "e2cb606e4c16f6e49683311086d3b673d1d89f6b86a21f694b21b94ff54777d6",
+      "llm_calls": 9,
+      "output_sha256": "473a669e5a929f5997806bc366bffcf0c9e5fa041c4bedf658ccb1d345f64086",
+      "removed_total_s": 14.512522196769714
+    },
+    {
+      "filename": "trace_20260129_162605_task26_为我调研在慢性抗原刺激下_如肿瘤微环境或HIV潜伏感染__C.jsonl",
+      "input_sha256": "fc43a3d8103ac80cbe8eababda0efcdae9206d0c32f9ed5f0e2c44f05f29bf03",
+      "llm_calls": 9,
+      "output_sha256": "e6f5e0025bab6c14cd7d75f9236c1982281c4f3edb747f27f9f1fe426722c63b",
+      "removed_total_s": 19.24327289581299
+    },
+    {
+      "filename": "trace_20260129_163011_task27_如何将AI心理咨询和人类心理咨询有机结合_以便为人类心理健康.jsonl",
+      "input_sha256": "38122b27ac0ee059aa0c9b6d8d72281dd6908f1cf79fe8ed20fe03ce8a2f5cb9",
+      "llm_calls": 9,
+      "output_sha256": "a8636d45bfd2ed1cfb492a148bd21fe38fe5cc35dd8ee5e95799ab3fbd1816dd",
+      "removed_total_s": 12.491741509437562
+    },
+    {
+      "filename": "trace_20260129_163259_task28_传统的药物研究_即便是从多组学角度出发也难以系统地_宏观地解.jsonl",
+      "input_sha256": "27bf271333cb11180dcaa0fc92b40e022aff2976119301dd836d073adaae1cd5",
+      "llm_calls": 9,
+      "output_sha256": "b8f3f25265c91ffca6c6091b17c4b43194b4d137278e2a9cf1a313c830dbd320",
+      "removed_total_s": 32.1675679063797
+    },
+    {
+      "filename": "trace_20260129_163553_task29_50年代至今_中国大陆中国古代文学研究头部学者知识背景差异调.jsonl",
+      "input_sha256": "61c045c24fa7c8b15222bc410f1cbfb0c284fca6b8c6bcc3ad55c407d8f8daa5",
+      "llm_calls": 9,
+      "output_sha256": "a8ff57c1263cebbec2c529183cf21c28e7e02c581691b288953fb1405bd18946",
+      "removed_total_s": 57.987175655364986
+    },
+    {
+      "filename": "trace_20260129_164054_task30_全球南方合作如何推动文明交流互鉴_从理论角度给出深入的学术分.jsonl",
+      "input_sha256": "b25c591e8fb8b28d9b90e476a5f08b455057f5275ae16f32737d75f42c6f671a",
+      "llm_calls": 9,
+      "output_sha256": "cbf31b11f8b6fc5e357e052998a0b1a1c49b06eb9462b1f45db6ec80acb76968",
+      "removed_total_s": 18.760895833969116
+    },
+    {
+      "filename": "trace_20260129_164342_task31_选题_中外博物馆教育的现状与未来趋势_要求1_分别总结国内外.jsonl",
+      "input_sha256": "205f6c2ef36df59efea8706ee8ce3ca82d1d876e1bdd6f687d06bea9244d2fde",
+      "llm_calls": 9,
+      "output_sha256": "d6c5e9c12941162140d7729771d2ba6d9aa9dab284096d2903ba41cfb77b20b2",
+      "removed_total_s": 15.90373998641968
+    },
+    {
+      "filename": "trace_20260129_164748_task32_收集整理目前中国历史学界对1937-1949年_抗日战争以及.jsonl",
+      "input_sha256": "8105dbd4e65a222fdaa246bc766e2f04db78d78882cf4a7b57f1bfc8378f1823",
+      "llm_calls": 9,
+      "output_sha256": "e3120addce9de29d5bcb22c02d48a51d41c17b089755a795a6cde117aefb7b9a",
+      "removed_total_s": 19.96318561077118
+    },
+    {
+      "filename": "trace_20260129_165547_task33_在微电子工艺中_金属薄膜的生长可以使用多种设备_物理气相沉积.jsonl",
+      "input_sha256": "9dfa6f61835c417975c2629be009c0e85ad19eca6fdd707e2fae4e222d0cf2fe",
+      "llm_calls": 9,
+      "output_sha256": "6cbf8b07d34c2ef57530af2f0dfa854ccbcfab169480e346f06e6ea34049c8d1",
+      "removed_total_s": 12.94910155773163
+    },
+    {
+      "filename": "trace_20260129_165954_task34_在二维半导体的接触领域_科研人员为了降低接触电阻做了许多努力.jsonl",
+      "input_sha256": "3b692b56673e18923088e5d665ab5d67b0252796557c27384d57ca04c8e5a483",
+      "llm_calls": 9,
+      "output_sha256": "fe77db35a4b10a58677649ed88fa00352e9f76a40466181d1dcd9aa95df9e017",
+      "removed_total_s": 52.777253842353815
+    },
+    {
+      "filename": "trace_20260129_170520_task35_市政污水收集和处理大部分城市采取的模式是核拨制_但这种机制造.jsonl",
+      "input_sha256": "c4fa37823303d7e998c3fb9def06dea3bcd5ff7318eb63ee1cb1ef806966a4f6",
+      "llm_calls": 9,
+      "output_sha256": "554bb50bf0bc95a89b600eed286dda710f4ce6dbdba9681a1ae2b36298bca7c0",
+      "removed_total_s": 21.38524944782257
+    },
+    {
+      "filename": "trace_20260129_170942_task36_制造业离散制造_单件小批_基本上靠人的技能才能完成的_为我调.jsonl",
+      "input_sha256": "0841c60d0514eaa4eb9a241ae245b20387d1618d1e18318833902db76aab4c25",
+      "llm_calls": 9,
+      "output_sha256": "3eda8203da815aaf9a0ff3b550505b91e91408367a2db5dc37daea5364167431",
+      "removed_total_s": 27.011926922798157
+    },
+    {
+      "filename": "trace_20260129_171332_task37_调研问题_爵士钢琴在现代音乐创作中的创新与风格演变研究__背.jsonl",
+      "input_sha256": "3ce30ac533fe406949e91e9fb0ae187965b077b231e0a5c34646ebb4ed511899",
+      "llm_calls": 9,
+      "output_sha256": "376b1d591568756a9be1bd72d9a290204d7756dec79280066a4d3fd77d21d4db",
+      "removed_total_s": 14.637818560600282
+    },
+    {
+      "filename": "trace_20260129_171620_task38_收集针对近三年内珠宝设计流行趋势变化_如高奢类品牌珠宝以及高.jsonl",
+      "input_sha256": "217389a089e99bb4945adf0a6eda0178c2fbc5d29d665d683b99da7939b04720",
+      "llm_calls": 9,
+      "output_sha256": "b3ea3868c5b5c4f64c146a7c725f777800e164b075709e3aff13683d0f49a86e",
+      "removed_total_s": 61.45523991584778
+    },
+    {
+      "filename": "trace_20260129_172022_task39_我是一名游戏开发_帮我分析一下不同类型游戏的用户群体画像.jsonl",
+      "input_sha256": "1e5c8a735bc03514c6401ead35e9b115e8366c545319c1f07d7e3aaec84792a2",
+      "llm_calls": 9,
+      "output_sha256": "ab7afcd0f0149722783a362a36bed4694da99b9dcb836e74d1364054969e29da",
+      "removed_total_s": 12.72606831073761
+    },
+    {
+      "filename": "trace_20260129_172402_task40_中国当前的刑罚体系中_死刑_死刑缓期执行_终身监禁的数量_比.jsonl",
+      "input_sha256": "238e8c6284af33dc920c069134c445ef2d618f791158eb3b5c2f2a36851fce06",
+      "llm_calls": 9,
+      "output_sha256": "9b5b2ac73d5dac14723b986e1b8f7a0b87b328a9daa0961fafe397957d2a792b",
+      "removed_total_s": 13.776243577003479
+    },
+    {
+      "filename": "trace_20260129_172730_task41_收集整理目前中国电影票房前十的电影的相关资料_横向比较各电影.jsonl",
+      "input_sha256": "3d373324ccbfe46d4db6ac2d9daa3a6d0631e3e61e6d144ceedf531dda7f4f5d",
+      "llm_calls": 9,
+      "output_sha256": "314393034bdda871a0d1e662a4b0048000b44c61fbcbb3aafc200ee3e0e17733",
+      "removed_total_s": 26.26973076820374
+    },
+    {
+      "filename": "trace_20260129_173246_task42_中共中央_国务院2025年印发的_教育强国建设规划纲要_20.jsonl",
+      "input_sha256": "c05b1ae61aafb0195f23ed64255b3506233db0b5c86146242cab76c3ce8c7f88",
+      "llm_calls": 9,
+      "output_sha256": "0e3caf99281bf0d2c68b280b04992d65fb37a632fc6a030de384542c347b14b5",
+      "removed_total_s": 18.89473032951355
+    },
+    {
+      "filename": "trace_20260129_173617_task43_软件行业未来趋势和被AI替代的可能性.jsonl",
+      "input_sha256": "53689984c131840eddf226109d8f82e53aa8a43a9d15a9063b8afffe6a13e726",
+      "llm_calls": 9,
+      "output_sha256": "c89a69d202f4a48ad2bcc7a1f1e23d5f078f7b9d28ad1f90c740f6c30d0789e6",
+      "removed_total_s": 9.411533608436583
+    },
+    {
+      "filename": "trace_20260129_173840_task44_国内城市轨道交通行业_主要指地铁_每年的碳滑板用量是多少_主.jsonl",
+      "input_sha256": "fc2601006d5f883afd2916b224e1b4a24f949f16cdffb413b2d2fc43baf17e0f",
+      "llm_calls": 9,
+      "output_sha256": "3b7fef78d0b7790c34ad839751a6a2f618061591b6e1b5832944fab7c0985cf8",
+      "removed_total_s": 12.832463355064393
+    },
+    {
+      "filename": "trace_20260129_174348_task45_分析_老子_历代注本中_神_的发展.jsonl",
+      "input_sha256": "707de2d8971be57fa95f34fa92f1e5144c05d3179a0889bff7ca81614bbd2524",
+      "llm_calls": 6,
+      "output_sha256": "180d9da80d36d889e25f0cceeb2d5c50d4457240a5c70c8c972e651e553c79a5",
+      "removed_total_s": 12.99425793647766
+    },
+    {
+      "filename": "trace_20260129_175319_task46_房地产行业可持续发展的动力是什么_未来10年国家在政策_资金.jsonl",
+      "input_sha256": "c06ad05774e095423bf775912ee90473f4d717d7d993d3a2bbc3a26f9d51fffd",
+      "llm_calls": 9,
+      "output_sha256": "c8e10a31d7b25f180e2638ed0f0212235572a970c85eb6aa470e9c3428db9d8d",
+      "removed_total_s": 15.429581899642946
+    },
+    {
+      "filename": "trace_20260129_175644_task47_2025_年_有哪些因素影响着旅客选择前往不同目的地旅游.jsonl",
+      "input_sha256": "3380ca377c923bc516724a7888a4c137b714cc3a8f867a48b4b0df57bd20f297",
+      "llm_calls": 9,
+      "output_sha256": "72a15bc524096c550429a211d6bd4533953b4b802cadf51a42f984fe9bf013ae",
+      "removed_total_s": 16.40141485691071
+    },
+    {
+      "filename": "trace_20260129_175815_task48_我今年五十三岁_体重一百六十斤_为我提供一份两周的食谱_包含.jsonl",
+      "input_sha256": "cf9ecc745cadfae3673f0b465e6ac902fc75b064d8a71335b9d0e79e1019b02e",
+      "llm_calls": 9,
+      "output_sha256": "2f6dee55f0ce74108a22b42f17c9118802cecb2811ff9bef4b4d939e45f1c756",
+      "removed_total_s": 9.075488624572754
+    },
+    {
+      "filename": "trace_20260129_180023_task49_为我调研全球范围内_20-30岁的女性对口腔正畸和医美的共同.jsonl",
+      "input_sha256": "c856536edf73f471ee3d032824da98528574da46b969265d6c8a1ca46ef538d6",
+      "llm_calls": 4,
+      "output_sha256": "3d9c85cb24fdef34c4efae130be446d8b335b3a2574230cbcdd2a02c6b430cf0",
+      "removed_total_s": 18.655623784065245
+    },
+    {
+      "filename": "trace_20260129_181515_task50_收集整理有关孩子身心健康成长的相关资料_比如怎样合理安排学习.jsonl",
+      "input_sha256": "53ceaf828607e395fb30278808df5199a72e39e13fd90bae8cda3866991fac73",
+      "llm_calls": 9,
+      "output_sha256": "c2ee40999196628d3b8d9f0b57827ca399bb135257288e9827d432c03090cf3f",
+      "removed_total_s": 20.6414523935318
+    },
+    {
+      "filename": "trace_20260129_181716_task51_From_2020_to_2050__how_many_el.jsonl",
+      "input_sha256": "cabe0299cc7ba402227c8339317def30d48f331ddcbfa415e3466de09de71096",
+      "llm_calls": 9,
+      "output_sha256": "4c5d3e28c63c16cfd342118dfc9d518ba20117506e64182b3c771ced815a521f",
+      "removed_total_s": 28.831207756996154
+    },
+    {
+      "filename": "trace_20260129_182104_task52_What_are_the_investment_philos.jsonl",
+      "input_sha256": "32ffbedf0b62500b94afb4443a0e6e34486c80b6e2295bbc343e2e521eb461bd",
+      "llm_calls": 9,
+      "output_sha256": "caf770559593f25ae710143447b407778877155b0dbcea939a2660d54088f27b",
+      "removed_total_s": 59.93294457435608
+    },
+    {
+      "filename": "trace_20260129_182252_task53_Researching_how_the_world_s_we.jsonl",
+      "input_sha256": "0cf299379a764f971c89acbe65e72aea14e0439c5208909bbc96de35fd91927d",
+      "llm_calls": 9,
+      "output_sha256": "569c980559dd4830d9ad2f561203355b7f5bdf92eb81797fb446b540d8b2f1b2",
+      "removed_total_s": 26.54803965091705
+    },
+    {
+      "filename": "trace_20260129_182409_task54_In_the_field_of_FinTech__machi.jsonl",
+      "input_sha256": "f8fa906203726ff0db59c87b45e9b348088ece0486881a8e32dc69ab7a6af7f8",
+      "llm_calls": 8,
+      "output_sha256": "33bae9edf10dd8309972716d7c9bd38dd954183f98c02779be0a0cfb7a0a4e74",
+      "removed_total_s": 45.18132952213288
+    },
+    {
+      "filename": "trace_20260129_182954_task55_While_the_market_features_dive.jsonl",
+      "input_sha256": "ad7866ef7776dd89a3370190e717c9c622f32850d8130d521b8f5134cac2d6e4",
+      "llm_calls": 9,
+      "output_sha256": "d9e008f073ed98888b1d83865c99014bbecdc2a28c330d2ff491dc88ee5bea45",
+      "removed_total_s": 61.85817919254303
+    },
+    {
+      "filename": "trace_20260129_183321_task56_Is_there_a_general_method_for.jsonl",
+      "input_sha256": "d20d2856be43aa5f69a9ba9ea830cb78d58c6ca777335e1d52b62f44583d53d2",
+      "llm_calls": 7,
+      "output_sha256": "b307dabe0daeb1a270047b5e1824777e76e2439fa97ecf1bce699bc25a8cb99c",
+      "removed_total_s": 17.11998954772949
+    },
+    {
+      "filename": "trace_20260129_184006_task57_Summarize_the_global_investmen.jsonl",
+      "input_sha256": "84f6e66a5c1c14761526204f87046e8970401cc4b7e4a4e199f1fd05add55c79",
+      "llm_calls": 9,
+      "output_sha256": "1c7e9d8c97b50e4a3a4f3c95e2924c115c4be0776948996ec44322935d95a7ff",
+      "removed_total_s": 43.52912428855896
+    },
+    {
+      "filename": "trace_20260129_184801_task58_Exploring_Horizontal_Gene_Tran.jsonl",
+      "input_sha256": "a52a2601408b53d2eeaf2705ef86e822678c28b862b367411a8063204af076b4",
+      "llm_calls": 9,
+      "output_sha256": "6bbcadc309fa3b9647117c0262e564360bfc30750701ed3550e5edc59528ab67",
+      "removed_total_s": 68.0926898097992
+    },
+    {
+      "filename": "trace_20260129_184959_task59_In_ecology__how_do_birds_achie.jsonl",
+      "input_sha256": "16dcdfed281ddaa8d15f0b6b4894a3574328eb8bb817a3ccedb500cf72cbb443",
+      "llm_calls": 9,
+      "output_sha256": "0e3b4c16ecdb2687876e8e29fa27fe063a46d00220d3c0ea45007380d32a5822",
+      "removed_total_s": 23.22923823356629
+    },
+    {
+      "filename": "trace_20260129_185333_task60_How_to_conduct_comprehensive_a.jsonl",
+      "input_sha256": "6b78f8a0c86220b5292346b00d42438ed825893c7c52452fa55f51af36ab5e09",
+      "llm_calls": 9,
+      "output_sha256": "756afb4b2a009f49c50512938a18c3ac7b39ece3a4cf00396937376853b868a6",
+      "removed_total_s": 62.66004906654358
+    },
+    {
+      "filename": "trace_20260129_185704_task61_Research_on_the_price_dynamics.jsonl",
+      "input_sha256": "73be618269b50109aeb2bd212b562d567f0788badf76f10e5fe25350f9c5f658",
+      "llm_calls": 9,
+      "output_sha256": "3127f8de30e9150d1b7db4ea8d612fb6574d1dbfa0cfb69fe92f8cfcb56c9630",
+      "removed_total_s": 45.6850766658783
+    },
+    {
+      "filename": "trace_20260129_190100_task62_What_are_the_most_effective_ap.jsonl",
+      "input_sha256": "b7631a5165095efb544782dda542e2950d8ba648f9a61a8b8693a81cc34e2c0a",
+      "llm_calls": 9,
+      "output_sha256": "cc13f85ebf1fd181502859fc2bd88afe127af9e97678234d3f7d67661a7ac44a",
+      "removed_total_s": 59.684019813537596
+    },
+    {
+      "filename": "trace_20260129_190604_task63__working_on_LN-based_nonlinear.jsonl",
+      "input_sha256": "186a799179f60c07af0f630a89bc98cf96ec9e6ec2a4034c7a3ce869adfa4f04",
+      "llm_calls": 9,
+      "output_sha256": "105f9db2eb5a0990f272d101203163a6cc27e7d545b00cb1a6eae6f244eb0233",
+      "removed_total_s": 19.262138953208922
+    },
+    {
+      "filename": "trace_20260129_190724_task64_Regarding_the_attitude_control.jsonl",
+      "input_sha256": "c800d3b6f7dce9d6cff8de1939072adad5aac579e165705bcea2ec38dfe8c92a",
+      "llm_calls": 9,
+      "output_sha256": "0db0403ec76cbca82fade850f2e9e2a3b7a36ce8c6e71899aa8c32b17a134b4f",
+      "removed_total_s": 51.10400874614715
+    },
+    {
+      "filename": "trace_20260129_191021_task65_As_an_agricultural_engineering.jsonl",
+      "input_sha256": "7256bf3a3d60fb17c76653739b00b59933cd510e3cac65123973847afae3004b",
+      "llm_calls": 9,
+      "output_sha256": "c80b9bcfbf2a8d9241eb2d9e726c54ddc5088d20616182ebc4c8547f4631aeeb",
+      "removed_total_s": 28.19291976928711
+    },
+    {
+      "filename": "trace_20260129_191422_task66_Which_Obsidian_plugins_can_eff.jsonl",
+      "input_sha256": "d228e7a3a51c3191b50d938e1bed45baccc7d07216549988007b129179622cff",
+      "llm_calls": 9,
+      "output_sha256": "c13c7127de1e4d44918be0ca1ed9f1e5177085cdd5ce7e4941eaefc8764ff732",
+      "removed_total_s": 16.59505955696106
+    },
+    {
+      "filename": "trace_20260129_192137_task67_Summarize_recent_research_prog.jsonl",
+      "input_sha256": "ba1d3300a4de9a1e1eecf3d5c99374d4479157438b9964bbd7e79de617eeb69e",
+      "llm_calls": 9,
+      "output_sha256": "d1e80f69ba9a653f957acb161d4de5304d32735a15a0ac19d590f747468f4947",
+      "removed_total_s": 43.090933551788325
+    },
+    {
+      "filename": "trace_20260129_192805_task68_I_need_to_dynamically_adjust_K.jsonl",
+      "input_sha256": "72a888cb9814f16caaa43999afbed125f3f507f0bcce75d627cf6b8d151e1c6f",
+      "llm_calls": 9,
+      "output_sha256": "968bb80acbc7136b782fb74839f1887ffeed03b2fc5a31a064a85158e0bc4efd",
+      "removed_total_s": 42.25103314876556
+    },
+    {
+      "filename": "trace_20260129_193204_task69_Please_provide_a_detailed_expl.jsonl",
+      "input_sha256": "5708fcf6fcf94f3e8e275880bbaf3b0918436d2238f32148286be9ecf1f09914",
+      "llm_calls": 9,
+      "output_sha256": "e7d7243ef9d31fd9b31b8ce94b61065d0fd194597b3a634ed2fa07d01e7f5413",
+      "removed_total_s": 65.24549543857574
+    },
+    {
+      "filename": "trace_20260129_193436_task70_Trace_the_evolution_from_Java.jsonl",
+      "input_sha256": "8cc416440416a292be41cc3eb4dc9a8244aed2bcc5f5af183abe6f0d54a49ee8",
+      "llm_calls": 9,
+      "output_sha256": "d3900e2fcfc7ad67d471f640d0d9caa41ab9a4aa41cfeb5e439c1a1153815ad3",
+      "removed_total_s": 8.434796314239502
+    },
+    {
+      "filename": "trace_20260129_193541_task71_Acting_as_an_expert_in_K-12_ed.jsonl",
+      "input_sha256": "16fbb9f54fa921af8e1687f9de7f197259a07d94309163993f84c7b338967d01",
+      "llm_calls": 9,
+      "output_sha256": "502325b7a6e6eaab3770f381ccb9740d5b194d27f6ada714967bd26e62fd4974",
+      "removed_total_s": 57.64970469951629
+    },
+    {
+      "filename": "trace_20260129_193742_task72_Please_write_a_literature_revi.jsonl",
+      "input_sha256": "ec567b9fc98c98dd5c3336f86561f75075a88f298be098d8306e51801fe4d37d",
+      "llm_calls": 9,
+      "output_sha256": "440a24c7788ddcf703b43aed881621fc9d5b8384384f4de3a8261b1f94606c48",
+      "removed_total_s": 56.996521306037906
+    },
+    {
+      "filename": "trace_20260129_193957_task73_As_a_senior_elementary_school.jsonl",
+      "input_sha256": "7ac2418bdb9fec1aa0043c5ae041aac4ffd14e8f99f64c71542468a21530e1d7",
+      "llm_calls": 9,
+      "output_sha256": "4303ee6ba4c3723487d1c005dc14895435dc551419eb8c293f7a7e76f489e031",
+      "removed_total_s": 16.61985587120056
+    },
+    {
+      "filename": "trace_20260129_194102_task74_Please_conduct_a_study_and_pre.jsonl",
+      "input_sha256": "ece14ae606b576a4f0129094b5f3daabe5d36ab24f5c679c4d266fe380474b62",
+      "llm_calls": 9,
+      "output_sha256": "d965b5b68df3aed9610746ecd49feff039e100421b0e38451d5d825b26cafcfc",
+      "removed_total_s": 10.154917335510255
+    },
+    {
+      "filename": "trace_20260129_194149_task75_Could_the_rapeutic_interventio.jsonl",
+      "input_sha256": "77e3bf828417601700b7229eedf91c20a49315c39a865edd9aaccf76ff02e2c5",
+      "llm_calls": 9,
+      "output_sha256": "ba0f0ec8e1b648c14e90b7d5f48357a4c5d40ba76b8ee1f9e6e0d342d086145d",
+      "removed_total_s": 18.87935342311859
+    },
+    {
+      "filename": "trace_20260129_194249_task76_The_significance_of_the_gut_mi.jsonl",
+      "input_sha256": "27a2998ac44e0222c54ccd8d26ae9056deb877fe652bf049b8dce58a048ab8dc",
+      "llm_calls": 9,
+      "output_sha256": "0643f96bda8f7774af8e1b749e38921e345e2c88345b9b96c02f168e9e3fa54f",
+      "removed_total_s": 54.69008352756501
+    },
+    {
+      "filename": "trace_20260129_194507_task77_What_is_the_role_of_need_for_c.jsonl",
+      "input_sha256": "a072e9470b0d187ecb1767a02c78caee5d5e20914dec1da8bdddc41c16d7a376",
+      "llm_calls": 9,
+      "output_sha256": "f9b329f8cb8af9e1fb7a07616ab94a46fcad8ddc02482a887a2eb5f1d777c985",
+      "removed_total_s": 15.201872897148133
+    },
+    {
+      "filename": "trace_20260129_194634_task78_Parkinson_s_disease_has_a_prof.jsonl",
+      "input_sha256": "4c46dd85af58e2144b3535c9392fc5fe72cd38df080a7f4e11e66e3a6e93b413",
+      "llm_calls": 9,
+      "output_sha256": "de7e92b2bbffa1ad48b74d23aa6aea6ef0f548ffb7b25ae4615722190c813609",
+      "removed_total_s": 42.85151158332824
+    },
+    {
+      "filename": "trace_20260129_194840_task79_Write_a_paper_on_Middle_Easter.jsonl",
+      "input_sha256": "6aa123a2ae924ed519a4b82f59b51f305fd3fe6a60a5db6753729e1c30e2f063",
+      "llm_calls": 9,
+      "output_sha256": "682601670b959c41d4901c9501817b465677983ed0d532fd6b381f01b2acfc1d",
+      "removed_total_s": 21.654221892356876
+    },
+    {
+      "filename": "trace_20260129_195012_task80_Please_investigate_the_influen.jsonl",
+      "input_sha256": "691c95208deb8c443e1a61c35a516f8b3feae5b5f1fbee053be36b16d1a8d680",
+      "llm_calls": 9,
+      "output_sha256": "a0236538a7fc2a781f22e70d9270bfdae83bd486060f6b7377f8eccf67cbf90f",
+      "removed_total_s": 68.63820996761322
+    },
+    {
+      "filename": "trace_20260129_195211_task81_Write_an_analysis_exploring_ho.jsonl",
+      "input_sha256": "584a6fbcbb8206c3a12855b760240bb153050b83f3b7f6834c3858f543056dc3",
+      "llm_calls": 9,
+      "output_sha256": "b61ffb029dd167387e6b840d8146a41165ae4e22f4961e080677b54d4857651a",
+      "removed_total_s": 26.88904386997223
+    },
+    {
+      "filename": "trace_20260129_195638_task82_Research_and_analyze_the_diver.jsonl",
+      "input_sha256": "0df0a4f96a7e2c589ff5d6624610d886f51a5a888eb58d10b9e6f0471f03cb51",
+      "llm_calls": 9,
+      "output_sha256": "3db5ee1a55f0b7ec2b970c897cd740ac02c10b273aad7517b6c96b12a2948202",
+      "removed_total_s": 24.030312705039975
+    },
+    {
+      "filename": "trace_20260129_195857_task83_Acting_as_a_senior_hardware_pr.jsonl",
+      "input_sha256": "2623f4a6649a4b864460ddcaf270ac676753e91b715d70480cdf8349c60ec7b6",
+      "llm_calls": 9,
+      "output_sha256": "0e4324fdf40d1691f9869e63e28baa19dd4230e50d91756884b551241010d699",
+      "removed_total_s": 62.23155029296875
+    },
+    {
+      "filename": "trace_20260129_200117_task84_Research_for_me_how_to_improve.jsonl",
+      "input_sha256": "771cfceb716ef77e9a0722bf08e0d9a395acff790bb28b5f86f07b7197ded77c",
+      "llm_calls": 9,
+      "output_sha256": "a8c33d4bec3e8977a89e7ffb26e495bf48a760b70cac99c112f1b8cadee7c3af",
+      "removed_total_s": 30.134662308692935
+    },
+    {
+      "filename": "trace_20260129_200407_task85_The_primary_components_of_a_pr.jsonl",
+      "input_sha256": "47cdbe16fc6b471d5a41692530000ffbb6385d36378bc2de5e9e048a35fac7dd",
+      "llm_calls": 9,
+      "output_sha256": "f81d2150261ae565f22a12f22afbdbfa5d6f3527b146b76442f067162e3c9570",
+      "removed_total_s": 44.27782844543457
+    },
+    {
+      "filename": "trace_20260129_200910_task86_Conduct_a_research_report_on_t.jsonl",
+      "input_sha256": "01660ba07cf34b4d7200d0a4d19a85893fda1226dd45c1006c41d7f142bee2fc",
+      "llm_calls": 9,
+      "output_sha256": "15cb045dfed552ab5616af09bf197d5d2cdf3610b054dcc6c03574082d149663",
+      "removed_total_s": 59.12580211639404
+    },
+    {
+      "filename": "trace_20260129_201743_task87_Are_AI_fashion_design_tools_le.jsonl",
+      "input_sha256": "335e4bcfb81465d9eab227bee7cf493255b5d87d6ea26c94a5e09a9604e7afa4",
+      "llm_calls": 9,
+      "output_sha256": "a67053114b37abad7839248e5b930a78ceeee7a7fc3080f1f1901e0db8c440b8",
+      "removed_total_s": 65.87188267230988
+    },
+    {
+      "filename": "trace_20260129_202117_task88_How_did_Netflix_manage_to_succ.jsonl",
+      "input_sha256": "fd14d01ab934201b66ba4612c6eef7158205aff6f03d6cde604c9494d2e5910c",
+      "llm_calls": 9,
+      "output_sha256": "18b9f8727b0f44d3fb5dcaf1d37b7d56fbbc8519f679c4540d3d4eae543f975d",
+      "removed_total_s": 23.490317497253415
+    },
+    {
+      "filename": "trace_20260129_202340_task89_Research_and_analyze_the_lates.jsonl",
+      "input_sha256": "86da3d1367b231d27ab8d67be45f44207c4a9217d41c91f8bc9187609a549e8e",
+      "llm_calls": 9,
+      "output_sha256": "f1e96cbc5d26331d6d178b0df0652756f80197d4992a847d20ec1e682370329a",
+      "removed_total_s": 64.6595369720459
+    },
+    {
+      "filename": "trace_20260129_202616_task90_Analyze_the_complex_issue_of_l.jsonl",
+      "input_sha256": "92d2c64b8e19abfd60e16363d86fb68cc0d31b13940105e57ef17310af46dba4",
+      "llm_calls": 9,
+      "output_sha256": "280f66604cc57d6e6df906e7a7497378e53fc7bb30c2322f3451ad24744ee849",
+      "removed_total_s": 57.59230517864227
+    },
+    {
+      "filename": "trace_20260129_203546_task91_I_would_like_a_detailed_analys.jsonl",
+      "input_sha256": "8c33ea21283c0016c073ead7a57a83853d530056694b2ddfe6a751bab339f2d2",
+      "llm_calls": 9,
+      "output_sha256": "8b2c17b9288325cf6668ad851f630579baccdfb738c4242e8634bdad56e5e212",
+      "removed_total_s": 30.552654080390923
+    },
+    {
+      "filename": "trace_20260129_204609_task92_For_a_research_project_titled.jsonl",
+      "input_sha256": "1aa8474572fb7906eead6f5c2b57c1c26b9714cec7c1afa3a024c681578451ab",
+      "llm_calls": 9,
+      "output_sha256": "b4113496491acd5ecba774e2ec05a75871340a395f7048f1ac88c0a533685e8d",
+      "removed_total_s": 62.81286204338073
+    },
+    {
+      "filename": "trace_20260129_205038_task93_Please_prepare_a_market_resear.jsonl",
+      "input_sha256": "1057fc0de8b5c063fcb5f012cbd1bf704c3dbfa28f254c7fac859970af2d01c9",
+      "llm_calls": 9,
+      "output_sha256": "f1ec6b09811f848343e3e259a81e5e0c102b5cede158f2f47173d02cbc976ca3",
+      "removed_total_s": 72.55542152404784
+    },
+    {
+      "filename": "trace_20260129_205428_task94_Could_you_provide_information.jsonl",
+      "input_sha256": "a07e4d61953dd573c82c398e2ca0484a523c8f51e3557cf3db335bfc7bbbb8e1",
+      "llm_calls": 9,
+      "output_sha256": "2271931078efa9600e7b8443fc5b3dd4fba9e5aaa76b96ea0db0f18ac22c0fd1",
+      "removed_total_s": 57.93784175395966
+    },
+    {
+      "filename": "trace_20260129_205929_task95_Create_comprehensive__in-depth.jsonl",
+      "input_sha256": "571066f8d77e051d31a95504b3505619bdfa4a436bf216299f217210b07f22ba",
+      "llm_calls": 9,
+      "output_sha256": "d52fe29d16cbaa397d70b5fa5a2a42a516fbd18d0ec539ba65ee246eaf39b302",
+      "removed_total_s": 45.82866383075714
+    },
+    {
+      "filename": "trace_20260129_210554_task96_Please_draft_a_research_report.jsonl",
+      "input_sha256": "abd9388af24265ce3174dede0b363d2c9ee5731056d6a9ce4e25135cd5569a5a",
+      "llm_calls": 9,
+      "output_sha256": "0b3c306fee017d548ed6cc0027228754a5bc51e11c03cde4be0441358c6c2d50",
+      "removed_total_s": 52.06376422405243
+    },
+    {
+      "filename": "trace_20260129_211023_task97_Find_data_and_evidence_to_supp.jsonl",
+      "input_sha256": "eeac28b47149f7dc4e1c4e8d0bcefba61fed5acd88574ba8cce26616f08b2575",
+      "llm_calls": 6,
+      "output_sha256": "83dbc9f71a143e66246e33923b72001f1ebb9cc11940353cb2ae91348d7c4c32",
+      "removed_total_s": 30.081713972091677
+    },
+    {
+      "filename": "trace_20260129_212451_task98_Research_Topic__Crafting_Techn.jsonl",
+      "input_sha256": "5fb1cf9f8e332587c3c8d13b7310acfd64e89a54572ef1fd3d4b410c0b68a186",
+      "llm_calls": 9,
+      "output_sha256": "af8f2c3c8aef0b1655af9f22bb3abd913c678e79c265ecbb010b3c94d395b125",
+      "removed_total_s": 48.33829998970032
+    },
+    {
+      "filename": "trace_20260129_212736_task99_Research_the_current_applicati.jsonl",
+      "input_sha256": "ba8e8d1aa3514688d5addcd5f998c1087b447adf206d6c877813ed548cc24f5f",
+      "llm_calls": 9,
+      "output_sha256": "9d37bfd3c7921a5786cb47de7837590e6495d0633272ee4550c851c523dc7f23",
+      "removed_total_s": 63.39271739959716
+    },
+    {
+      "filename": "trace_20260129_213057_task100_Write_a_paper_to_discuss_the_i.jsonl",
+      "input_sha256": "7be1c3cc5a9c665133646c545f0435fd0b9c9212b6055216363ff3d9a2382057",
+      "llm_calls": 9,
+      "output_sha256": "6bc77f8b404c9916490d54960ac837675d7e2207b55145f8c83d7932c3bb62f6",
+      "removed_total_s": 67.04916359424591
+    }
+  ],
+  "input_dir": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces_tool_slo_search_uniform_1_3s_visit_serial_uniform_2_8s",
+  "llm_calls": 873,
+  "output_dir": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces_tool_slo_search_uniform_1_3s_visit_serial_uniform_2_8s_llm_x0_42",
+  "removed_total_s": 3637.395439448356,
+  "scaled_fields": [
+    "total_time_ms",
+    "inference_time_ms",
+    "rtt_ms"
+  ],
+  "schema": "paste_repro.llm_duration_scaled_trace.v1",
+  "timestamp_policy": "preserve each LLM causal start after prior shifts; move its completion and every later event earlier by removed total duration"
+}

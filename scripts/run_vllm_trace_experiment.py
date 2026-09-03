@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional
 
 import aiohttp
 
+from azure_llm_trace import apply_azure_arrivals, load_azure_llm_invocations
 from online_session_predictor import OnlineSessionPredictor
 from trace_experiment_lib import (
     cap_workload_by_arrival_time,
@@ -344,6 +345,41 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run strict trace replay against a live vLLM server")
     parser.add_argument("--trace-dir", default="traces/my_traces")
     parser.add_argument("--prepared-workload", default=None)
+    parser.add_argument(
+        "--azure-arrival-trace",
+        default=None,
+        help=(
+            "Azure LLM Inference Trace 2024 CSV. When set, its timestamps "
+            "replace only the top-level Agent-session arrivals."
+        ),
+    )
+    parser.add_argument(
+        "--azure-dataset-variant",
+        choices=["conversation", "code"],
+        default="conversation",
+    )
+    parser.add_argument("--azure-start-time", default=None)
+    parser.add_argument("--azure-duration-s", type=float, default=None)
+    parser.add_argument(
+        "--azure-max-sessions",
+        type=int,
+        default=None,
+        help=(
+            "Maximum Azure rows to replay. Defaults to --trace-count as a "
+            "safety bound."
+        ),
+    )
+    parser.add_argument(
+        "--azure-arrival-speedup",
+        type=float,
+        default=1.0,
+        help="Compress only inter-session Azure arrival offsets.",
+    )
+    parser.add_argument(
+        "--azure-session-mapping",
+        choices=["round_robin", "shuffled_round_robin"],
+        default="round_robin",
+    )
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--server-url", default="http://127.0.0.1:8000")
     parser.add_argument("--model", default="Alibaba-NLP/Tongyi-DeepResearch-30B-A3B")
@@ -1204,7 +1240,9 @@ async def run_trace_task(
     previous_requests: List[Dict[str, Any]] = []
     for request_index, request in enumerate(trace["requests"]):
         wait_s = float(request["wait_after_prev_s"])
-        scaled_wait_s = wait_s if request["call_index"] == 0 else _scaled_tool_wait_s(wait_s, speedup)
+        # The first request's wait is an absolute session-arrival offset.  It
+        # must not be compressed by the independent intra-session tool speedup.
+        scaled_wait_s = wait_s if request_index == 0 else _scaled_tool_wait_s(wait_s, speedup)
         if tool_wait_mode == "sleep" and scaled_wait_s > 0:
             await asyncio.sleep(scaled_wait_s)
 
@@ -1453,6 +1491,10 @@ async def main_async(args: argparse.Namespace) -> int:
         raise ValueError(
             "--tool-prediction-model is required when --tool-overlap-mode=learned"
         )
+    if args.azure_arrival_speedup <= 0:
+        raise ValueError("--azure-arrival-speedup must be positive")
+    if args.azure_max_sessions is not None and args.azure_max_sessions <= 0:
+        raise ValueError("--azure-max-sessions must be positive")
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1502,6 +1544,27 @@ async def main_async(args: argparse.Namespace) -> int:
             prefix_marker_mode=args.prefix_marker_mode,
             tool_prediction_model=args.tool_prediction_model,
             tool_prediction_top_k=args.tool_prediction_top_k,
+        )
+
+    if args.azure_arrival_trace:
+        invocations = load_azure_llm_invocations(
+            args.azure_arrival_trace,
+            start_time=args.azure_start_time,
+            duration_s=args.azure_duration_s,
+            max_sessions=(
+                args.azure_max_sessions
+                if args.azure_max_sessions is not None
+                else args.trace_count
+            ),
+        )
+        workload = apply_azure_arrivals(
+            workload,
+            invocations,
+            source_file=args.azure_arrival_trace,
+            dataset_variant=args.azure_dataset_variant,
+            arrival_speedup=args.azure_arrival_speedup,
+            mapping=args.azure_session_mapping,
+            mapping_seed=args.seed,
         )
 
     if args.max_arrival_time_s is not None:

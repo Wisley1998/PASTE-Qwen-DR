@@ -1,0 +1,152 @@
+{
+  "schema": "paste_repro.murakkab_fixed_v9_m_only_execution",
+  "version": 1,
+  "status": "fixed_engineering_execution",
+  "evidence_class": "fixed-v9-setup-engineering",
+  "confirmatory_eligible": false,
+  "nonconfirmatory_reason": "The formal-v9 workload and prior PASTE results were observed before this M-only execution was specified.",
+  "scope": "Run only constrained Murakkab M on the exact fixed PASTE deployment and frozen-v9 workload. Do not relabel any historical A cell and do not run or modify historical PASTE artifacts.",
+  "implementation": {
+    "kind": "constrained_murakkab_style_emulation",
+    "official_code_used": false,
+    "official_runtime_reproduced": false,
+    "timed_runtime_semantics": "A-equivalent native-FCFS plus demand-only execution",
+    "control_plane_boundary": "Singleton typed-DAG validation and selection run outside the task-completion timing window. The existing sequential live agent executes dependency-ready node bodies.",
+    "interpretation": "With one model, one hardware layout, one workflow, and one replica count, Murakkab's configuration search has exactly one feasible candidate and supplies no runtime optimization beyond reactive dependency dispatch."
+  },
+  "cell": {
+    "id": "M",
+    "label": "Constrained Murakkab-style emulation",
+    "llm_scheduler": "native FCFS",
+    "tool_execution": "demand only",
+    "call_graph_mode": "frozen",
+    "typed_dag": true,
+    "dependency_ready_dispatch": true
+  },
+  "repetitions": 3,
+  "fresh_server_per_repetition": true,
+  "result_cache_empty_per_repetition": true,
+  "attempt_policy": {
+    "planned_performance_repetitions": 3,
+    "development_smoke_is_not_a_performance_repetition": true,
+    "failed_or_contaminated_repetitions_are_retained": true,
+    "failed_or_contaminated_repetitions_must_not_be_silently_replaced": true,
+    "performance_based_parameter_changes_between_repetitions_allowed": false
+  },
+  "workload": {
+    "path": "reproduction/workloads/live_joint_wikipedia_frozen_formal_v9.json",
+    "sha256": "c15314f470d25beb709bace748357b09815a5971413de985e38beb901100ed20",
+    "source_count": 80,
+    "offered_concurrency": 80,
+    "retrospective_existing_workload": true
+  },
+  "shared_setup": {
+    "model": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B",
+    "model_revision": "4b0ac5767427a55d08a254f0367e2934976598e0",
+    "serving_engine": "vLLM 0.10.1",
+    "dtype": "bf16",
+    "tensor_parallelism": 4,
+    "gpu": {
+      "count": 4,
+      "type": "NVIDIA A100-SXM4-40GB",
+      "visible_indices": [4, 5, 6, 7],
+      "background_policy": "registered_shared_resnet_background_v1",
+      "registered_background": {
+        "required": true,
+        "user_confirmed_prior_paste_same_condition": true,
+        "selected_gpu_compute_app_records": 4,
+        "same_pid_on_every_selected_gpu": true,
+        "additional_selected_gpu_compute_apps_allowed": false,
+        "executable": "/opt/conda/envs/ptca/bin/python3.10",
+        "cwd": "/home/aiscuser/gpu_occupy",
+        "argv": ["python", "resnet.py"],
+        "resolved_script": "/home/aiscuser/gpu_occupy/resnet.py",
+        "resolved_script_sha256": "3239df3d117271605971a2db4b7f6251b42e06a13cac3509c118b2cc16df09a2",
+        "identity_must_match_before_and_after": true
+      }
+    },
+    "model_context_tokens": 16384,
+    "gpu_memory_utilization": 0.86,
+    "max_num_batched_tokens": 2048,
+    "max_num_sequences": 96,
+    "cuda_graph_sizes": [32],
+    "replicas": 1,
+    "native_prefix_caching": true,
+    "explicit_prefix_locality_reordering": false,
+    "offered_tasks": 80,
+    "max_active_tasks": 80,
+    "private_context_padding_tokens": 10000,
+    "llm_calls_per_task": 3,
+    "fixed_final_completion_tokens": 192,
+    "workflow": [
+      "initial_llm",
+      "search",
+      "decision_llm",
+      "visit",
+      "synthesis_llm"
+    ],
+    "tool_runtime": {
+      "physical_workers": 4,
+      "search_capacity": 3,
+      "visit_capacity": 2,
+      "visit_minimum_start_interval_seconds": 2.5,
+      "maximum_speculative_workers": 2,
+      "minimum_speculative_workers": 0,
+      "maximum_speculative_pending": 128,
+      "speculative_ttl_seconds": 120,
+      "tool_signal_policy": "execution_aware",
+      "search_backend": "Bing HTML",
+      "visit_backend": "r.jina.ai",
+      "maximum_http_attempts": 2,
+      "http_retry_backoff_seconds": 1.0,
+      "required_observed_retries": 0,
+      "http_attempt_start_gate": true,
+      "tool_timeout_seconds": 60,
+      "search_max_results": 5,
+      "visit_max_characters": 3000
+    }
+  },
+  "constrained_murakkab": {
+    "workflow_configuration_candidates": 1,
+    "model_candidates": 1,
+    "hardware_candidates": 1,
+    "parallelism_candidates": 1,
+    "replica_count_candidates": 1,
+    "slo_tiers": 1,
+    "optimizer_expected_result": "select the sole fixed executable workflow",
+    "runtime": "dependency-respecting reactive dispatch of ready nodes",
+    "scale_actions_allowed": false,
+    "reconfiguration_allowed": false
+  },
+  "forbidden_treatment_differences": [
+    "model switching",
+    "hardware switching",
+    "tensor-parallelism changes",
+    "replica or GPU-count changes",
+    "autoscaling",
+    "cross-workflow multiplexing",
+    "workflow pruning or quality-tier changes",
+    "synthetic SLO-tier mixtures",
+    "speculative tool execution",
+    "PASTE Joint scheduler extensions"
+  ],
+  "required_outputs": [
+    "completed-task throughput",
+    "task mean, p50, p95, p99, and maximum end-to-end latency",
+    "task completion makespan",
+    "LLM latency by call index",
+    "search and visit exposed wait, queue, and service time",
+    "physical HTTP attempts and worker service time",
+    "successful-task and authoritative-commit integrity"
+  ],
+  "claim_boundary": {
+    "comparison_is_not_part_of_this_execution": true,
+    "gpu_count_saving_claimed": false,
+    "energy_measured": false,
+    "cost_measured": false,
+    "registered_background_same_process_identity_and_code_required": true,
+    "registered_background_load_intensity_equivalence_claimed": false,
+    "historical_A_may_be_used_only_for_schema_diagnostics": true,
+    "historical_A_must_not_be_relabelled_M": true
+  }
+}

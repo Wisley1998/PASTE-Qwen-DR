@@ -1,0 +1,175 @@
+{
+  "schema": "paste_repro.murakkab_paste_fixed_model_protocol",
+  "version": 1,
+  "status": "draft_protocol_pending_common_frontend_and_new_holdout_freeze",
+  "research_question": "Under the exact fixed Tongyi/Qwen-DR deployment used by PASTE, compare a constrained Murakkab-style reactive DAG executor with PASTE without granting either treatment a different model, hardware, workflow, capacity, or request information.",
+  "supersedes_for_system_comparison": "reproduction/configs/murakkab_paste_trace.json",
+  "shared_setup": {
+    "model": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B",
+    "model_revision": "4b0ac5767427a55d08a254f0367e2934976598e0",
+    "serving_engine": "vLLM 0.10.1",
+    "dtype": "bf16",
+    "tensor_parallelism": 4,
+    "gpu": {
+      "count": 4,
+      "type": "NVIDIA A100-SXM4-40GB"
+    },
+    "model_context_tokens": 16384,
+    "gpu_memory_utilization": 0.86,
+    "max_num_batched_tokens": 2048,
+    "max_num_sequences": 96,
+    "replicas": 1,
+    "native_prefix_caching": true,
+    "explicit_prefix_locality_reordering": false,
+    "offered_tasks": 80,
+    "max_active_tasks": 80,
+    "private_context_padding_tokens": 10000,
+    "llm_calls_per_task": 3,
+    "fixed_final_completion_tokens": 192,
+    "workflow": [
+      "initial_llm",
+      "search",
+      "decision_llm",
+      "visit",
+      "synthesis_llm"
+    ],
+    "tool_runtime": {
+      "physical_workers": 4,
+      "search_capacity": 3,
+      "visit_capacity": 2,
+      "visit_minimum_start_interval_seconds": 2.5,
+      "maximum_speculative_workers": 2,
+      "minimum_speculative_workers": 0,
+      "maximum_speculative_pending": 128,
+      "speculative_ttl_seconds": 120,
+      "tool_signal_policy": "execution_aware",
+      "search_backend": "Bing HTML",
+      "visit_backend": "r.jina.ai",
+      "maximum_http_attempts": 2,
+      "http_retry_backoff_seconds": 1.0,
+      "required_observed_retries": 0
+    },
+    "cell_isolation": [
+      "fresh vLLM process",
+      "fresh broker",
+      "empty result cache"
+    ]
+  },
+  "common_frontend": {
+    "required": true,
+    "description": "Every cell must traverse the same typed declarative DAG and registry. Only the execution backend changes.",
+    "optimizer_and_onboarding_outside_timed_path": true
+  },
+  "constrained_murakkab": {
+    "workflow_configuration_candidates": 1,
+    "model_candidates": 1,
+    "hardware_candidates": 1,
+    "parallelism_candidates": 1,
+    "replica_count_candidates": 1,
+    "slo_tiers": 1,
+    "optimizer_expected_result": "select the sole fixed executable workflow",
+    "runtime": "dependency-respecting reactive dispatch of ready nodes",
+    "scale_actions_allowed": false,
+    "reconfiguration_allowed": false
+  },
+  "forbidden_treatment_differences": [
+    "model switching",
+    "hardware switching",
+    "tensor-parallelism changes",
+    "replica or GPU-count changes",
+    "autoscaling",
+    "cross-workflow multiplexing",
+    "workflow pruning or quality-tier changes",
+    "synthetic SLO-tier mixtures",
+    "using PASTE top_k as a Murakkab mechanism"
+  ],
+  "cells": [
+    {
+      "id": "M",
+      "label": "Murakkab-fixed",
+      "llm_scheduler": "native FCFS",
+      "tool_execution": "demand only",
+      "description": "The singleton executable DAG is dispatched only after dependencies and authoritative invocations are ready."
+    },
+    {
+      "id": "S",
+      "label": "PASTE-speculation-only",
+      "llm_scheduler": "native FCFS",
+      "tool_execution": "bounded exact-match visit speculation"
+    },
+    {
+      "id": "J",
+      "label": "PASTE-Joint-only",
+      "llm_scheduler": "PASTE Joint physical-KV",
+      "tool_execution": "demand only"
+    },
+    {
+      "id": "P",
+      "label": "PASTE-full",
+      "llm_scheduler": "PASTE Joint physical-KV",
+      "tool_execution": "bounded exact-match visit speculation"
+    }
+  ],
+  "comparisons": {
+    "required_headline_contrasts": [
+      "M versus S: same native-FCFS runtime, isolating PASTE causal lookahead",
+      "M versus P: constrained fixed-DAG endpoint versus full PASTE"
+    ],
+    "additional_mechanism_decomposition": [
+      "M versus J",
+      "J versus P",
+      "two-by-two factorial interaction"
+    ]
+  },
+  "evidence_tracks": {
+    "primary_realistic": {
+      "call_graph_mode": "autonomous",
+      "authoritative_url_source": "the fixed Tongyi model selects from the current visible search response",
+      "paste_predictor": "checksummed rank mapper trained only on a disjoint pre-experiment role and late-bound to the current response",
+      "paste_prediction_width": 1,
+      "oracle_expected_url_allowed": false
+    },
+    "controlled_upper_bound": {
+      "call_graph_mode": "frozen",
+      "authoritative_url_source": "predeclared workload expected_url",
+      "headline_eligible": false,
+      "interpretation": "perfect-prediction live queue/serving mechanism upper bound only"
+    }
+  },
+  "primary_metrics": [
+    "paired per-source mean task end-to-end latency",
+    "task p50, p95, and p99 latency",
+    "SLO violation rate for one absolute deadline frozen from development only",
+    "makespan",
+    "LLM and exposed search/visit wait decomposition",
+    "actual HTTP attempts and tool worker service seconds",
+    "wasted speculative service seconds",
+    "successful task and authoritative-commit integrity"
+  ],
+  "resource_claim_boundary": {
+    "provisioned_gpu_count_in_every_cell": 4,
+    "gpu_count_saving_identifiable": false,
+    "admissions_plus_misses_proxy_allowed": false,
+    "energy_claim_requires": "NVML integration over the identical task-release-to-last-completion window on all four GPUs",
+    "cost_claim_requires": "an explicit fixed-deployment charging model declared before execution"
+  },
+  "statistical_protocol": {
+    "unit": "source",
+    "blocks": 4,
+    "latin_square_orders": [
+      ["M", "S", "J", "P"],
+      ["S", "M", "P", "J"],
+      ["J", "P", "M", "S"],
+      ["P", "J", "S", "M"]
+    ],
+    "fresh_server_per_cell": true,
+    "reverse_order_required": true,
+    "paired_bootstrap_draws": 10000,
+    "report_every_block_and_all_prespecified_contrasts": true
+  },
+  "evidence_discipline": {
+    "existing_formal_v9_status": "retrospective reference only; it was observed before this protocol and its A cell must not be relabeled Murakkab",
+    "confirmatory_requirement": "implement and freeze the shared DAG frontend, code hashes, estimator, cell orders, and a new source set disjoint from all development and formal-v2-v9 workloads before the first performance run",
+    "null_or_negative_results_must_be_reported": true
+  }
+}

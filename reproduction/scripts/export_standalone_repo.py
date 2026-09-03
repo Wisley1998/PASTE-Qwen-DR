@@ -19,9 +19,15 @@ SOURCE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DESTINATION = SOURCE_ROOT.parent / "PASTE-Qwen-DR"
 EXCLUDED_DIRECTORY_NAMES = {"__pycache__", ".pytest_cache"}
 EXCLUDED_REPRODUCTION_TOP_LEVEL = {"artifacts", "logs", "run"}
-ROOT_FILES = ("LICENSE", "requirements.txt")
+ROOT_FILES = (
+    "LICENSE",
+    "requirements.txt",
+    "docs/AZURE_LLM_2024_AGENT_TRACE_GUIDE.md",
+)
 ROOT_SCRIPT_FILES = (
+    "scripts/azure_llm_trace.py",
     "scripts/online_session_predictor.py",
+    "scripts/prepare_azure_agent_workload.py",
     "scripts/run_live_tool_llm_experiment.py",
     "scripts/run_online_trace_learned_experiment.py",
     "scripts/run_vllm_trace_experiment.py",
@@ -29,7 +35,10 @@ ROOT_SCRIPT_FILES = (
     "scripts/pythonhooks/sched_policy_patch.py",
     "scripts/pythonhooks/sitecustomize.py",
 )
-ROOT_TEST_FILES = ("tests/test_learned_tool_overlap.py",)
+ROOT_TEST_FILES = (
+    "tests/test_azure_llm_trace.py",
+    "tests/test_learned_tool_overlap.py",
+)
 CHECKED_IN_EVIDENCE = (
     "reproduction/artifacts/live_joint/development/v9_screen/v9-screen-r1/completed_screen.json",
     "reproduction/artifacts/live_joint/development/v9_screen/v9-screen-r1/stage-0/selected_transport.json",

@@ -43,7 +43,7 @@ from paste_repro.online_learned_agent import (  # noqa: E402
 )
 from paste_repro.live_broker import LiveToolBroker  # noqa: E402
 from paste_repro.live_executor import WikipediaLiveExecutor  # noqa: E402
-from paste_repro.tool_prediction import TraceLearnedVisitPredictor  # noqa: E402
+from paste_repro.tool_prediction import load_visit_predictor  # noqa: E402
 
 
 SCHEDULER_ENV_KEYS = (
@@ -305,9 +305,10 @@ def parse_args() -> argparse.Namespace:
         "--visit-prediction-model",
         type=Path,
         help=(
-            "Checksummed trace-learned rank artifact. When supplied, visit "
-            "speculation is late-bound to the current live search response; "
-            "the LLM still chooses authoritatively from all returned URLs."
+            "Checksummed rank-only or contextual exact-URL predictor artifact. "
+            "When supplied, visit speculation is late-bound to the current live "
+            "search response; the LLM still chooses authoritatively from all "
+            "returned URLs."
         ),
     )
     parser.add_argument("--source-limit", type=int)
@@ -672,9 +673,7 @@ async def async_main(args: argparse.Namespace) -> int:
         )
 
     visit_predictor = (
-        TraceLearnedVisitPredictor.from_artifact(
-            args.visit_prediction_model, top_k=args.visit_top_k
-        )
+        load_visit_predictor(args.visit_prediction_model, top_k=args.visit_top_k)
         if args.visit_prediction_model is not None
         else None
     )

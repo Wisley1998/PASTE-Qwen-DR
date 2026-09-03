@@ -1,0 +1,241 @@
+{
+  "experiment_contract": {
+    "admission_fractions": [
+      1.0,
+      0.5,
+      0.25,
+      0.1,
+      0.0
+    ],
+    "admission_policy": "global rank-first, hash-rotated within rank",
+    "admission_repetitions": 100,
+    "budgets": [
+      1,
+      3,
+      5
+    ],
+    "gpu_required": false,
+    "network_requests": 0,
+    "runtime_concurrencies": [
+      1,
+      8,
+      32
+    ],
+    "runtime_repetitions": 3,
+    "speculative_slots": 8,
+    "synthetic_prediction_lead_ms": 2.5,
+    "synthetic_tool_service_ms": 5.0
+  },
+  "repositories": {
+    "PASTE-Qwen-DR": {
+      "git_revision": "83e018557566c78e5d499dae5bfd1a877b66eef2",
+      "root": "/home/aiscuser/PASTE-Qwen-DR"
+    },
+    "gemini-cli-PASTE": {
+      "git_revision": "0cbb8bb05910f3fa3d0d0cb29630af47c871b98d",
+      "root": "/home/aiscuser/gemini-cli-PASTE"
+    },
+    "virtual-lab-PASTE": {
+      "git_revision": "15f3bc3227892cf0d5d96c3b9e5ed1d63ca74a8f",
+      "root": "/home/aiscuser/virtual-lab-PASTE"
+    }
+  },
+  "result_scope": {
+    "comment3_gpu_run": "target_and_high_completed_and_validated; see ../scheduler_robustness/REPORT.md; Granite cross-model portability failed closed in baseline A and produced no A/E result",
+    "cpu_sweep": "completed",
+    "historical_gpu_results": "reported_separately"
+  },
+  "schema": "paste.reviewer_comment2.provenance.v1",
+  "source_index_scope": {
+    "exhaustive": false,
+    "lineage_references": {
+      "gemini_frozen_split_manifest": {
+        "path": "/home/aiscuser/gemini-cli-PASTE/reproduction/artifacts/trace_predictor/split_manifest.json",
+        "sha256": "ec5647a6190744e26a53754855d1a30c1b46cb184206d0a8d6aebb5261b7d1d5"
+      },
+      "gemini_recomputed_train_and_split": "metric_audit.json#/gemini_split_manifest",
+      "qwen_recomputed_train_and_split": "metric_audit.json#/qwen_official/model_artifact/training_split",
+      "virtual_frozen_predictor_manifest": {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/artifacts/tongyi_live_predictor.json",
+        "sha256": "18162c8d0c0772d46009edfb231397094807fccae2c12b546de27320869a33ca"
+      }
+    },
+    "note": "Direct evaluation inputs only; do not treat this source index as an exhaustive inventory of training-source SHA-256 values."
+  },
+  "sources": {
+    "gemini_heldout": [
+      {
+        "path": "/home/aiscuser/gemini-cli-PASTE/results/code-improved/prompt_042_django__django-12747_tool_calls.jsonl",
+        "sha256": "51ff5b08bacf640ac40d880f0134fccf52ec72b877d88bc8d375d0706018fe77"
+      },
+      {
+        "path": "/home/aiscuser/gemini-cli-PASTE/results/code-improved/prompt_051_django__django-13230_tool_calls.jsonl",
+        "sha256": "2d398ce666026df5f3fb46f7eebd0709936a6a4f7726050cdc73a148b4a2e925"
+      },
+      {
+        "path": "/home/aiscuser/gemini-cli-PASTE/results/code-improved/prompt_056_django__django-13447_tool_calls.jsonl",
+        "sha256": "5f1ab8acef4ef16cfbc322bb1d850fc3531fcef3c36afef3d45df71e82ad3252"
+      }
+    ],
+    "qwen_heldout": [
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_171620_task38_收集针对近三年内珠宝设计流行趋势变化_如高奢类品牌珠宝以及高.jsonl",
+        "sha256": "bb40dbc57d7501bd58564edea594a194d54145baaf991eca91f44dadc39ef879"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_152650_task12_收集整理近10年来国际上自来水生产及销售企业在技术创新且已经.jsonl",
+        "sha256": "2cda759c6610ce556c22f27b49de5f5fd4f4e9fd2301997717ab8fe7ccab4783"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_190724_task64_Regarding_the_attitude_control.jsonl",
+        "sha256": "9f7189d2d526f7b9d1512cffa01ae0520ff48ab30f9052186987523aa4f64da7"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_204609_task92_For_a_research_project_titled.jsonl",
+        "sha256": "1f6fcb5d7991ec7b9fd24b9fcbfd2088bacd90814cde330eff2e6a8413bbc1c9"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_184959_task59_In_ecology__how_do_birds_achie.jsonl",
+        "sha256": "b7d28ac6d6e108457b30acb4fff00534f8d4138f2f3b9590ee62fcef6f4ff8fe"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_194507_task77_What_is_the_role_of_need_for_c.jsonl",
+        "sha256": "dca9873c1aa353c85f26279b2b1f81277588fadceaf19a5d1f15f611de603a48"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_193541_task71_Acting_as_an_expert_in_K-12_ed.jsonl",
+        "sha256": "77c94d7e5259399e45546c2f762d918f21e6c6e7eed0e49de99de0768d2ce26a"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_192137_task67_Summarize_recent_research_prog.jsonl",
+        "sha256": "8cbe31114a309c1ee74cbcfdb570442b421a411c07f48a58ef6f186bd32b6769"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_170942_task36_制造业离散制造_单件小批_基本上靠人的技能才能完成的_为我调.jsonl",
+        "sha256": "a8719ad8b0ff052a7015363231e9e201a19755b2d11119abddb42ce1fd1d0f0e"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_193957_task73_As_a_senior_elementary_school.jsonl",
+        "sha256": "ce61756f24dd5266571fbd3ba47451d64316506c38ec36efd5d67788d6fa7f02"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_203546_task91_I_would_like_a_detailed_analys.jsonl",
+        "sha256": "80dda85ff7f2a620565506ff791bbc2192a218cd36fc1475411904cb58a8eec4"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_175319_task46_房地产行业可持续发展的动力是什么_未来10年国家在政策_资金.jsonl",
+        "sha256": "db97ec89a9b4441ecedb7f33e704338ef686805c536cb4b46f0835105e7731e5"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_171332_task37_调研问题_爵士钢琴在现代音乐创作中的创新与风格演变研究__背.jsonl",
+        "sha256": "b43916f0d9e9ee81e1cc3fe8cb9da408aea53f1a71159a6cc9092124df8a17e0"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_125406_task1_收集整理目前中国9阶层实际收入和财务状况_特别研究得出中国的.jsonl",
+        "sha256": "d5a37dfdffc0736432594417fe39f130878bf84c554f020998f2d6205c0afa07"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_163011_task27_如何将AI心理咨询和人类心理咨询有机结合_以便为人类心理健康.jsonl",
+        "sha256": "c534494284d607bc54030215039c8445047be0a3e3318573cf8601eddabf309f"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_182104_task52_What_are_the_investment_philos.jsonl",
+        "sha256": "cab848641a9b1d454ada34126233dc9927df3a405aef3b285ba517589b5c4344"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_130834_task6_请帮我整理下目前全球具身智能发展的技术路线_以及各个路线的代.jsonl",
+        "sha256": "634d2dfb06faf3a44551c16d8ca04d2838cf7a0f537820d1f430dbc52338ea03"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_154807_task21_现在AI这么热门_我最感兴趣的就是人工智能在教育领域应用现状.jsonl",
+        "sha256": "34f9f7185bc8218352e8cd6f292afa3230d0d4e5ca4bb26d571a86f2f57bd1fd"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_213057_task100_Write_a_paper_to_discuss_the_i.jsonl",
+        "sha256": "2bdc2090ac5cff4e3d1ecec7d10081ad6fa341762232e300b45d21e15f416650"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_172730_task41_收集整理目前中国电影票房前十的电影的相关资料_横向比较各电影.jsonl",
+        "sha256": "0b850014cf97e8719f14d7f67266241ba7d1803cc8004c92900bde0b3b51a530"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_153747_task18_请你学习一下GCS算法的原理_目前的GCS算法主要是用于安全.jsonl",
+        "sha256": "b53f84b9a66308e15e98156db1a383501bcd71a80e5b1efb5c0b6742770ca0e0"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_211023_task97_Find_data_and_evidence_to_supp.jsonl",
+        "sha256": "589184338b2fb85c936f427d925e84d33a04cc3df4b4a951fe45e97bcef38618"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_190100_task62_What_are_the_most_effective_ap.jsonl",
+        "sha256": "3076d151fc76465725a5cb817ef66c9a64ad152a8e975ad739584c4bfe511281"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_193742_task72_Please_write_a_literature_revi.jsonl",
+        "sha256": "3904e1a40f1cd614cbc69b6ac6e873503312d81a5882d1b679735ea41c05da08"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_195211_task81_Write_an_analysis_exploring_ho.jsonl",
+        "sha256": "12b66850ceab8cacc44c6318f358158c47314ee3c9397f33cc9b16d49d9b6ccf"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_153229_task15_收集整理目前世界上关于量子网络的研究_横向比较各课题组的相关.jsonl",
+        "sha256": "131b05943afa552fef3e7749e389e340609a0374dc83da40996d5cec90258b5d"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_153605_task17___在当今软件开发行业中_低代码_无代码平台对传统开发流程的.jsonl",
+        "sha256": "c8f25e4600b1d31c4bbb76466629efe8ffc22ce9091e186380339bce87d77fd8"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_154633_task20_研究下Anthropic最新发布的Streamable_HT.jsonl",
+        "sha256": "44e80bf05f64f490817f5bf4f7a818d06ea77b1370ee609ee3127a3843f09590"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_212736_task99_Research_the_current_applicati.jsonl",
+        "sha256": "be9032bfa009ba536dcb520463a24f86c5e1c818d1052c1f78cdbc9984fa1934"
+      },
+      {
+        "path": "/home/aiscuser/PASTE-Qwen-DR/traces/my_traces/trace_20260129_192805_task68_I_need_to_dynamically_adjust_K.jsonl",
+        "sha256": "0b5f756c86e9e52d236003a99bbca6e185f31f4af9f45fdbf277d1c9701362ec"
+      }
+    ],
+    "virtual_prefetcher_summary": {
+      "path": "/home/aiscuser/virtual-lab-PASTE/src/virtual_lab/prefetcher.py",
+      "sha256": "6326c56cbcbdf873971eb35c7efc6812589e947d5000c53911e5de1834f46db4"
+    },
+    "virtual_tongyi_loso": [
+      {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/traces/tongyi_live_train_v3_eutils_20260823T231451Z/sessions/train_alpha_fold_drug_discovery/trace.json",
+        "sha256": "bab721dd44dd6de0c76e46bd2e36cfd94024f4050c32e03d0f29d48a6436d44b"
+      },
+      {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/traces/tongyi_live_train_v3_eutils_20260823T231451Z/sessions/train_alzheimer_biomarkers/trace.json",
+        "sha256": "57fd91c4bdf5ce26ab34fea084c52f9f9e7c5b3254a110736b0a436424ae7f58"
+      },
+      {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/traces/tongyi_live_train_v3_eutils_20260823T231451Z/sessions/train_antimicrobial_resistance/trace.json",
+        "sha256": "f9d0dd35c407fb1b9c0a137d46e93bec4a93cb6c7a4e8c248c1785e2caec8ed4"
+      },
+      {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/traces/tongyi_live_train_v3_eutils_20260823T231451Z/sessions/train_car_t_solid_tumor/trace.json",
+        "sha256": "8739247345559729e986847720c29d3e81bb1c8b754b1cab6d41c8bc14764e41"
+      },
+      {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/traces/tongyi_live_train_v3_eutils_20260823T231451Z/sessions/train_crispr_off_target/trace.json",
+        "sha256": "f35960e92c22f38000d5f1ea3ee381b782c6f9747ec0b772f25061116d538728"
+      },
+      {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/traces/tongyi_live_train_v3_eutils_20260823T231451Z/sessions/train_lupus_precision_therapy/trace.json",
+        "sha256": "bd1138f54d0ef8b48bad7155431adf5685f8448a1d5a45e1a20295520c8c9d7b"
+      },
+      {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/traces/tongyi_live_train_v3_eutils_20260823T231451Z/sessions/train_microbiome_parkinson/trace.json",
+        "sha256": "e9f73ffbe9dd1cc6d9ca093a141d0345c0a3136d0a1337e8b12ffcd18245c2dc"
+      },
+      {
+        "path": "/home/aiscuser/virtual-lab-PASTE/reproduction/traces/tongyi_live_train_v3_eutils_20260823T231451Z/sessions/train_mrna_cancer_vaccine/trace.json",
+        "sha256": "e7ee78be768884fde1ae59008e51669df5ca84fcf31b89095e13c03ff3454609"
+      }
+    ]
+  }
+}

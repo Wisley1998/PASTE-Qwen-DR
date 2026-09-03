@@ -1,0 +1,10 @@
+dataset,metric_scope,budget,opportunities,decisions_with_targets,targets,target_hits,target_recall,decision_hits,decision_hit_rate,unthrottled_selected_predictions,useful_candidates,candidate_precision
+qwen_url_exact_heldout,exact URL invocation / authoritative URL target,1,34,34,88,17,0.19318181818181818,17,0.5,34,17,0.5
+qwen_url_exact_heldout,exact URL invocation / authoritative URL target,3,34,34,88,38,0.4318181818181818,25,0.7352941176470589,102,38,0.37254901960784315
+qwen_url_exact_heldout,exact URL invocation / authoritative URL target,5,34,34,88,49,0.5568181818181818,26,0.7647058823529411,170,49,0.28823529411764703
+virtual_tongyi_url_exact_loso,exact URL invocation / physically successful fetch,1,16,16,16,15,0.9375,15,0.9375,16,15,0.9375
+virtual_tongyi_url_exact_loso,exact URL invocation / physically successful fetch,3,16,16,16,16,1.0,16,1.0,31,16,0.5161290322580645
+virtual_tongyi_url_exact_loso,exact URL invocation / physically successful fetch,5,16,16,16,16,1.0,16,1.0,31,16,0.5161290322580645
+gemini_safe_tool_name_heldout,tool-name ranking only / safe-local target; not exact arguments or promotion,1,81,28,28,8,0.2857142857142857,8,0.2857142857142857,81,8,0.09876543209876543
+gemini_safe_tool_name_heldout,tool-name ranking only / safe-local target; not exact arguments or promotion,3,81,28,28,24,0.8571428571428571,24,0.8571428571428571,243,24,0.09876543209876543
+gemini_safe_tool_name_heldout,tool-name ranking only / safe-local target; not exact arguments or promotion,5,81,28,28,27,0.9642857142857143,27,0.9642857142857143,382,27,0.07068062827225131

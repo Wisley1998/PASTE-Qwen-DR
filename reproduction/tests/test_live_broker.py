@@ -13,6 +13,776 @@ from paste_repro.live_executor import SyncToolMapExecutor, WikipediaLiveExecutor
 
 
 class LiveToolBrokerTests(unittest.IsolatedAsyncioTestCase):
+    async def test_isolated_slice_preserves_baseline_authority_caps(
+        self,
+    ) -> None:
+        speculative_started = asyncio.Event()
+        two_authorities_started = asyncio.Event()
+        release_speculation = asyncio.Event()
+        release_authority = asyncio.Event()
+        authority_starts = 0
+
+        async def executor(invocation: Invocation) -> str:
+            nonlocal authority_starts
+            value = str(invocation.arguments["url"])
+            if value.endswith("speculative"):
+                speculative_started.set()
+                await release_speculation.wait()
+            else:
+                authority_starts += 1
+                if authority_starts == 2:
+                    two_authorities_started.set()
+                await release_authority.wait()
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=3,
+            max_speculative_workers=1,
+            max_authoritative_workers=2,
+            tool_capacities={"visit": 3},
+            authoritative_tool_capacities={"visit": 2},
+            authoritative_tool_reserves={"visit": 2},
+            ttl_s=10.0,
+        )
+        await broker.speculate(
+            Invocation(
+                "visit", {"url": "https://example.test/speculative"}
+            ),
+            session_id="speculative",
+        )
+        await asyncio.wait_for(speculative_started.wait(), timeout=1)
+        calls = [
+            asyncio.create_task(
+                broker.authoritative(
+                    Invocation(
+                        "visit", {"url": f"https://example.test/auth-{index}"}
+                    ),
+                    session_id=f"auth-{index}",
+                )
+            )
+            for index in range(3)
+        ]
+        await asyncio.wait_for(two_authorities_started.wait(), timeout=1)
+        await asyncio.sleep(0)
+
+        snapshot = broker.snapshot()
+        self.assertEqual(snapshot["counts"]["running_speculative"], 1)
+        self.assertEqual(snapshot["counts"]["running_authoritative"], 2)
+        self.assertEqual(snapshot["counts"]["queued_authoritative"], 1)
+        self.assertEqual(snapshot["capacity"]["max_authoritative_workers"], 2)
+        self.assertEqual(
+            snapshot["capacity"]["authoritative_tool_capacities"],
+            {"visit": 2},
+        )
+
+        release_authority.set()
+        await asyncio.gather(*calls)
+        release_speculation.set()
+        await broker.cancel_predictions()
+        stats = broker.stats.to_dict()
+        self.assertLessEqual(stats["max_running_authoritative"], 2)
+        self.assertLessEqual(
+            stats["max_running_authoritative_by_tool"]["visit"], 2
+        )
+        await broker.close()
+
+    async def test_authority_does_not_wait_for_expired_running_cleanup(
+        self,
+    ) -> None:
+        now = [0.0]
+        speculative_started = asyncio.Event()
+        release_speculation = asyncio.Event()
+
+        async def executor(invocation: Invocation) -> str:
+            value = str(invocation.arguments["url"])
+            if value.endswith("speculative"):
+                speculative_started.set()
+                physical = asyncio.create_task(release_speculation.wait())
+                try:
+                    await asyncio.shield(physical)
+                except asyncio.CancelledError:
+                    await asyncio.shield(physical)
+                    raise
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=2,
+            max_speculative_workers=1,
+            ttl_s=1.0,
+            clock=lambda: now[0],
+        )
+        await broker.speculate(
+            Invocation(
+                "visit", {"url": "https://example.test/speculative"}
+            ),
+            session_id="speculative",
+        )
+        await asyncio.wait_for(speculative_started.wait(), timeout=1)
+        now[0] = 2.0
+
+        result = await asyncio.wait_for(
+            broker.authoritative(
+                Invocation(
+                    "visit", {"url": "https://example.test/authority"}
+                ),
+                session_id="authority",
+            ),
+            timeout=0.1,
+        )
+        self.assertEqual(result.source, "executed")
+
+        release_speculation.set()
+        await broker.cancel_predictions()
+        await broker.close()
+
+    async def test_strict_authority_does_not_join_running_prediction(
+        self,
+    ) -> None:
+        speculative_started = asyncio.Event()
+        release_speculation = asyncio.Event()
+        calls = 0
+
+        async def executor(_: Invocation) -> str:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                speculative_started.set()
+                await release_speculation.wait()
+                return "speculative"
+            return "fresh-authority"
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=2,
+            max_speculative_workers=1,
+            ttl_s=10.0,
+        )
+        invocation = Invocation(
+            "visit", {"url": "https://example.test/exact"}
+        )
+        await broker.speculate(invocation, session_id="strict")
+        await asyncio.wait_for(speculative_started.wait(), timeout=1)
+
+        result = await asyncio.wait_for(
+            broker.authoritative(
+                invocation,
+                session_id="strict",
+                reuse_running_speculation=False,
+            ),
+            timeout=0.1,
+        )
+        self.assertEqual(result.source, "executed")
+        self.assertEqual(result.result, "fresh-authority")
+        self.assertEqual(calls, 2)
+
+        release_speculation.set()
+        await broker.cancel_predictions(session_id="strict")
+        for _ in range(20):
+            if not broker.snapshot()["jobs"]:
+                break
+            await asyncio.sleep(0)
+        speculative_record = next(
+            row for row in broker.tool_records() if row["speculative"]
+        )
+        self.assertTrue(speculative_record["exact_match"])
+        self.assertFalse(speculative_record["committed"])
+        self.assertEqual(
+            speculative_record["source"], "race_speculation_loser"
+        )
+        await broker.close()
+
+    async def test_strict_running_race_returns_speculation_winner(
+        self,
+    ) -> None:
+        speculative_started = asyncio.Event()
+        backup_started = asyncio.Event()
+        release_speculation = asyncio.Event()
+        release_backup = asyncio.Event()
+        calls = 0
+
+        async def executor(_: Invocation) -> str:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                speculative_started.set()
+                await release_speculation.wait()
+                return "speculative"
+            backup_started.set()
+            await release_backup.wait()
+            return "backup"
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=2,
+            max_speculative_workers=1,
+            max_authoritative_workers=1,
+            tool_capacities={"visit": 2},
+            authoritative_tool_capacities={"visit": 1},
+            authoritative_tool_reserves={"visit": 1},
+            ttl_s=10.0,
+        )
+        invocation = Invocation(
+            "visit", {"url": "https://example.test/race"}
+        )
+        await broker.speculate(invocation, session_id="race")
+        await asyncio.wait_for(speculative_started.wait(), timeout=1)
+        authority = asyncio.create_task(
+            broker.authoritative(
+                invocation,
+                session_id="race",
+                reuse_running_speculation=False,
+            )
+        )
+        await asyncio.wait_for(backup_started.wait(), timeout=1)
+        release_speculation.set()
+        result = await asyncio.wait_for(authority, timeout=0.1)
+
+        self.assertEqual(result.source, "promoted_inflight")
+        self.assertEqual(result.result, "speculative")
+        self.assertFalse(release_backup.is_set())
+        self.assertEqual(broker.stats.speculative_race_wins, 1)
+        self.assertEqual(broker.stats.commits, 1)
+
+        release_backup.set()
+        for _ in range(20):
+            if not broker.snapshot()["jobs"]:
+                break
+            await asyncio.sleep(0)
+        self.assertEqual(broker.snapshot()["jobs"], [])
+        backup_record = next(
+            row
+            for row in broker.tool_records()
+            if row["race_role"] == "authority_backup"
+        )
+        self.assertFalse(backup_record["committed"])
+        self.assertEqual(backup_record["source"], "race_backup_loser")
+        await broker.close()
+
+    async def test_strict_running_race_ignores_speculative_failure(
+        self,
+    ) -> None:
+        speculative_started = asyncio.Event()
+        fail_speculation = asyncio.Event()
+        release_backup = asyncio.Event()
+        calls = 0
+
+        async def executor(_: Invocation) -> str:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                speculative_started.set()
+                await fail_speculation.wait()
+                raise RuntimeError("speculative failure")
+            await release_backup.wait()
+            return "backup"
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=2,
+            max_speculative_workers=1,
+            max_authoritative_workers=1,
+            ttl_s=10.0,
+        )
+        invocation = Invocation(
+            "visit", {"url": "https://example.test/failure-race"}
+        )
+        await broker.speculate(invocation, session_id="race")
+        await speculative_started.wait()
+        authority = asyncio.create_task(
+            broker.authoritative(
+                invocation,
+                session_id="race",
+                reuse_running_speculation=False,
+            )
+        )
+        fail_speculation.set()
+        await asyncio.sleep(0)
+        self.assertFalse(authority.done())
+        release_backup.set()
+        result = await asyncio.wait_for(authority, timeout=1)
+        self.assertEqual(result.source, "executed")
+        self.assertEqual(result.result, "backup")
+        self.assertEqual(calls, 2)
+        self.assertEqual(broker.stats.authoritative_race_wins, 1)
+        await broker.close()
+
+    async def test_strict_running_race_backup_failure_is_terminal(
+        self,
+    ) -> None:
+        speculative_started = asyncio.Event()
+        release_speculation = asyncio.Event()
+        calls = 0
+
+        async def executor(_: Invocation) -> str:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                speculative_started.set()
+                await release_speculation.wait()
+                return "late-speculation"
+            raise RuntimeError("baseline failure")
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=2,
+            max_speculative_workers=1,
+            max_authoritative_workers=1,
+            ttl_s=10.0,
+        )
+        invocation = Invocation(
+            "visit", {"url": "https://example.test/backup-failure"}
+        )
+        await broker.speculate(invocation, session_id="race")
+        await speculative_started.wait()
+
+        with self.assertRaisesRegex(RuntimeError, "baseline failure"):
+            await asyncio.wait_for(
+                broker.authoritative(
+                    invocation,
+                    session_id="race",
+                    reuse_running_speculation=False,
+                ),
+                timeout=0.1,
+            )
+        self.assertFalse(release_speculation.is_set())
+        release_speculation.set()
+        await broker.close()
+
+    async def test_speculate_batch_dispatches_global_highest_utility_first(
+        self,
+    ) -> None:
+        release = asyncio.Event()
+        started = asyncio.Event()
+        order: list[str] = []
+
+        async def executor(invocation: Invocation) -> str:
+            value = str(invocation.arguments["url"])
+            order.append(value)
+            started.set()
+            await release.wait()
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=1,
+            max_speculative_pending=4,
+            ttl_s=10,
+        )
+        admitted = await broker.speculate_batch(
+            (
+                (
+                    Invocation("visit", {"url": "https://example.test/low"}),
+                    "low",
+                    0.1,
+                ),
+                (
+                    Invocation("visit", {"url": "https://example.test/high"}),
+                    "high",
+                    0.9,
+                ),
+            )
+        )
+        self.assertEqual(admitted, (True, True))
+        await asyncio.wait_for(started.wait(), timeout=1)
+        self.assertEqual(order, ["https://example.test/high"])
+
+        cancellation = asyncio.create_task(broker.cancel_predictions())
+        release.set()
+        self.assertEqual(await asyncio.wait_for(cancellation, timeout=1), 2)
+        await broker.close()
+
+    async def test_higher_priority_replaces_lower_queued_prediction(
+        self,
+    ) -> None:
+        authority_started = asyncio.Event()
+        release_authority = asyncio.Event()
+        speculative_started = asyncio.Event()
+        started_urls: list[str] = []
+
+        async def executor(invocation: Invocation) -> str:
+            value = str(invocation.arguments["url"])
+            started_urls.append(value)
+            if value.endswith("authority"):
+                authority_started.set()
+                await release_authority.wait()
+            else:
+                speculative_started.set()
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=1,
+            max_speculative_pending=1,
+            ttl_s=10.0,
+        )
+        authority = asyncio.create_task(
+            broker.authoritative(
+                Invocation(
+                    "visit", {"url": "https://example.test/authority"}
+                ),
+                session_id="authority",
+            )
+        )
+        await authority_started.wait()
+        low = Invocation("visit", {"url": "https://example.test/low"})
+        high = Invocation("visit", {"url": "https://example.test/high"})
+        self.assertTrue(
+            await broker.speculate(low, session_id="low", priority=0.1)
+        )
+        self.assertTrue(
+            await broker.speculate(
+                high,
+                session_id="high",
+                priority=0.9,
+                replace_lower_priority_queued=True,
+            )
+        )
+        pending = broker.snapshot()["jobs"]
+        self.assertEqual(
+            [job["session_id"] for job in pending if job["lane"] == "speculative"],
+            ["high"],
+        )
+        self.assertEqual(broker.stats.speculative_replaced_by_priority, 1)
+
+        release_authority.set()
+        await authority
+        await speculative_started.wait()
+        await broker.cancel_predictions()
+        self.assertNotIn("https://example.test/low", started_urls)
+        low_record = next(
+            row for row in broker.tool_records() if row["session_id"] == "low"
+        )
+        self.assertEqual(low_record["source"], "replaced_by_higher_priority")
+        self.assertEqual(low_record["service_s"], 0.0)
+        await broker.close()
+
+    async def test_speculate_batch_capacity_admits_highest_utility(self) -> None:
+        async def executor(_: Invocation) -> None:
+            raise AssertionError("zero speculative workers must not execute")
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=0,
+            max_speculative_pending=1,
+            ttl_s=10,
+        )
+        low = Invocation("visit", {"url": "https://example.test/low"})
+        high = Invocation("visit", {"url": "https://example.test/high"})
+        admitted = await broker.speculate_batch(
+            (
+                (low, "low", 0.1),
+                (high, "high", 0.9),
+            )
+        )
+
+        self.assertEqual(admitted, (False, True))
+        jobs = broker.snapshot()["jobs"]
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0]["session_id"], "high")
+        self.assertEqual(jobs[0]["priority"], 0.9)
+        self.assertEqual(broker.stats.rejected_speculative_capacity, 1)
+        await broker.cancel_predictions()
+        await broker.close()
+
+    async def test_start_deadline_validation_and_backward_compatibility(
+        self,
+    ) -> None:
+        calls: list[str] = []
+
+        async def executor(invocation: Invocation) -> str:
+            value = str(invocation.arguments["url"])
+            calls.append(value)
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=1,
+            ttl_s=10,
+        )
+        invocation = Invocation(
+            "visit", {"url": "https://example.test/compat"}
+        )
+        for invalid in (math.inf, -math.inf, math.nan, True):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(ValueError, "must be finite"):
+                    await broker.speculate(
+                        invocation,
+                        start_deadline=invalid,  # type: ignore[arg-type]
+                    )
+        with self.assertRaisesRegex(ValueError, "must be finite"):
+            await broker.speculate_batch(
+                ((invocation, "batch", 1.0),),
+                start_deadline=math.inf,
+            )
+
+        # Existing callers need not provide a deadline.
+        self.assertTrue(await broker.speculate(invocation, session_id="compat"))
+        for _ in range(10):
+            if calls:
+                break
+            await asyncio.sleep(0)
+        self.assertEqual(calls, ["https://example.test/compat"])
+        await broker.cancel_predictions()
+        await broker.close()
+
+    async def test_elapsed_start_deadline_is_rejected_without_execution(
+        self,
+    ) -> None:
+        now = [10.0]
+        calls: list[str] = []
+
+        async def executor(invocation: Invocation) -> str:
+            calls.append(str(invocation.arguments["url"]))
+            return calls[-1]
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=1,
+            ttl_s=100,
+            clock=lambda: now[0],
+        )
+        admitted = await broker.speculate(
+            Invocation("visit", {"url": "https://example.test/late"}),
+            session_id="late",
+            priority=0.9,
+            start_deadline=10.0,
+        )
+
+        self.assertFalse(admitted)
+        self.assertEqual(calls, [])
+        self.assertEqual(broker.pending_speculative_count, 0)
+        self.assertEqual(broker.stats.rejected_speculative_deadline, 1)
+        record = broker.tool_records()[0]
+        self.assertFalse(record["admitted"])
+        self.assertEqual(record["outcome"], "rejected_start_deadline")
+        self.assertEqual(record["expiration_reason"], "start_deadline")
+        self.assertEqual(record["start_deadline"], 10.0)
+        self.assertEqual(record["deadline_missed_by_s"], 0.0)
+        self.assertIsNone(record["started_at"])
+        await broker.close()
+
+    async def test_queued_prediction_does_not_start_after_deadline(self) -> None:
+        now = [0.0]
+        authority_started = asyncio.Event()
+        release_authority = asyncio.Event()
+        calls: list[str] = []
+
+        async def executor(invocation: Invocation) -> str:
+            value = str(invocation.arguments["url"])
+            calls.append(value)
+            if value.endswith("authority"):
+                authority_started.set()
+                await release_authority.wait()
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=1,
+            max_speculative_pending=2,
+            ttl_s=100,
+            clock=lambda: now[0],
+        )
+        authority = asyncio.create_task(
+            broker.authoritative(
+                Invocation(
+                    "visit", {"url": "https://example.test/authority"}
+                ),
+                session_id="authority",
+            )
+        )
+        await asyncio.wait_for(authority_started.wait(), timeout=1)
+        self.assertTrue(
+            await broker.speculate(
+                Invocation("visit", {"url": "https://example.test/late"}),
+                session_id="late",
+                priority=0.9,
+                start_deadline=5.0,
+            )
+        )
+        queued = broker.snapshot(session_id="late")["jobs"][0]
+        self.assertEqual(queued["state"], "queued")
+        self.assertEqual(queued["start_deadline"], 5.0)
+        self.assertEqual(queued["start_deadline_in_s"], 5.0)
+        self.assertEqual(queued["expires_at"], 100.0)
+
+        now[0] = 6.0
+        release_authority.set()
+        self.assertEqual(
+            (await asyncio.wait_for(authority, timeout=1)).result,
+            "https://example.test/authority",
+        )
+        await asyncio.sleep(0)
+
+        self.assertEqual(calls, ["https://example.test/authority"])
+        self.assertEqual(broker.pending_speculative_count, 0)
+        self.assertEqual(broker.stats.speculative_started, 0)
+        self.assertEqual(broker.stats.speculative_expired, 1)
+        self.assertEqual(
+            broker.stats.speculative_deadline_expired_before_start, 1
+        )
+        late_record = next(
+            row for row in broker.tool_records() if row["session_id"] == "late"
+        )
+        self.assertEqual(late_record["outcome"], "expired")
+        self.assertEqual(late_record["expiration_reason"], "start_deadline")
+        self.assertEqual(late_record["start_deadline"], 5.0)
+        self.assertEqual(late_record["expires_at"], 100.0)
+        self.assertEqual(late_record["deadline_missed_by_s"], 1.0)
+        self.assertIsNone(late_record["started_at"])
+        self.assertEqual(late_record["service_s"], 0.0)
+        await broker.close()
+
+    async def test_running_prediction_survives_start_deadline_and_promotes(
+        self,
+    ) -> None:
+        now = [0.0]
+        started = asyncio.Event()
+        release = asyncio.Event()
+        invocation = Invocation(
+            "visit", {"url": "https://example.test/inflight"}
+        )
+
+        async def executor(_: Invocation) -> str:
+            started.set()
+            await release.wait()
+            return "inflight"
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=1,
+            ttl_s=100,
+            clock=lambda: now[0],
+        )
+        self.assertTrue(
+            await broker.speculate(
+                invocation,
+                session_id="inflight",
+                start_deadline=5.0,
+            )
+        )
+        await asyncio.wait_for(started.wait(), timeout=1)
+
+        now[0] = 6.0
+        self.assertEqual(await broker.sweep(now=6.0), 0)
+        self.assertEqual(broker.pending_speculative_count, 1)
+        self.assertEqual(
+            broker.snapshot()["counts"]["running_speculative"], 1
+        )
+        authoritative = asyncio.create_task(
+            broker.authoritative(invocation, session_id="inflight")
+        )
+        await asyncio.sleep(0)
+        release.set()
+        committed = await asyncio.wait_for(authoritative, timeout=1)
+        self.assertEqual(committed.source, "promoted_inflight")
+        self.assertEqual(committed.result, "inflight")
+        self.assertEqual(broker.stats.speculative_expired, 0)
+        await broker.close()
+
+    async def test_authoritative_tool_reserve_keeps_visit_slot_available(
+        self,
+    ) -> None:
+        release = asyncio.Event()
+        authority_started = asyncio.Event()
+        starts: list[str] = []
+
+        async def executor(invocation: Invocation) -> str:
+            value = str(invocation.arguments["url"])
+            starts.append(value)
+            if value.endswith("authority"):
+                authority_started.set()
+            await release.wait()
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=4,
+            max_speculative_workers=2,
+            max_speculative_pending=4,
+            tool_capacities={"visit": 2},
+            authoritative_tool_reserves={"visit": 1},
+            ttl_s=10,
+        )
+        self.assertEqual(
+            await broker.speculate_batch(
+                (
+                    (
+                        Invocation(
+                            "visit", {"url": "https://example.test/spec-1"}
+                        ),
+                        "spec-1",
+                        0.9,
+                    ),
+                    (
+                        Invocation(
+                            "visit", {"url": "https://example.test/spec-2"}
+                        ),
+                        "spec-2",
+                        0.8,
+                    ),
+                )
+            ),
+            (True, True),
+        )
+        for _ in range(20):
+            if len(starts) == 1:
+                break
+            await asyncio.sleep(0)
+        self.assertEqual(len(starts), 1)
+        self.assertEqual(
+            broker.snapshot()["capacity"]["authoritative_tool_reserves"],
+            {"visit": 1},
+        )
+
+        authority = asyncio.create_task(
+            broker.authoritative(
+                Invocation(
+                    "visit", {"url": "https://example.test/authority"}
+                ),
+                session_id="authority",
+            )
+        )
+        await asyncio.wait_for(authority_started.wait(), timeout=1)
+        self.assertEqual(len(starts), 2)
+        self.assertEqual(
+            broker.snapshot()["counts"]["running_speculative"],
+            1,
+        )
+        release.set()
+        self.assertEqual((await authority).result, "https://example.test/authority")
+        await broker.cancel_predictions()
+        self.assertLessEqual(
+            broker.stats.max_running_speculative_by_tool.get("visit", 0),
+            1,
+        )
+        await broker.close()
+
+    def test_minimum_speculation_rejects_fully_reserved_tool(self) -> None:
+        async def executor(_: Invocation) -> None:
+            return None
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "authoritative tool reserve",
+        ):
+            LiveToolBroker(
+                executor,
+                max_workers=2,
+                max_speculative_workers=1,
+                min_speculative_workers=1,
+                tool_capacities={"visit": 2},
+                authoritative_tool_reserves={"visit": 2},
+            )
+
     async def test_per_tool_capacity_is_shared_and_does_not_idle_other_tools(
         self,
     ) -> None:
@@ -541,6 +1311,35 @@ class LiveToolBrokerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(broker.stats.commits, 1)
         await broker.close()
 
+    async def test_failed_queued_promotion_is_not_retried(self) -> None:
+        attempts = 0
+
+        async def executor(_: Invocation) -> None:
+            nonlocal attempts
+            attempts += 1
+            raise RuntimeError("baseline-equivalent failure")
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=0,
+            ttl_s=10,
+        )
+        invocation = Invocation("visit", {"url": "queued-exact"})
+        self.assertTrue(
+            await broker.speculate(invocation, session_id="s")
+        )
+
+        with self.assertRaisesRegex(
+            RuntimeError, "baseline-equivalent failure"
+        ):
+            await broker.authoritative(invocation, session_id="s")
+
+        self.assertEqual(attempts, 1)
+        self.assertEqual(broker.stats.queued_promotions, 1)
+        self.assertEqual(broker.stats.commits, 0)
+        await broker.close()
+
     async def test_ineligible_canary_bypasses_an_exact_prediction(self) -> None:
         calls = 0
 
@@ -863,6 +1662,132 @@ class LiveToolBrokerTests(unittest.IsolatedAsyncioTestCase):
             self.assertIsNone(record[field])
 
         await broker.cancel_predictions(session_id="running")
+        await broker.close()
+
+    async def test_bulk_cancel_detaches_queued_siblings_before_draining(self) -> None:
+        release = asyncio.Event()
+        two_started = asyncio.Event()
+        started: list[str] = []
+
+        async def executor(invocation: Invocation) -> str:
+            value = str(invocation.arguments["url"])
+            started.append(value)
+            if len(started) == 2:
+                two_started.set()
+            physical = asyncio.create_task(release.wait())
+            try:
+                await asyncio.shield(physical)
+            except asyncio.CancelledError:
+                await asyncio.shield(physical)
+                raise
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=2,
+            max_speculative_workers=2,
+            max_speculative_pending=8,
+            ttl_s=10,
+        )
+        for index in range(5):
+            self.assertTrue(
+                await broker.speculate(
+                    Invocation("visit", {"url": f"https://example.test/{index}"}),
+                    session_id="batch",
+                )
+            )
+        await asyncio.wait_for(two_started.wait(), timeout=1)
+
+        cancellation = asyncio.create_task(
+            broker.cancel_predictions(session_id="batch")
+        )
+        for _ in range(20):
+            if broker.pending_speculative_count == 0:
+                break
+            await asyncio.sleep(0)
+        self.assertEqual(broker.pending_speculative_count, 0)
+        self.assertFalse(cancellation.done())
+        self.assertEqual(len(started), 2)
+
+        release.set()
+        self.assertEqual(
+            await asyncio.wait_for(cancellation, timeout=1),
+            5,
+        )
+        self.assertEqual(len(started), 2)
+        never_started = [
+            record
+            for record in broker.tool_records()
+            if record["started_at"] is None
+        ]
+        self.assertEqual(len(never_started), 3)
+        self.assertTrue(all(record["service_s"] == 0.0 for record in never_started))
+        await broker.close()
+
+    async def test_sweep_detaches_all_expired_before_draining_runner(self) -> None:
+        now = [0.0]
+        release = asyncio.Event()
+        first_started = asyncio.Event()
+        started: list[str] = []
+
+        async def executor(invocation: Invocation) -> str:
+            value = str(invocation.arguments["url"])
+            started.append(value)
+            first_started.set()
+            physical = asyncio.create_task(release.wait())
+            try:
+                await asyncio.shield(physical)
+            except asyncio.CancelledError:
+                await asyncio.shield(physical)
+                raise
+            return value
+
+        broker = LiveToolBroker(
+            executor,
+            max_workers=1,
+            max_speculative_workers=1,
+            max_speculative_pending=8,
+            ttl_s=10,
+            clock=lambda: now[0],
+        )
+        requests = tuple(
+            (
+                Invocation(
+                    "visit", {"url": f"https://example.test/{index}"}
+                ),
+                "expired-batch",
+                float(5 - index),
+            )
+            for index in range(5)
+        )
+        self.assertEqual(
+            await broker.speculate_batch(requests),
+            (True, True, True, True, True),
+        )
+        await asyncio.wait_for(first_started.wait(), timeout=1)
+
+        sweeping = asyncio.create_task(broker.sweep(now=math.inf))
+        for _ in range(20):
+            if broker.pending_speculative_count == 0:
+                break
+            await asyncio.sleep(0)
+        self.assertEqual(broker.pending_speculative_count, 0)
+        self.assertFalse(sweeping.done())
+        self.assertEqual(len(started), 1)
+
+        release.set()
+        self.assertEqual(await asyncio.wait_for(sweeping, timeout=1), 5)
+        self.assertEqual(len(started), 1)
+        self.assertEqual(broker.stats.speculative_started, 1)
+        self.assertEqual(broker.stats.speculative_expired, 5)
+        never_started = [
+            record
+            for record in broker.tool_records()
+            if record["started_at"] is None
+        ]
+        self.assertEqual(len(never_started), 4)
+        self.assertTrue(all(record["outcome"] == "expired" for record in never_started))
+        self.assertTrue(all(record["service_s"] == 0.0 for record in never_started))
         await broker.close()
 
     async def test_failed_attempt_retains_planned_transport_identity(self) -> None:
@@ -1524,7 +2449,120 @@ class _ScriptedSession:
         return outcome
 
 
+class _DrainProbeContent(_FakeContent):
+    def __init__(self, value: bytes, *, delay_s: float) -> None:
+        super().__init__(value)
+        self._delay_s = delay_s
+
+    async def iter_chunked(self, _: int):
+        await asyncio.sleep(self._delay_s)
+        yield self._value
+
+
+class _DrainProbeResponse(_FakeResponse):
+    def __init__(
+        self,
+        *,
+        payload: dict[str, object] | None = None,
+        body: bytes = b"",
+        content_type: str = "application/json",
+        delay_s: float,
+        exited: asyncio.Event,
+    ) -> None:
+        super().__init__(payload=payload, body=body, content_type=content_type)
+        self._delay_s = delay_s
+        self._exited = exited
+        self.content = _DrainProbeContent(self._body, delay_s=delay_s)
+
+    async def read(self) -> bytes:
+        await asyncio.sleep(self._delay_s)
+        return self._body
+
+    async def __aexit__(self, *_: object) -> None:
+        self._exited.set()
+
+
+class _ConcurrentFailureSession:
+    def __init__(self, exited: asyncio.Event) -> None:
+        self.exited = exited
+        self.calls: list[tuple[str, dict[str, object]]] = []
+
+    def get(self, url: str, **kwargs: object) -> _FakeResponse:
+        self.calls.append((url, kwargs))
+        params = kwargs.get("params")
+        query = params.get("q") if isinstance(params, dict) else None
+        identity = str(query or url)
+        if "bad" in identity:
+            return _FakeResponse(status=503, body=b"failed")
+        if isinstance(params, dict):
+            return _DrainProbeResponse(
+                payload={"pages": []},
+                delay_s=0.01,
+                exited=self.exited,
+            )
+        return _DrainProbeResponse(
+            body=b"<html><body>drained</body></html>",
+            content_type="text/html",
+            delay_s=0.01,
+            exited=self.exited,
+        )
+
+
 class WikipediaLiveExecutorTests(unittest.IsolatedAsyncioTestCase):
+    async def test_search_batch_failure_drains_siblings_and_aggregates_attempts(
+        self,
+    ) -> None:
+        exited = asyncio.Event()
+        session = _ConcurrentFailureSession(exited)
+        executor = WikipediaLiveExecutor(session=session, max_http_attempts=1)
+
+        with self.assertRaises(_FakeHTTPStatusError) as caught:
+            await executor(
+                Invocation("search", {"query": ["bad query", "slow query"]})
+            )
+
+        self.assertTrue(exited.is_set())
+        self.assertEqual(len(session.calls), 2)
+        ledger = caught.exception.paste_http_attempt_log
+        self.assertEqual({entry["request_index"] for entry in ledger}, {0, 1})
+        self.assertEqual(
+            {entry["request_index"]: entry["status"] for entry in ledger},
+            {0: 503, 1: 200},
+        )
+        self.assertEqual(caught.exception.paste_http_batch_failure_indexes, (0,))
+        await executor.close()
+
+    async def test_visit_batch_failure_drains_siblings_and_aggregates_attempts(
+        self,
+    ) -> None:
+        exited = asyncio.Event()
+        session = _ConcurrentFailureSession(exited)
+        executor = WikipediaLiveExecutor(session=session, max_http_attempts=1)
+
+        with self.assertRaises(_FakeHTTPStatusError) as caught:
+            await executor(
+                Invocation(
+                    "visit",
+                    {
+                        "url": [
+                            "https://example.test/bad",
+                            "https://example.test/slow",
+                        ]
+                    },
+                )
+            )
+
+        self.assertTrue(exited.is_set())
+        self.assertEqual(len(session.calls), 2)
+        ledger = caught.exception.paste_http_attempt_log
+        self.assertEqual({entry["request_index"] for entry in ledger}, {0, 1})
+        self.assertEqual(
+            {entry["request_index"]: entry["status"] for entry in ledger},
+            {0: 503, 1: 200},
+        )
+        self.assertEqual(caught.exception.paste_http_batch_failure_indexes, (0,))
+        await executor.close()
+
     async def test_real_aiohttp_internal_connection_retry_is_disabled(self) -> None:
         import aiohttp
 

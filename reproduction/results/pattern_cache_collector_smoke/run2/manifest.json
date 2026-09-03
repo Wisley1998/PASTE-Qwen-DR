@@ -1,0 +1,76 @@
+{
+  "artifact_type": "paste_repro.multiturn_qwen_collection_manifest",
+  "authentication_configured": false,
+  "collection_status": "complete",
+  "collector_source_sha256": "d541086b63b7002afeb49a425e21afa0121fbd50bbc1050b34621556c7b6c5be",
+  "completed_at_utc": "2026-08-31T10:45:49.790255Z",
+  "config": {
+    "chat_completion_url": "http://127.0.0.1:8200/v1/chat/completions",
+    "endpoint": "http://127.0.0.1:8200",
+    "max_calls": 9,
+    "max_output_tokens": 8192,
+    "model": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B",
+    "request_timeout_s": 300.0,
+    "seed": 0,
+    "temperature": 0.0,
+    "tool": {
+      "executor": "WikipediaLiveExecutor",
+      "http_attempt_min_start_intervals_s": {
+        "search": 1.0,
+        "visit": 1.0
+      },
+      "max_http_attempts": 2,
+      "max_search_results": 5,
+      "max_visit_urls": 6,
+      "retry_backoff_s": 5.0,
+      "search_min_start_interval_s": 1.0,
+      "search_mode": "bing",
+      "timeout_s": 20.0,
+      "visit_min_start_interval_s": 1.0,
+      "visit_mode": "jina"
+    },
+    "top_p": 1.0
+  },
+  "prompt_policy_version": "tongyi_deepresearch_wikipedia_multiturn_v1",
+  "prompt_sha256": "fcc8c9dea968dd335d22709ef675bcb8991d05746ba1c2aa1d481dc6da915c67",
+  "schema_version": 1,
+  "sessions": [
+    {
+      "completed_at_utc": "2026-08-31T10:45:49.786341Z",
+      "event_count": 11,
+      "final_answer_sha256": "3a2a9058803dcd5b38051fc87754d1a03fbcab2fb269f73df303a5ce854b91ff",
+      "llm_calls": 5,
+      "provenance": {
+        "evaluation_eligible": false,
+        "purpose": "collector integration smoke only",
+        "synthetic": true
+      },
+      "question_sha256": "545139a3cd0df0d231839a4af51deec76d1232fa42c5c9ee959831f802d197c4",
+      "session_id": "0001-smoke_photosynthesis",
+      "source_id": "smoke_photosynthesis",
+      "source_sha256": "2ecbaeea7a20b0dba0061db38de1e2484b7779d4c06c44b0bb68bb30fc477dfa",
+      "started_at_utc": "2026-08-31T10:44:13.764059Z",
+      "status": "succeeded",
+      "tool_calls": 4,
+      "trace_file": "0001-smoke_photosynthesis.jsonl",
+      "trace_sha256": "6da3ff25b77a3531bda2ec542d6f3b87adf7c27ec0021e8546822b3128fd1698"
+    }
+  ],
+  "started_at_utc": "2026-08-31T10:44:13.761987Z",
+  "summary": {
+    "failed": 0,
+    "session_count": 1,
+    "succeeded": 1
+  },
+  "trace_schema": "paste_repro.legacy_event_jsonl_v1",
+  "workload": {
+    "file_name": "multiturn_collector_smoke_v1.json",
+    "file_sha256": "563350de815df74aa2868b25aa8e9fc066d292d428b6a14666d879a49d38e28f",
+    "ordered_source_ids": [
+      "smoke_photosynthesis"
+    ],
+    "schema_version": 1,
+    "source_count": 1,
+    "workload_id": "multiturn-collector-smoke-v1"
+  }
+}

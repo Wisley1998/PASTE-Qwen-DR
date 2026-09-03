@@ -1,0 +1,27 @@
+{
+  "baseline_model_artifact_sha256": "30a0cb7c58b35a29603ea6a805e17d09fca9fa6542a3e186c461ca303902bc56",
+  "challenger_model_artifact_sha256": "1660479ba4dbb05f926f154cbf19512a58a30dfdf56ce036a38f6c2c5d937bcc",
+  "completed": true,
+  "frozen_protocol_sha256": "bbb3cac2c253b01a8503bf0841734f45b8afca01eea6e09b0e42fc72b3ed872c",
+  "manifest_sha256": "5fd16fd4ca151d4d174aad2b3c85115bbbe9229f67ad84af080ecdb5cac8f687",
+  "metrics_sha256": "1285f61de10c5617fb86957856db0a0e6b7e20c409239916636f22f7ca527acd",
+  "outer_result_was_not_used_for_model_changes": true,
+  "outer_started_file_sha256": "3ecc736a2f01222d6fd1515797a6e719624939c5a82df6dcce5aa2cc79d1862f",
+  "outer_started_manifest_sha256": "17726260a1f9c738af21fd1780ec8805e54670de02ed87bc03a481841264a849",
+  "predictions_sha256": "fe21a5def2c0d024d61555c4d98293e3d22f0ca6e330d540684e4148118bb526",
+  "promotion_decision": {
+    "accepted": false,
+    "latency_gate": true,
+    "rule": "online p99 and observed max <100ms; outer Top-5 hits strictly greater than M0; outer Top-1 and Top-3 hits each no lower than M0",
+    "selected_model": "M0_rank_only",
+    "top1_noninferior": false,
+    "top3_noninferior": false,
+    "top5_strictly_better": true
+  },
+  "provenance_sha256": "6cc21984173a474ef9d0531fafa6bacf03aaa2540db8c65eb8b2867867c0cb5f",
+  "report_sha256": "63b43477cbbf073d7ff2f72ab87a970fda6e0b55a7a5bbe73a854a2bfc70cf86",
+  "schema": "paste_repro.predictor_outer_completion",
+  "selected_model": "M0_rank_only",
+  "selected_model_artifact_sha256": "30a0cb7c58b35a29603ea6a805e17d09fca9fa6542a3e186c461ca303902bc56",
+  "version": 1
+}

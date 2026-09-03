@@ -1,0 +1,71 @@
+{
+  "artifact_type": "paste_repro.multiturn_qwen_collection_manifest",
+  "authentication_configured": false,
+  "collection_status": "complete_with_failures",
+  "collector_source_sha256": "62979afcf4a7ce4d17f5db5ac2c35acc9d40053b2d0d998d0e2f1954562c23c9",
+  "completed_at_utc": "2026-08-31T10:40:18.339050Z",
+  "config": {
+    "chat_completion_url": "http://127.0.0.1:8200/v1/chat/completions",
+    "endpoint": "http://127.0.0.1:8200",
+    "max_calls": 9,
+    "max_output_tokens": 8192,
+    "model": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B",
+    "request_timeout_s": 300.0,
+    "seed": 0,
+    "temperature": 0.0,
+    "tool": {
+      "executor": "WikipediaLiveExecutor",
+      "max_http_attempts": 1,
+      "max_search_results": 5,
+      "max_visit_urls": 6,
+      "search_mode": "rest",
+      "timeout_s": 20.0,
+      "visit_mode": "direct"
+    },
+    "top_p": 1.0
+  },
+  "prompt_policy_version": "tongyi_deepresearch_wikipedia_multiturn_v1",
+  "prompt_sha256": "fcc8c9dea968dd335d22709ef675bcb8991d05746ba1c2aa1d481dc6da915c67",
+  "schema_version": 1,
+  "sessions": [
+    {
+      "completed_at_utc": "2026-08-31T10:40:18.337751Z",
+      "error_message": "429, message='Too many requests. Please respect our robot policy https://w.wiki/4wJS. (a6ad963)', url='https://en.wikipedia.org/w/rest.php/v1/search/page?q=Chemosynthesis+Wikipedia&limit=5'",
+      "error_type": "ClientResponseError",
+      "event_count": 7,
+      "final_answer_sha256": null,
+      "llm_calls": 2,
+      "provenance": {
+        "evaluation_eligible": false,
+        "purpose": "collector integration smoke only",
+        "synthetic": true
+      },
+      "question_sha256": "545139a3cd0df0d231839a4af51deec76d1232fa42c5c9ee959831f802d197c4",
+      "session_id": "0001-smoke_photosynthesis",
+      "source_id": "smoke_photosynthesis",
+      "source_sha256": "2ecbaeea7a20b0dba0061db38de1e2484b7779d4c06c44b0bb68bb30fc477dfa",
+      "started_at_utc": "2026-08-31T10:40:06.834539Z",
+      "status": "failed",
+      "tool_calls": 2,
+      "trace_file": "0001-smoke_photosynthesis.jsonl",
+      "trace_sha256": "d97df21292e394bcbab5e29143d70a55d247cac7533922ee612d7516e87920f2"
+    }
+  ],
+  "started_at_utc": "2026-08-31T10:40:06.828097Z",
+  "summary": {
+    "failed": 1,
+    "session_count": 1,
+    "succeeded": 0
+  },
+  "trace_schema": "paste_repro.legacy_event_jsonl_v1",
+  "workload": {
+    "file_name": "multiturn_collector_smoke_v1.json",
+    "file_sha256": "563350de815df74aa2868b25aa8e9fc066d292d428b6a14666d879a49d38e28f",
+    "ordered_source_ids": [
+      "smoke_photosynthesis"
+    ],
+    "schema_version": 1,
+    "source_count": 1,
+    "workload_id": "multiturn-collector-smoke-v1"
+  }
+}

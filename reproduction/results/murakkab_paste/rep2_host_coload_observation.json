@@ -1,0 +1,156 @@
+{
+  "schema": "paste_repro.host_coload_observation",
+  "version": 1,
+  "captured_at_utc": "2026-08-31T10:42:48.194542535Z",
+  "captured_after_run": true,
+  "observation_scope": "Read-only process, nvidia-smi, state-file, and server-log evidence collected after the external co-load was noticed; this is not a continuous host-load trace.",
+  "affected_run": {
+    "run_tag": "m-fixed-v9-engineering-r2-20260831a",
+    "repetition": 2,
+    "timed_start_wall_s": 1788172394.5173404,
+    "timed_start_utc": "2026-08-31T10:33:14.517340Z",
+    "timed_end_wall_s": 1788172696.7057636,
+    "timed_end_utc": "2026-08-31T10:38:16.705764Z",
+    "runner_raw_result_path": "reproduction/artifacts/murakkab_fixed/live/m-fixed-v9-engineering-r2-20260831a/runner_raw/result.json",
+    "runner_raw_result_sha256": "e7e93f63e5fd0d6061389a2131c9671957fccf9de000a91805715054ef3de279",
+    "evidence_result_path": "reproduction/artifacts/murakkab_fixed/live/m-fixed-v9-engineering-r2-20260831a/evidence/result.json",
+    "evidence_result_sha256": "1d7c51744d946926bc94e8f400eb886eaa9d36a3985bc43337643fbf3ab3c634",
+    "completion_manifest_path": "reproduction/artifacts/murakkab_fixed/live/m-fixed-v9-engineering-r2-20260831a/completed_run.json",
+    "completion_manifest_sha256": "8cf8a78e12f93b4cc6f85b7dc01cdc374faa07365ca957bfc8c2894fc7c52830",
+    "hardware_before_path": "reproduction/artifacts/murakkab_fixed/live/m-fixed-v9-engineering-r2-20260831a/hardware_before.json",
+    "hardware_before_sha256": "b602be82c6754339d4f5e5539ec0badaffc2e90e758d68b96f301404e36dc95b",
+    "hardware_before_query_wall_s": 1788172242.979013,
+    "hardware_before_unregistered_compute_apps": [],
+    "hardware_after_path": "reproduction/artifacts/murakkab_fixed/live/m-fixed-v9-engineering-r2-20260831a/hardware_after.json",
+    "hardware_after_sha256": "38ffc97b131729e61633716094b1d76c8993c140b1f7496dc22d004cef9a5b1c",
+    "hardware_after_query_wall_s": 1788172706.385541
+  },
+  "external_vllm": {
+    "managed_by_this_murakkab_run": false,
+    "api_pid": 1725797,
+    "api_process_starttime_ticks": 27894815,
+    "api_process_start_wall_s": 1788172592.15,
+    "api_process_start_utc": "2026-08-31T10:36:32.150000Z",
+    "api_process_overlap_with_timed_run_s": 104.5557636,
+    "engine_pid": 1726901,
+    "engine_process_starttime_ticks": 27897252,
+    "engine_process_start_wall_s": 1788172616.52,
+    "worker_pids": [1727365, 1727366, 1727367, 1727368],
+    "worker_process_starttime_ticks": [27898187, 27898187, 27898188, 27898188],
+    "first_worker_start_wall_s": 1788172625.87,
+    "first_worker_start_utc": "2026-08-31T10:37:05.870000Z",
+    "worker_overlap_with_timed_run_s": 70.8357636,
+    "boot_id": "7b8ea543-1395-4b60-ac21-c96ad9430146",
+    "clock_ticks_per_second": 100,
+    "kernel_boot_time_wall_s": 1787893644,
+    "executable": "/home/aiscuser/.conda/envs/paste/bin/python3.10",
+    "cwd": "/home/aiscuser/PASTE-Qwen-DR",
+    "argv": [
+      "/home/aiscuser/.conda/envs/paste/bin/python",
+      "-m",
+      "vllm.entrypoints.openai.api_server",
+      "--model",
+      "/home/aiscuser/hf_cache/models--Alibaba-NLP--Tongyi-DeepResearch-30B-A3B/snapshots/4b0ac5767427a55d08a254f0367e2934976598e0",
+      "--served-model-name",
+      "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8200",
+      "--tensor-parallel-size",
+      "4",
+      "--disable-custom-all-reduce",
+      "--dtype",
+      "bfloat16",
+      "--max-model-len",
+      "114688",
+      "--gpu-memory-utilization",
+      "0.84",
+      "--enable-chunked-prefill",
+      "--max-num-batched-tokens",
+      "8192",
+      "--max-num-seqs",
+      "2",
+      "--disable-log-requests",
+      "--enable-prefix-caching",
+      "--cuda-graph-sizes",
+      "1"
+    ],
+    "listen_endpoint": "127.0.0.1:8200",
+    "state_pid_path": "reproduction/results/pattern_cache_newholdout/server_state/vllm_8200.pid",
+    "state_pid_sha256_at_capture": "406fc68deb27ace3cc69d11edc4319f1f65558705a7fa6341e2db345e91f6e26",
+    "state_policy_path": "reproduction/results/pattern_cache_newholdout/server_state/vllm_8200.policy",
+    "state_policy_sha256_at_capture": "3719e55bbf52ef96d81ca7594a8da7d44c8d2b5a61c6a5cc63e3fd90cc3d3bc4",
+    "server_log_path": "reproduction/results/pattern_cache_newholdout/server_logs/vllm_8200.log",
+    "server_log_size_bytes_at_capture": 134151,
+    "server_log_sha256_at_capture": "879b9694c142936c505ebaf1509e5b9ca61563d27d5e664b4263dcdda01321bf",
+    "server_log_last_modified_at_capture_utc": "2026-08-31T10:40:28.893866Z",
+    "server_became_ready_utc_from_log": "2026-08-31T10:38:38Z",
+    "server_became_ready_after_affected_run_ended": true
+  },
+  "external_gpu_compute_applications_in_bound_run_after_snapshot": [
+    {
+      "gpu_index": 0,
+      "gpu_uuid": "GPU-1c42e584-9bbb-6832-0b5d-fed1473774ef",
+      "pid": 1727365,
+      "used_memory_mib": 16168
+    },
+    {
+      "gpu_index": 1,
+      "gpu_uuid": "GPU-92dccf2e-0a88-609a-3563-1b037c1d3242",
+      "pid": 1727366,
+      "used_memory_mib": 15924
+    },
+    {
+      "gpu_index": 2,
+      "gpu_uuid": "GPU-e6778893-6687-19de-2d5e-2dd0e0bc811f",
+      "pid": 1727367,
+      "used_memory_mib": 16024
+    },
+    {
+      "gpu_index": 3,
+      "gpu_uuid": "GPU-e1f5aaf2-af55-97c0-1ae4-bdb8e849a0c7",
+      "pid": 1727368,
+      "used_memory_mib": 16068
+    }
+  ],
+  "gpu_compute_applications_at_capture": [
+    {
+      "gpu_index": 0,
+      "gpu_uuid": "GPU-1c42e584-9bbb-6832-0b5d-fed1473774ef",
+      "pid": 1727365,
+      "used_memory_mib": 34234
+    },
+    {
+      "gpu_index": 1,
+      "gpu_uuid": "GPU-92dccf2e-0a88-609a-3563-1b037c1d3242",
+      "pid": 1727366,
+      "used_memory_mib": 34226
+    },
+    {
+      "gpu_index": 2,
+      "gpu_uuid": "GPU-e6778893-6687-19de-2d5e-2dd0e0bc811f",
+      "pid": 1727367,
+      "used_memory_mib": 34226
+    },
+    {
+      "gpu_index": 3,
+      "gpu_uuid": "GPU-e1f5aaf2-af55-97c0-1ae4-bdb8e849a0c7",
+      "pid": 1727368,
+      "used_memory_mib": 34234
+    }
+  ],
+  "selected_gpu_observation_at_capture": {
+    "indices": [4, 5, 6, 7],
+    "additional_compute_apps_beyond_registered_resnet": false,
+    "registered_resnet_pid": 2298
+  },
+  "interpretation": {
+    "functional_integrity_invalidated": false,
+    "performance_cleanliness_invalidated": true,
+    "reason": "An unplanned vLLM process tree began loading on GPUs 0-3 during the timed run. Even though the selected GPUs 4-7 remained application-isolated apart from the registered ResNet and the M server, same-host CPU, memory, I/O, NVSwitch, NIC, thermal, or power contention cannot be ruled out.",
+    "exclusion_based_on_performance_value": false,
+    "performance_values_inspected_before_exclusion_decision": true,
+    "decision_characterization": "Post-run operational contamination exclusion, not a performance-threshold exclusion."
+  }
+}

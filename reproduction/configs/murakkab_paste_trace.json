@@ -1,0 +1,115 @@
+{
+  "schema": "paste_repro.murakkab_trace_experiment_config",
+  "version": 1,
+  "workflow": {
+    "id": "qwen_deep_research_search_visit",
+    "description": "Logical Qwen DeepResearch search/visit path; execution knobs are selected from profiles rather than embedded in the DAG.",
+    "nodes": [
+      {
+        "id": "search",
+        "executor": "web_search",
+        "depends_on": [],
+        "input_types": {},
+        "output_type": "ranked_search_results"
+      },
+      {
+        "id": "decision_llm",
+        "executor": "qwen_deep_research",
+        "depends_on": [
+          "search"
+        ],
+        "input_types": {
+          "search": "ranked_search_results"
+        },
+        "output_type": "authoritative_visit_request"
+      },
+      {
+        "id": "visit",
+        "executor": "isolated_paste_visit_broker",
+        "depends_on": [
+          "decision_llm"
+        ],
+        "input_types": {
+          "decision_llm": "authoritative_visit_request"
+        },
+        "output_type": "visited_documents"
+      },
+      {
+        "id": "synthesis_llm",
+        "executor": "qwen_deep_research",
+        "depends_on": [
+          "visit"
+        ],
+        "input_types": {
+          "visit": "visited_documents"
+        },
+        "output_type": "answer"
+      }
+    ]
+  },
+  "candidate_configurations": [
+    {
+      "id": "demand_only_k0",
+      "top_k": 0
+    },
+    {
+      "id": "paste_k1",
+      "top_k": 1
+    },
+    {
+      "id": "paste_k2",
+      "top_k": 2
+    },
+    {
+      "id": "paste_k3",
+      "top_k": 3
+    },
+    {
+      "id": "paste_k4",
+      "top_k": 4
+    },
+    {
+      "id": "paste_default_k5",
+      "top_k": 5
+    }
+  ],
+  "latency_slos": [
+    {
+      "tier": "basic",
+      "minimum_stall_reduction": 0.0,
+      "planning_margin": 0.0,
+      "demand_weight": 0.25
+    },
+    {
+      "tier": "fair",
+      "minimum_stall_reduction": 0.05,
+      "planning_margin": 0.1,
+      "demand_weight": 0.25
+    },
+    {
+      "tier": "good",
+      "minimum_stall_reduction": 0.1,
+      "planning_margin": 0.1,
+      "demand_weight": 0.25
+    },
+    {
+      "tier": "best",
+      "minimum_stall_reduction": 0.15,
+      "planning_margin": 0.1,
+      "demand_weight": 0.25
+    }
+  ],
+  "optimizer": {
+    "objective": "minimize_admitted_tool_request_units",
+    "profile_aggregation": "worst_case_across_calibration_and_tuning",
+    "quality_constraint": "same_authoritative_invocations_with_exact_match_commit"
+  },
+  "baselines": {
+    "static_demand_config_id": "demand_only_k0",
+    "static_paste_config_id": "paste_default_k5"
+  },
+  "bootstrap": {
+    "samples": 10000,
+    "seed": "murakkab-paste-bootstrap-v1"
+  }
+}

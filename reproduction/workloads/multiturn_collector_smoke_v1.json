@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "workload_id": "multiturn-collector-smoke-v1",
+  "sources": [
+    {
+      "source_id": "smoke_photosynthesis",
+      "question": "Compare photosynthesis and chemosynthesis using web evidence, then answer briefly.",
+      "provenance": {
+        "evaluation_eligible": false,
+        "purpose": "collector integration smoke only",
+        "synthetic": true
+      }
+    }
+  ]
+}

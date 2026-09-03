@@ -17,7 +17,7 @@ deterministic executor in tests.
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 import hashlib
 import heapq
@@ -41,10 +41,13 @@ class LiveBrokerStats:
     speculative_admitted: int = 0
     duplicate_predictions: int = 0
     rejected_speculative_capacity: int = 0
+    rejected_speculative_deadline: int = 0
     speculative_started: int = 0
     speculative_completed: int = 0
     speculative_failures: int = 0
     speculative_expired: int = 0
+    speculative_deadline_expired_before_start: int = 0
+    speculative_replaced_by_priority: int = 0
     speculative_cancelled: int = 0
     authoritative_requests: int = 0
     authoritative_misses: int = 0
@@ -55,6 +58,9 @@ class LiveBrokerStats:
     queued_promotions: int = 0
     running_promotions: int = 0
     completed_reuse: int = 0
+    running_speculative_races: int = 0
+    speculative_race_wins: int = 0
+    authoritative_race_wins: int = 0
     reserved_speculative_dispatches: int = 0
     authoritative_after_reserved_dispatches: int = 0
     commits: int = 0
@@ -64,6 +70,11 @@ class LiveBrokerStats:
     max_queued_speculative: int = 0
     max_running_total: int = 0
     max_running_speculative: int = 0
+    max_running_authoritative: int = 0
+    max_running_speculative_by_tool: dict[str, int] = field(default_factory=dict)
+    max_running_authoritative_by_tool: dict[str, int] = field(
+        default_factory=dict
+    )
     max_running_by_tool: dict[str, int] = field(default_factory=dict)
     max_queued_by_tool: dict[str, int] = field(default_factory=dict)
 
@@ -99,6 +110,7 @@ class _BrokerJob:
     priority: float
     created_at: float
     expires_at: float
+    start_deadline: float | None
     future: "asyncio.Future[_ExecutionRecord]"
     originally_speculative: bool
     state: JobState = "queued"
@@ -110,14 +122,19 @@ class _BrokerJob:
     worker_id: int | None = None
     runner: "asyncio.Task[None] | None" = None
     expiry_task: "asyncio.Task[None] | None" = None
+    discard_uncommitted_on_finish: bool = False
+    discard_source: str | None = None
 
 
 class LiveToolBroker:
     """Prioritized tool queue with bounded, correctness-safe speculation.
 
-    ``max_workers`` bounds all live executor calls.  At most
-    ``max_speculative_workers`` of those calls may be speculative, leaving the
-    rest available to authoritative traffic.  ``min_speculative_workers`` may
+    ``max_workers`` bounds all live executor calls. At most
+    ``max_speculative_workers`` of those calls may be speculative. Optional
+    ``max_authoritative_workers`` and ``authoritative_tool_capacities`` cap the
+    authority lane as well, allowing an explicitly added speculative slice to
+    remain isolated instead of silently increasing demand-only capacity.
+    ``min_speculative_workers`` may
     reserve a bounded opportunity for dispatchable speculative work, but it
     must leave at least one global and per-tool slot for authoritative work.
     A zero minimum preserves authoritative-first dispatch.
@@ -126,9 +143,15 @@ class LiveToolBroker:
     rejected by that speculative limit.  Optional ``tool_capacities`` impose
     additional shared limits on physical calls of a given tool.  Both lanes
     consume the same per-tool capacity, so speculation cannot bypass a visit
-    service's concurrency limit.  ``tool_min_start_intervals_s`` optionally
-    adds a shared per-tool start-rate gate.  Rate-limited calls remain in the
-    broker queue and do not consume worker or service time while waiting.
+    service's concurrency limit.  ``authoritative_tool_reserves`` can keep a
+    concurrency slice unavailable to speculative work.  This is not a rate
+    reservation: ``tool_min_start_intervals_s`` adds one shared per-tool
+    start-rate gate, and a speculative start consumes that shared interval.
+    Rate-limited calls remain in the broker queue and do not consume worker or
+    service time while waiting.  An optional per-admission ``start_deadline``
+    is a latest-start bound only: queued predictions are invalidated at that
+    point, while predictions already running remain governed by the ordinary
+    TTL and may still be claimed authoritatively.
     """
 
     def __init__(
@@ -137,6 +160,7 @@ class LiveToolBroker:
         *,
         max_workers: int = 8,
         max_speculative_workers: int | None = None,
+        max_authoritative_workers: int | None = None,
         min_speculative_workers: int = 0,
         max_speculative_pending: int | None = None,
         ttl_s: float = 30.0,
@@ -144,6 +168,8 @@ class LiveToolBroker:
         service_time_hints_s: Mapping[str, float] | None = None,
         service_ewma_alpha: float = 0.2,
         tool_capacities: Mapping[str, int] | None = None,
+        authoritative_tool_capacities: Mapping[str, int] | None = None,
+        authoritative_tool_reserves: Mapping[str, int] | None = None,
         tool_min_start_intervals_s: Mapping[str, float] | None = None,
     ) -> None:
         if max_workers <= 0:
@@ -153,6 +179,16 @@ class LiveToolBroker:
         if not 0 <= max_speculative_workers <= max_workers:
             raise ValueError(
                 "max_speculative_workers must be between zero and max_workers"
+            )
+        if max_authoritative_workers is None:
+            max_authoritative_workers = max_workers
+        if (
+            isinstance(max_authoritative_workers, bool)
+            or not isinstance(max_authoritative_workers, int)
+            or not 1 <= max_authoritative_workers <= max_workers
+        ):
+            raise ValueError(
+                "max_authoritative_workers must be between one and max_workers"
             )
         if (
             isinstance(min_speculative_workers, bool)
@@ -189,6 +225,45 @@ class LiveToolBroker:
                     "each tool capacity must be an integer in [1, max_workers]"
                 )
             capacities[raw_name] = raw_capacity
+        authority_capacities: dict[str, int] = {}
+        for raw_name, raw_capacity in dict(
+            authoritative_tool_capacities or {}
+        ).items():
+            if not isinstance(raw_name, str) or not raw_name:
+                raise ValueError(
+                    "authoritative-tool-capacity names must be non-empty strings"
+                )
+            capacity = capacities.get(raw_name, max_workers)
+            if (
+                isinstance(raw_capacity, bool)
+                or not isinstance(raw_capacity, int)
+                or not 1 <= raw_capacity <= capacity
+            ):
+                raise ValueError(
+                    "each authoritative tool capacity must be an integer in "
+                    "[1, tool capacity]"
+                )
+            authority_capacities[raw_name] = raw_capacity
+        tool_reserves: dict[str, int] = {}
+        for raw_name, raw_reserve in dict(
+            authoritative_tool_reserves or {}
+        ).items():
+            if not isinstance(raw_name, str) or not raw_name:
+                raise ValueError(
+                    "authoritative-tool-reserve names must be non-empty strings"
+                )
+            capacity = capacities.get(raw_name, max_workers)
+            if (
+                isinstance(raw_reserve, bool)
+                or not isinstance(raw_reserve, int)
+                or not 0 <= raw_reserve <= capacity
+            ):
+                raise ValueError(
+                    "each authoritative tool reserve must be an integer in "
+                    "[0, tool capacity]"
+                )
+            if raw_reserve:
+                tool_reserves[raw_name] = raw_reserve
         if min_speculative_workers > 0:
             if min_speculative_workers >= max_workers:
                 raise ValueError(
@@ -205,6 +280,18 @@ class LiveToolBroker:
                     "min_speculative_workers must leave at least one per-tool "
                     "slot available to authoritative traffic: "
                     + ", ".join(too_small)
+                )
+            no_speculative_headroom = sorted(
+                name
+                for name, reserve in tool_reserves.items()
+                if capacities.get(name, max_workers) - reserve
+                < min_speculative_workers
+            )
+            if no_speculative_headroom:
+                raise ValueError(
+                    "min_speculative_workers exceeds capacity left after the "
+                    "authoritative tool reserve: "
+                    + ", ".join(no_speculative_headroom)
                 )
         min_start_intervals: dict[str, float] = {}
         for raw_name, raw_interval in dict(
@@ -228,6 +315,7 @@ class LiveToolBroker:
         self._executor = executor
         self._max_workers = int(max_workers)
         self._max_speculative_workers = int(max_speculative_workers)
+        self._max_authoritative_workers = int(max_authoritative_workers)
         self._min_speculative_workers = int(min_speculative_workers)
         self._max_speculative_pending = int(max_speculative_pending)
         self._ttl_s = float(ttl_s)
@@ -237,6 +325,8 @@ class LiveToolBroker:
             str(name): float(value) for name, value in hints.items()
         }
         self._tool_capacities = capacities
+        self._authoritative_tool_capacities = authority_capacities
+        self._authoritative_tool_reserves = tool_reserves
         self._tool_min_start_intervals_s = min_start_intervals
         self._tool_next_eligible_at: dict[str, float] = {}
 
@@ -255,6 +345,7 @@ class LiveToolBroker:
         self._running_total = 0
         self._running_speculative = 0
         self._running_by_tool: dict[str, int] = {}
+        self._running_speculative_by_tool: dict[str, int] = {}
         self._dispatch_ordinal_by_tool: dict[str, int] = {}
         # A reserved speculative start may overtake at most one already-queued
         # authoritative call of the same tool.  The next competing start token
@@ -302,9 +393,11 @@ class LiveToolBroker:
         lane: Lane,
         priority: float,
         originally_speculative: bool,
+        start_deadline: float | None = None,
     ) -> _BrokerJob:
         loop = asyncio.get_running_loop()
         now = self._clock()
+        ttl_expires_at = now + self._ttl_s if originally_speculative else math.inf
         self._next_job_id += 1
         job = _BrokerJob(
             job_id=self._next_job_id,
@@ -313,7 +406,8 @@ class LiveToolBroker:
             lane=lane,
             priority=float(priority),
             created_at=now,
-            expires_at=now + self._ttl_s if originally_speculative else math.inf,
+            expires_at=ttl_expires_at,
+            start_deadline=start_deadline,
             future=loop.create_future(),
             originally_speculative=originally_speculative,
         )
@@ -342,6 +436,12 @@ class LiveToolBroker:
             "source": lane,
             "cancelled": False,
             "priority": float(priority),
+            "start_deadline": start_deadline,
+            "expires_at": (
+                ttl_expires_at if math.isfinite(ttl_expires_at) else None
+            ),
+            "expiration_reason": None,
+            "deadline_missed_by_s": None,
             "speculation_eligible": True,
             "canary": False,
             "worker_id": None,
@@ -362,21 +462,40 @@ class LiveToolBroker:
             "dispatch_lane": None,
             "dispatch_reason": None,
             "running_speculative_before": None,
+            "running_authoritative_before": None,
+            "running_authoritative_same_tool_before": None,
             "queued_authoritative_same_tool_before": None,
             "reservation_debt_before": None,
             "reservation_debt_after": None,
             "per_tool_dispatch_ordinal": None,
+            "race_role": None,
+            "race_peer_job_id": None,
+            "race_winner": None,
             "worker_pool": {
                 "max_workers": self._max_workers,
                 "max_speculative_workers": self._max_speculative_workers,
+                "max_authoritative_workers": self._max_authoritative_workers,
                 "min_speculative_workers": self._min_speculative_workers,
                 "max_speculative_pending": self._max_speculative_pending,
                 "tool_capacities": dict(sorted(self._tool_capacities.items())),
+                "authoritative_tool_capacities": dict(
+                    sorted(self._authoritative_tool_capacities.items())
+                ),
+                "authoritative_tool_reserves": dict(
+                    sorted(self._authoritative_tool_reserves.items())
+                ),
                 "tool_min_start_intervals_s": dict(
                     sorted(self._tool_min_start_intervals_s.items())
                 ),
             },
             "tool_capacity": self._tool_capacity(invocation.tool_name),
+            "tool_speculative_capacity": max(
+                0,
+                self._tool_capacity(invocation.tool_name)
+                - self._authoritative_tool_reserves.get(
+                    invocation.tool_name, 0
+                ),
+            ),
             "tool_min_start_interval_s": self._tool_min_start_interval(
                 invocation.tool_name
             ),
@@ -546,6 +665,7 @@ class LiveToolBroker:
         session_id: str,
         priority: float,
         reason: str,
+        start_deadline: float | None = None,
     ) -> None:
         now = self._clock()
         self._rejected_records.append(
@@ -573,6 +693,19 @@ class LiveToolBroker:
                 "source": "speculative",
                 "cancelled": False,
                 "priority": float(priority),
+                "start_deadline": start_deadline,
+                "expires_at": None,
+                "expiration_reason": (
+                    "start_deadline"
+                    if reason == "rejected_start_deadline"
+                    else None
+                ),
+                "deadline_missed_by_s": (
+                    max(0.0, now - start_deadline)
+                    if reason == "rejected_start_deadline"
+                    and start_deadline is not None
+                    else None
+                ),
                 "speculation_eligible": True,
                 "canary": False,
                 "worker_id": None,
@@ -593,21 +726,42 @@ class LiveToolBroker:
                 "dispatch_lane": None,
                 "dispatch_reason": None,
                 "running_speculative_before": None,
+                "running_authoritative_before": None,
+                "running_authoritative_same_tool_before": None,
                 "queued_authoritative_same_tool_before": None,
                 "reservation_debt_before": None,
                 "reservation_debt_after": None,
                 "per_tool_dispatch_ordinal": None,
+                "race_role": None,
+                "race_peer_job_id": None,
+                "race_winner": None,
                 "worker_pool": {
                     "max_workers": self._max_workers,
                     "max_speculative_workers": self._max_speculative_workers,
+                    "max_authoritative_workers": (
+                        self._max_authoritative_workers
+                    ),
                     "min_speculative_workers": self._min_speculative_workers,
                     "max_speculative_pending": self._max_speculative_pending,
                     "tool_capacities": dict(sorted(self._tool_capacities.items())),
+                    "authoritative_tool_capacities": dict(
+                        sorted(self._authoritative_tool_capacities.items())
+                    ),
+                    "authoritative_tool_reserves": dict(
+                        sorted(self._authoritative_tool_reserves.items())
+                    ),
                     "tool_min_start_intervals_s": dict(
                         sorted(self._tool_min_start_intervals_s.items())
                     ),
                 },
                 "tool_capacity": self._tool_capacity(invocation.tool_name),
+                "tool_speculative_capacity": max(
+                    0,
+                    self._tool_capacity(invocation.tool_name)
+                    - self._authoritative_tool_reserves.get(
+                        invocation.tool_name, 0
+                    ),
+                ),
                 "tool_min_start_interval_s": self._tool_min_start_interval(
                     invocation.tool_name
                 ),
@@ -659,6 +813,79 @@ class LiveToolBroker:
         telemetry["http_attempts"] = 0
         telemetry["transport_identity_source"] = None
 
+    def _job_expiration_reason(self, job: _BrokerJob, *, now: float) -> str:
+        """Return the bound that made a prediction removable at ``now``."""
+
+        if (
+            job.state == "queued"
+            and job.start_deadline is not None
+            and job.start_deadline <= now
+            and job.start_deadline <= job.expires_at
+        ):
+            return "start_deadline"
+        return "ttl"
+
+    def _expire_queued_speculative_locked(self, *, now: float) -> int:
+        """Atomically invalidate every queued prediction due by ``now``.
+
+        This helper performs no awaits and is safe to call immediately before
+        choosing a dispatch candidate.  Expiry tasks are cancelled eagerly so
+        fake-clock jumps and far-future TTL sleeps cannot retain detached jobs.
+        """
+
+        due = [
+            job
+            for job in self._predictions.values()
+            if job.state == "queued"
+            and job.lane == "speculative"
+            and (
+                job.expires_at <= now
+                or (
+                    job.start_deadline is not None
+                    and job.start_deadline <= now
+                )
+            )
+        ]
+        current = asyncio.current_task()
+        for job in due:
+            key = self._prediction_key(job.session_id, job.invocation)
+            if self._predictions.get(key) is not job:
+                continue
+            self._predictions.pop(key, None)
+            self.stats.speculative_expired += 1
+            expiration_reason = self._job_expiration_reason(job, now=now)
+            if expiration_reason == "start_deadline":
+                self.stats.speculative_deadline_expired_before_start += 1
+
+            telemetry = self._tool_records[job.job_id]
+            telemetry["cancelled"] = True
+            telemetry["outcome"] = "expired"
+            telemetry["source"] = "expired"
+            telemetry["expiration_reason"] = expiration_reason
+            telemetry["deadline_missed_by_s"] = (
+                max(0.0, now - job.start_deadline)
+                if expiration_reason == "start_deadline"
+                and job.start_deadline is not None
+                else None
+            )
+            telemetry["finish"] = now
+            telemetry["finished_at"] = now
+            self._finalize_never_started_cancellation_locked(job, telemetry)
+            job.state = "cancelled"
+            job.generation += 1
+            if not job.future.done():
+                job.future.cancel()
+            self._jobs.pop(job.job_id, None)
+
+            expiry_task = job.expiry_task
+            if (
+                expiry_task is not None
+                and expiry_task is not current
+                and not expiry_task.done()
+            ):
+                expiry_task.cancel()
+        return len(due)
+
     def _tool_capacity(self, tool_name: str) -> int:
         return self._tool_capacities.get(tool_name, self._max_workers)
 
@@ -675,6 +902,30 @@ class LiveToolBroker:
     def _tool_has_capacity_locked(self, tool_name: str) -> bool:
         return self._running_by_tool.get(tool_name, 0) < self._tool_capacity(
             tool_name
+        )
+
+    def _global_has_authoritative_capacity_locked(self) -> bool:
+        running_authoritative = self._running_total - self._running_speculative
+        return running_authoritative < self._max_authoritative_workers
+
+    def _tool_has_authoritative_capacity_locked(self, tool_name: str) -> bool:
+        running_authoritative = self._running_by_tool.get(
+            tool_name, 0
+        ) - self._running_speculative_by_tool.get(tool_name, 0)
+        capacity = self._authoritative_tool_capacities.get(
+            tool_name, self._tool_capacity(tool_name)
+        )
+        return running_authoritative < capacity
+
+    def _tool_has_speculative_capacity_locked(self, tool_name: str) -> bool:
+        speculative_cap = max(
+            0,
+            self._tool_capacity(tool_name)
+            - self._authoritative_tool_reserves.get(tool_name, 0),
+        )
+        return (
+            self._running_speculative_by_tool.get(tool_name, 0)
+            < speculative_cap
         )
 
     def _push_locked(self, job: _BrokerJob) -> None:
@@ -713,9 +964,16 @@ class LiveToolBroker:
                 if skip_tools and tool_name in skip_tools:
                     blocked.append(item)
                     continue
-                if self._tool_has_capacity_locked(
-                    tool_name
-                ) and self._tool_rate_eligible_locked(tool_name):
+                lane_has_capacity = (
+                    self._tool_has_authoritative_capacity_locked(tool_name)
+                    if lane == "authoritative"
+                    else self._tool_has_speculative_capacity_locked(tool_name)
+                )
+                if (
+                    lane_has_capacity
+                    and self._tool_has_capacity_locked(tool_name)
+                    and self._tool_rate_eligible_locked(tool_name)
+                ):
                     for blocked_item in blocked:
                         heapq.heappush(heap, blocked_item)
                     return job
@@ -725,14 +983,18 @@ class LiveToolBroker:
         return None
 
     def _dispatchable_authoritative_tools_locked(self) -> set[str]:
+        if not self._global_has_authoritative_capacity_locked():
+            return set()
         tools: set[str] = set()
         for job in self._jobs.values():
             if job.state != "queued" or job.lane != "authoritative":
                 continue
             tool_name = job.invocation.tool_name
-            if self._tool_has_capacity_locked(
-                tool_name
-            ) and self._tool_rate_eligible_locked(tool_name):
+            if (
+                self._tool_has_capacity_locked(tool_name)
+                and self._tool_has_authoritative_capacity_locked(tool_name)
+                and self._tool_rate_eligible_locked(tool_name)
+            ):
                 tools.add(tool_name)
         return tools
 
@@ -767,6 +1029,10 @@ class LiveToolBroker:
         self.stats.max_running_speculative = max(
             self.stats.max_running_speculative, self._running_speculative
         )
+        self.stats.max_running_authoritative = max(
+            self.stats.max_running_authoritative,
+            self._running_total - self._running_speculative,
+        )
         queued_by_tool: dict[str, int] = {}
         for job in self._jobs.values():
             if job.state == "queued":
@@ -779,6 +1045,19 @@ class LiveToolBroker:
         for name, count in self._running_by_tool.items():
             self.stats.max_running_by_tool[name] = max(
                 self.stats.max_running_by_tool.get(name, 0), count
+            )
+        for name, count in self._running_speculative_by_tool.items():
+            self.stats.max_running_speculative_by_tool[name] = max(
+                self.stats.max_running_speculative_by_tool.get(name, 0),
+                count,
+            )
+        for name, count in self._running_by_tool.items():
+            authoritative = count - self._running_speculative_by_tool.get(
+                name, 0
+            )
+            self.stats.max_running_authoritative_by_tool[name] = max(
+                self.stats.max_running_authoritative_by_tool.get(name, 0),
+                authoritative,
             )
 
     def _earliest_rate_wakeup_locked(self) -> float | None:
@@ -838,6 +1117,10 @@ class LiveToolBroker:
         if self._closed:
             return
         while self._running_total < self._max_workers:
+            # A slot becoming free is exactly when an expired queued sibling
+            # could otherwise start.  Invalidate the full due set before any
+            # lane or utility selection.
+            self._expire_queued_speculative_locked(now=self._clock())
             job = None
             minimum_speculative_dispatch = False
             if self._running_speculative < self._min_speculative_workers:
@@ -852,7 +1135,10 @@ class LiveToolBroker:
                     "speculative", skip_tools=repay_tools
                 )
                 minimum_speculative_dispatch = job is not None
-            if job is None:
+            if (
+                job is None
+                and self._global_has_authoritative_capacity_locked()
+            ):
                 job = self._pop_dispatchable_locked("authoritative")
             if job is None and (
                 self._running_speculative < self._max_speculative_workers
@@ -861,8 +1147,32 @@ class LiveToolBroker:
             if job is None:
                 break
 
+            dispatch_at = self._clock()
+            if (
+                job.lane == "speculative"
+                and (
+                    job.expires_at <= dispatch_at
+                    or (
+                        job.start_deadline is not None
+                        and job.start_deadline <= dispatch_at
+                    )
+                )
+            ):
+                # The deadline may have crossed after heap selection.  The job
+                # is still queued, so batch expiry can invalidate it and every
+                # other candidate that became due without consuming a worker.
+                self._expire_queued_speculative_locked(now=dispatch_at)
+                continue
+
             tool_name = job.invocation.tool_name
             running_speculative_before = self._running_speculative
+            running_authoritative_before = (
+                self._running_total - self._running_speculative
+            )
+            running_authoritative_same_tool_before = (
+                self._running_by_tool.get(tool_name, 0)
+                - self._running_speculative_by_tool.get(tool_name, 0)
+            )
             queued_authoritative_same_tool_before = (
                 self._valid_queue_count_for_tool_locked(
                     "authoritative", tool_name
@@ -904,7 +1214,7 @@ class LiveToolBroker:
                 dispatch_reason = "speculative_opportunistic"
 
             job.state = "running"
-            job.started_at = self._clock()
+            job.started_at = dispatch_at
             job.worker_id = heapq.heappop(self._available_worker_ids)
             per_tool_dispatch_ordinal = (
                 self._dispatch_ordinal_by_tool.get(tool_name, 0) + 1
@@ -919,6 +1229,12 @@ class LiveToolBroker:
             telemetry["dispatch_reason"] = dispatch_reason
             telemetry["running_speculative_before"] = (
                 running_speculative_before
+            )
+            telemetry["running_authoritative_before"] = (
+                running_authoritative_before
+            )
+            telemetry["running_authoritative_same_tool_before"] = (
+                running_authoritative_same_tool_before
             )
             telemetry["queued_authoritative_same_tool_before"] = (
                 queued_authoritative_same_tool_before
@@ -974,6 +1290,9 @@ class LiveToolBroker:
             )
             if job.lane == "speculative":
                 self._running_speculative += 1
+                self._running_speculative_by_tool[tool_name] = (
+                    self._running_speculative_by_tool.get(tool_name, 0) + 1
+                )
                 self.stats.speculative_started += 1
             else:
                 self.stats.authoritative_started += 1
@@ -1068,6 +1387,15 @@ class LiveToolBroker:
                 self._running_by_tool.pop(tool_name, None)
             if was_speculative_lane:
                 self._running_speculative -= 1
+                remaining_speculative_for_tool = (
+                    self._running_speculative_by_tool.get(tool_name, 0) - 1
+                )
+                if remaining_speculative_for_tool > 0:
+                    self._running_speculative_by_tool[tool_name] = (
+                        remaining_speculative_for_tool
+                    )
+                else:
+                    self._running_speculative_by_tool.pop(tool_name, None)
             job.finished_at = finished_at
             if job.worker_id is not None:
                 heapq.heappush(self._available_worker_ids, job.worker_id)
@@ -1128,6 +1456,16 @@ class LiveToolBroker:
                     job.future.set_result(record)
 
             service_s = max(0.0, finished_at - (job.started_at or finished_at))
+            if job.discard_uncommitted_on_finish:
+                if job.originally_speculative and job.state in {
+                    "completed",
+                    "failed",
+                }:
+                    self.stats.wasted_speculative_service_s += service_s
+                if job.discard_source is not None:
+                    telemetry["source"] = job.discard_source
+                telemetry["committed"] = False
+                self._jobs.pop(job.job_id, None)
             if error is None and service_s > 0:
                 old = self._service_ewma_s.get(job.invocation.tool_name)
                 self._service_ewma_s[job.invocation.tool_name] = (
@@ -1140,9 +1478,20 @@ class LiveToolBroker:
 
     async def _expire_after(self, job: _BrokerJob) -> None:
         try:
-            delay = max(0.0, job.expires_at - self._clock())
-            await asyncio.sleep(delay)
-            await self._discard_prediction(job, expired=True)
+            while True:
+                async with self._lock:
+                    key = self._prediction_key(job.session_id, job.invocation)
+                    if self._predictions.get(key) is not job:
+                        return
+                    wake_at = job.expires_at
+                    if job.state == "queued" and job.start_deadline is not None:
+                        wake_at = min(wake_at, job.start_deadline)
+                    delay = max(0.0, wake_at - self._clock())
+                await asyncio.sleep(delay)
+                # Expire every prediction due at this observation point in one
+                # atomic batch.  A start-deadline wake removes only jobs still
+                # queued; a job that started in time remains until its TTL.
+                await self.sweep(now=self._clock())
         except asyncio.CancelledError:
             return
 
@@ -1152,6 +1501,8 @@ class LiveToolBroker:
         *,
         session_id: str = "default",
         priority: float = 0.0,
+        start_deadline: float | None = None,
+        replace_lower_priority_queued: bool = False,
     ) -> bool:
         """Queue one isolated prediction.
 
@@ -1159,48 +1510,175 @@ class LiveToolBroker:
         within the speculative lane.  It cannot overtake authoritative work
         unless the explicit one-worker reservation is enabled; after such an
         overtake, the next competing same-tool start is authoritative.
+        ``start_deadline`` is an optional absolute value in the broker's
+        monotonic clock domain.  A prediction is never admitted or dispatched
+        at or after that value.
         """
 
-        if not math.isfinite(priority):
-            raise ValueError("priority must be finite")
-        await self.sweep()
-        key = self._prediction_key(session_id, invocation)
+        return (
+            await self.speculate_batch(
+                ((invocation, session_id, priority),),
+                start_deadline=start_deadline,
+                replace_lower_priority_queued=(
+                    replace_lower_priority_queued
+                ),
+            )
+        )[0]
+
+    async def speculate_batch(
+        self,
+        requests: Sequence[tuple[Invocation, str, float]],
+        *,
+        start_deadline: float | None = None,
+        replace_lower_priority_queued: bool = False,
+    ) -> tuple[bool, ...]:
+        """Atomically admit a globally prioritized speculative microbatch.
+
+        The input tuples are ``(invocation, session_id, priority)``.
+        ``start_deadline`` applies to the whole microbatch and is expressed in
+        the broker's absolute monotonic clock domain.
+        Expiration is swept once, every candidate enters the priority heap,
+        and dispatch runs only after the complete microbatch is visible.  This
+        avoids per-candidate O(N) sweeps and prevents an early low-utility
+        candidate from starting before a later high-utility task is admitted.
+        """
+
+        deadline: float | None = None
+        if not isinstance(replace_lower_priority_queued, bool):
+            raise ValueError("replace_lower_priority_queued must be a boolean")
+        if start_deadline is not None:
+            if (
+                isinstance(start_deadline, bool)
+                or not isinstance(start_deadline, (int, float))
+                or not math.isfinite(start_deadline)
+            ):
+                raise ValueError("start_deadline must be finite")
+            deadline = float(start_deadline)
+
+        batch = tuple(requests)
+        if not batch:
+            return ()
+        for _, _, priority in batch:
+            if not math.isfinite(priority):
+                raise ValueError("priority must be finite")
+        admitted = [False] * len(batch)
+        # Capacity admission is part of the microbatch decision.  Preserve the
+        # caller-facing result order, but let higher caller priority claim a
+        # scarce pending slot before a lower-priority tuple that happened to
+        # be listed first.
+        ordered = sorted(
+            enumerate(batch),
+            key=lambda item: (-item[1][2], item[0]),
+        )
         async with self._lock:
             if self._closed:
                 raise RuntimeError("broker is closed")
-            if key in self._predictions:
-                self.stats.duplicate_predictions += 1
-                self._record_rejection_locked(
-                    invocation,
-                    session_id=session_id,
-                    priority=priority,
-                    reason="duplicate",
-                )
-                return False
-            if len(self._predictions) >= self._max_speculative_pending:
-                self.stats.rejected_speculative_capacity += 1
-                self._record_rejection_locked(
-                    invocation,
-                    session_id=session_id,
-                    priority=priority,
-                    reason="rejected_capacity",
-                )
-                return False
+            # Admission must not wait for an unrelated non-preemptible runner
+            # to drain.  Retire every queued job that can be removed without
+            # awaiting physical cleanup; running expiry remains the background
+            # expiry task's responsibility.
+            self._expire_queued_speculative_locked(now=self._clock())
+            for input_index, (invocation, session_id, priority) in ordered:
+                if deadline is not None and self._clock() >= deadline:
+                    self.stats.rejected_speculative_deadline += 1
+                    self._record_rejection_locked(
+                        invocation,
+                        session_id=session_id,
+                        priority=priority,
+                        reason="rejected_start_deadline",
+                        start_deadline=deadline,
+                    )
+                    continue
+                key = self._prediction_key(session_id, invocation)
+                if key in self._predictions:
+                    self.stats.duplicate_predictions += 1
+                    self._record_rejection_locked(
+                        invocation,
+                        session_id=session_id,
+                        priority=priority,
+                        reason="duplicate",
+                        start_deadline=deadline,
+                    )
+                    continue
+                if len(self._predictions) >= self._max_speculative_pending:
+                    replaceable = min(
+                        (
+                            job
+                            for job in self._predictions.values()
+                            if job.state == "queued"
+                            and job.lane == "speculative"
+                        ),
+                        key=lambda job: (job.priority, -job.queue_order),
+                        default=None,
+                    )
+                    if (
+                        replace_lower_priority_queued
+                        and replaceable is not None
+                        and priority > replaceable.priority
+                    ):
+                        victim_key = self._prediction_key(
+                            replaceable.session_id,
+                            replaceable.invocation,
+                        )
+                        self._predictions.pop(victim_key, None)
+                        replaceable.state = "cancelled"
+                        replaceable.generation += 1
+                        victim_telemetry = self._tool_records[
+                            replaceable.job_id
+                        ]
+                        victim_telemetry["cancelled"] = True
+                        victim_telemetry["outcome"] = (
+                            "replaced_by_higher_priority"
+                        )
+                        victim_telemetry["source"] = (
+                            "replaced_by_higher_priority"
+                        )
+                        victim_telemetry["expiration_reason"] = (
+                            "priority_replacement"
+                        )
+                        victim_telemetry["finish"] = self._clock()
+                        victim_telemetry["finished_at"] = victim_telemetry[
+                            "finish"
+                        ]
+                        self._finalize_never_started_cancellation_locked(
+                            replaceable, victim_telemetry
+                        )
+                        if not replaceable.future.done():
+                            replaceable.future.cancel()
+                        if (
+                            replaceable.expiry_task is not None
+                            and not replaceable.expiry_task.done()
+                        ):
+                            replaceable.expiry_task.cancel()
+                        self._jobs.pop(replaceable.job_id, None)
+                        self.stats.speculative_replaced_by_priority += 1
+                    else:
+                        self.stats.rejected_speculative_capacity += 1
+                        self._record_rejection_locked(
+                            invocation,
+                            session_id=session_id,
+                            priority=priority,
+                            reason="rejected_capacity",
+                            start_deadline=deadline,
+                        )
+                        continue
 
-            job = self._new_job_locked(
-                invocation,
-                session_id=session_id,
-                lane="speculative",
-                priority=priority,
-                originally_speculative=True,
-            )
-            self._predictions[key] = job
-            self._push_locked(job)
-            job.expiry_task = asyncio.create_task(self._expire_after(job))
-            self.stats.speculative_admitted += 1
+                job = self._new_job_locked(
+                    invocation,
+                    session_id=session_id,
+                    lane="speculative",
+                    priority=priority,
+                    originally_speculative=True,
+                    start_deadline=deadline,
+                )
+                self._predictions[key] = job
+                self._push_locked(job)
+                job.expiry_task = asyncio.create_task(self._expire_after(job))
+                self.stats.speculative_admitted += 1
+                admitted[input_index] = True
             self._dispatch_locked()
             self._touch_locked()
-            return True
+        return tuple(admitted)
 
     async def authoritative(
         self,
@@ -1208,30 +1686,41 @@ class LiveToolBroker:
         *,
         session_id: str = "default",
         speculation_eligible: bool = True,
+        reuse_running_speculation: bool = True,
     ) -> LiveAuthoritativeResult:
         """Execute and commit one exact authoritative invocation.
 
-        Set ``speculation_eligible=False`` for an unbiased canary call.  Such a
+        Set ``speculation_eligible=False`` for an unbiased canary call. Such a
         call never consumes a prediction even if an exact one happens to be
-        present.
+        present. Set ``reuse_running_speculation=False`` when strict latency
+        isolation is required: completed predictions may still be reused and
+        queued predictions promoted, while an in-flight exact prediction races
+        a fresh authoritative backup and can never become the only path.
         """
 
-        await self.sweep()
         confirmation_at = self._clock()
         wait_started = confirmation_at
         key = self._prediction_key(session_id, invocation)
+        race_backup: _BrokerJob | None = None
 
         async with self._lock:
             if self._closed:
                 raise RuntimeError("broker is closed")
+            # Authority admission is the fast path.  In particular it must
+            # never await sweep(), because sweep may wait for an unrelated,
+            # physically non-preemptible speculative call to drain.
+            self._expire_queued_speculative_locked(now=confirmation_at)
             self.stats.authoritative_requests += 1
             # Pop makes every prediction single-use even if duplicate
             # authoritative calls for the same key arrive concurrently.
-            job = (
-                self._predictions.pop(key, None)
-                if speculation_eligible
-                else None
+            candidate = (
+                self._predictions.get(key) if speculation_eligible else None
             )
+            claimable = (
+                candidate is not None
+                and candidate.expires_at > confirmation_at
+            )
+            job = self._predictions.pop(key, None) if claimable else None
             source: str
             failed_prediction = job is not None and job.state == "failed"
             if job is None or job.state in {"cancelled", "failed"}:
@@ -1289,14 +1778,48 @@ class LiveToolBroker:
                 elif job.state == "running":
                     # It already consumes a shared worker; changing lanes here
                     # would corrupt speculative-running accounting.
-                    self.stats.running_promotions += 1
                     source = "promoted_inflight"
+                    if reuse_running_speculation:
+                        self.stats.running_promotions += 1
+                    else:
+                        self.stats.running_speculative_races += 1
+                        self.stats.authoritative_executions += 1
+                        race_backup = self._new_job_locked(
+                            invocation,
+                            session_id=session_id,
+                            lane="authoritative",
+                            priority=0.0,
+                            originally_speculative=False,
+                        )
+                        backup_telemetry = self._tool_records[
+                            race_backup.job_id
+                        ]
+                        backup_telemetry["confirmation"] = confirmation_at
+                        backup_telemetry[
+                            "authoritative_confirmation_at"
+                        ] = confirmation_at
+                        backup_telemetry["source"] = "race_backup"
+                        backup_telemetry["authoritative"] = True
+                        backup_telemetry["race_role"] = "authority_backup"
+                        backup_telemetry["race_peer_job_id"] = job.job_id
+                        telemetry["race_role"] = "running_speculation"
+                        telemetry["race_peer_job_id"] = race_backup.job_id
+                        self._push_locked(race_backup)
                 else:
                     self.stats.completed_reuse += 1
                     source = "reused"
                 telemetry["source"] = source
             self._dispatch_locked()
             self._touch_locked()
+
+        if race_backup is not None:
+            return await self._resolve_running_race(
+                speculative_job=job,
+                backup_job=race_backup,
+                invocation=invocation,
+                confirmation_at=confirmation_at,
+                wait_started=wait_started,
+            )
 
         try:
             record = await asyncio.shield(job.future)
@@ -1305,7 +1828,19 @@ class LiveToolBroker:
             raise
 
         if record.error is not None:
-            if job.originally_speculative:
+            # ``originally_speculative`` also labels a prediction that was
+            # still queued when authority claimed it.  Once promoted, that
+            # job starts in the authoritative lane and is already the single
+            # baseline-equivalent attempt; retrying it as a speculative
+            # failure would add work and delay versus demand-only.  A fresh
+            # fallback is needed only when the failed physical attempt really
+            # started on the speculative lane.
+            started_as_speculation = (
+                job.originally_speculative
+                and self._tool_records[job.job_id].get("dispatch_lane")
+                == "speculative"
+            )
+            if started_as_speculation:
                 # A failed speculative attempt is never committed.  Submit a
                 # fresh correctness-critical call through the authoritative
                 # lane of the same shared pool.
@@ -1379,6 +1914,201 @@ class LiveToolBroker:
             self._jobs.pop(job.job_id, None)
             self._authoritative_state.append(committed)
             self.stats.commits += 1
+            self._touch_locked()
+        return committed
+
+    def _mark_race_loser_locked(
+        self,
+        job: _BrokerJob,
+        *,
+        source: str,
+    ) -> None:
+        """Detach a race loser without waiting for non-preemptible service."""
+
+        telemetry = self._tool_records[job.job_id]
+        telemetry["source"] = source
+        telemetry["race_winner"] = False
+        telemetry["committed"] = False
+        if job.originally_speculative:
+            telemetry["exact_match"] = True
+
+        if job.state == "queued":
+            job.state = "cancelled"
+            job.generation += 1
+            telemetry["cancelled"] = True
+            telemetry["outcome"] = "cancelled"
+            telemetry["finish"] = self._clock()
+            telemetry["finished_at"] = telemetry["finish"]
+            self._finalize_never_started_cancellation_locked(job, telemetry)
+            if not job.future.done():
+                job.future.cancel()
+            self._jobs.pop(job.job_id, None)
+            return
+
+        if job.state in {"running", "cancelling"}:
+            job.discard_uncommitted_on_finish = True
+            job.discard_source = source
+            return
+
+        if job.originally_speculative and job.started_at is not None:
+            end = job.finished_at if job.finished_at is not None else self._clock()
+            self.stats.wasted_speculative_service_s += max(
+                0.0, end - job.started_at
+            )
+        self._jobs.pop(job.job_id, None)
+
+    async def _resolve_running_race(
+        self,
+        *,
+        speculative_job: _BrokerJob,
+        backup_job: _BrokerJob,
+        invocation: Invocation,
+        confirmation_at: float,
+        wait_started: float,
+    ) -> LiveAuthoritativeResult:
+        """Commit speculative success or the backup's first terminal result.
+
+        A speculative failure is ignored while the protected authoritative
+        backup continues. A backup failure is terminal, matching the baseline
+        path instead of waiting arbitrarily long for speculation.
+        """
+
+        try:
+            watched: set[asyncio.Future[_ExecutionRecord]] = {
+                speculative_job.future,
+                backup_job.future,
+            }
+            winner_job: _BrokerJob | None = None
+            winner_record: _ExecutionRecord | None = None
+            backup_failure: BaseException | None = None
+            while winner_job is None and backup_failure is None:
+                await asyncio.wait(
+                    watched,
+                    return_when=asyncio.FIRST_COMPLETED,
+                )
+
+                speculative_record: _ExecutionRecord | None = None
+                if speculative_job.future.done():
+                    try:
+                        speculative_record = speculative_job.future.result()
+                    except asyncio.CancelledError:
+                        speculative_record = None
+                speculative_success = (
+                    speculative_record is not None
+                    and speculative_record.error is None
+                )
+
+                backup_record: _ExecutionRecord | None = None
+                backup_done = backup_job.future.done()
+                if backup_done:
+                    try:
+                        backup_record = backup_job.future.result()
+                    except asyncio.CancelledError as exc:
+                        backup_failure = exc
+
+                if backup_done:
+                    speculative_finished_first = (
+                        speculative_success
+                        and backup_record is not None
+                        and speculative_record.finished_at
+                        < backup_record.finished_at
+                    )
+                    if speculative_finished_first:
+                        winner_job = speculative_job
+                        winner_record = speculative_record
+                    elif backup_record is not None:
+                        if backup_record.error is None:
+                            winner_job = backup_job
+                            winner_record = backup_record
+                        else:
+                            backup_failure = backup_record.error
+                    elif backup_failure is None:
+                        backup_failure = asyncio.CancelledError()
+                elif speculative_success:
+                    winner_job = speculative_job
+                    winner_record = speculative_record
+                else:
+                    # A speculative failure never creates a third call and is
+                    # not terminal; only the existing backup remains relevant.
+                    watched = {backup_job.future}
+        except asyncio.CancelledError:
+            await asyncio.gather(
+                self._cancel_job(speculative_job, expired=False),
+                self._cancel_job(backup_job, expired=False),
+                return_exceptions=True,
+            )
+            raise
+
+        if backup_failure is not None:
+            async with self._lock:
+                backup_telemetry = self._tool_records[backup_job.job_id]
+                backup_telemetry["source"] = "executed"
+                backup_telemetry["race_winner"] = True
+                self._jobs.pop(backup_job.job_id, None)
+                self._mark_race_loser_locked(
+                    speculative_job,
+                    source="race_speculation_loser",
+                )
+                self.stats.authoritative_race_wins += 1
+                self._dispatch_locked()
+                self._touch_locked()
+            raise backup_failure
+
+        if winner_job is None or winner_record is None:  # pragma: no cover
+            raise RuntimeError("running-speculation race ended without a winner")
+
+        speculative_won = winner_job is speculative_job
+        loser_job = backup_job if speculative_won else speculative_job
+        source = "promoted_inflight" if speculative_won else "executed"
+        service_s = max(
+            0.0, winner_record.finished_at - winner_record.started_at
+        )
+        saved_service_s = 0.0
+        if speculative_won:
+            saved_service_s = max(
+                0.0,
+                min(confirmation_at, winner_record.finished_at)
+                - winner_record.started_at,
+            )
+            saved_service_s = min(service_s, saved_service_s)
+
+        committed = LiveAuthoritativeResult(
+            invocation=invocation,
+            result=winner_record.result,
+            source=source,
+            exposed_wait_s=max(0.0, self._clock() - wait_started),
+            queue_s=max(0.0, winner_record.started_at - winner_job.created_at),
+            service_s=service_s,
+            saved_service_s=saved_service_s,
+        )
+        async with self._lock:
+            telemetry = self._tool_records[winner_job.job_id]
+            telemetry["source"] = source
+            telemetry["authoritative"] = True
+            telemetry["exact_match"] = speculative_won
+            telemetry["exposed_wait_s"] = committed.exposed_wait_s
+            telemetry["saved_service_s"] = committed.saved_service_s
+            telemetry["committed"] = True
+            telemetry["outcome"] = "committed"
+            telemetry["race_winner"] = True
+            self._jobs.pop(winner_job.job_id, None)
+            self._mark_race_loser_locked(
+                loser_job,
+                source=(
+                    "race_backup_loser"
+                    if speculative_won
+                    else "race_speculation_loser"
+                ),
+            )
+            if speculative_won:
+                self.stats.running_promotions += 1
+                self.stats.speculative_race_wins += 1
+                self.stats.saved_service_s += saved_service_s
+            else:
+                self.stats.authoritative_race_wins += 1
+            self._authoritative_state.append(committed)
+            self.stats.commits += 1
+            self._dispatch_locked()
             self._touch_locked()
         return committed
 
@@ -1484,8 +2214,18 @@ class LiveToolBroker:
         session_id: str | None = None,
         keep: Invocation | None = None,
     ) -> int:
-        """Cancel unconfirmed predictions, optionally within one session."""
+        """Atomically detach unconfirmed predictions, then drain running work.
 
+        All selected jobs are removed from the dispatchable state while the
+        broker lock is held.  This matters for blocking/non-preemptible tool
+        executors: awaiting one running cancellation must not give queued
+        siblings an opportunity to start before their turn is cancelled.
+        """
+
+        current = asyncio.current_task()
+        running: list[tuple[_BrokerJob, asyncio.Task[None]]] = []
+        expiry_tasks: list[asyncio.Task[None]] = []
+        cancelled = 0
         async with self._lock:
             selected = [
                 job
@@ -1493,26 +2233,210 @@ class LiveToolBroker:
                 if (session_id is None or job.session_id == session_id)
                 and (keep is None or job.invocation.key != keep.key)
             ]
-        cancelled = 0
-        for job in selected:
-            cancelled += int(await self._discard_prediction(job, expired=False))
+            for job in selected:
+                key = self._prediction_key(job.session_id, job.invocation)
+                if self._predictions.get(key) is not job:
+                    continue
+                self._predictions.pop(key, None)
+                self.stats.speculative_cancelled += 1
+                cancelled += 1
+
+                telemetry = self._tool_records[job.job_id]
+                telemetry["cancelled"] = True
+                telemetry["outcome"] = "cancelled"
+                telemetry["source"] = "cancelled"
+                if job.state != "running" and telemetry["finish"] is None:
+                    telemetry["finish"] = self._clock()
+                    telemetry["finished_at"] = telemetry["finish"]
+                if job.started_at is None:
+                    self._finalize_never_started_cancellation_locked(
+                        job, telemetry
+                    )
+                if job.started_at is not None and job.state in {
+                    "completed",
+                    "failed",
+                }:
+                    end = (
+                        job.finished_at
+                        if job.finished_at is not None
+                        else self._clock()
+                    )
+                    self.stats.wasted_speculative_service_s += max(
+                        0.0, end - job.started_at
+                    )
+
+                runner: asyncio.Task[None] | None = None
+                if job.state in {"queued", "running"}:
+                    job.state = (
+                        "cancelling" if job.state == "running" else "cancelled"
+                    )
+                    job.generation += 1
+                    runner = job.runner
+                    if runner is None and not job.future.done():
+                        job.future.cancel()
+                if runner is None:
+                    self._jobs.pop(job.job_id, None)
+                else:
+                    running.append((job, runner))
+
+                expiry_task = job.expiry_task
+                if (
+                    expiry_task is not None
+                    and expiry_task is not current
+                    and not expiry_task.done()
+                ):
+                    expiry_tasks.append(expiry_task)
+
+            # Dispatch only after every selected queued sibling has been made
+            # ineligible.  Running calls retain their physical slots until the
+            # executor actually drains.
+            self._dispatch_locked()
+            self._touch_locked()
+
+        for _, runner in running:
+            if runner is not current and not runner.done():
+                runner.cancel()
+        if running:
+            await asyncio.gather(
+                *(runner for _, runner in running if runner is not current),
+                return_exceptions=True,
+            )
+            async with self._lock:
+                for job, runner in running:
+                    if runner is not current:
+                        self._jobs.pop(job.job_id, None)
+                self._touch_locked()
+
+        for expiry_task in expiry_tasks:
+            expiry_task.cancel()
+        if expiry_tasks:
+            await asyncio.gather(*expiry_tasks, return_exceptions=True)
         return cancelled
 
     async def sweep(self, *, now: float | None = None) -> int:
-        """Expire predictions whose TTL elapsed (also useful with fake clocks)."""
+        """Atomically expire every prediction due at one cutoff.
+
+        The whole expired set is detached before any running executor is
+        cancelled or awaited.  This is the expiration counterpart of
+        :meth:`cancel_predictions`: a non-preemptible runner must not release a
+        slot that lets another prediction from the same expired set start.
+        """
 
         cutoff = self._clock() if now is None else float(now)
+        current = asyncio.current_task()
+        running: list[tuple[_BrokerJob, asyncio.Task[None]]] = []
+        expiry_tasks: list[asyncio.Task[None]] = []
+        removed = 0
         async with self._lock:
             expired = [
                 job
                 for job in self._predictions.values()
-                if job.expires_at <= cutoff or math.isinf(cutoff)
+                if job.expires_at <= cutoff
+                or (
+                    job.state == "queued"
+                    and job.lane == "speculative"
+                    and job.start_deadline is not None
+                    and job.start_deadline <= cutoff
+                )
+                or math.isinf(cutoff)
             ]
-        removed = 0
-        for job in expired:
-            removed += int(await self._discard_prediction(job, expired=True))
-        async with self._lock:
+            for job in expired:
+                key = self._prediction_key(job.session_id, job.invocation)
+                if self._predictions.get(key) is not job:
+                    continue
+                self._predictions.pop(key, None)
+                self.stats.speculative_expired += 1
+                removed += 1
+                expiration_reason = self._job_expiration_reason(
+                    job, now=cutoff
+                )
+                if expiration_reason == "start_deadline":
+                    self.stats.speculative_deadline_expired_before_start += 1
+
+                telemetry = self._tool_records[job.job_id]
+                telemetry["cancelled"] = True
+                telemetry["outcome"] = "expired"
+                telemetry["source"] = "expired"
+                telemetry["expiration_reason"] = expiration_reason
+                telemetry["deadline_missed_by_s"] = (
+                    max(
+                        0.0,
+                        (
+                            cutoff
+                            if math.isfinite(cutoff)
+                            else self._clock()
+                        )
+                        - job.start_deadline,
+                    )
+                    if expiration_reason == "start_deadline"
+                    and job.start_deadline is not None
+                    else None
+                )
+                if job.state != "running" and telemetry["finish"] is None:
+                    telemetry["finish"] = self._clock()
+                    telemetry["finished_at"] = telemetry["finish"]
+                if job.started_at is None:
+                    self._finalize_never_started_cancellation_locked(
+                        job, telemetry
+                    )
+                if job.started_at is not None and job.state in {
+                    "completed",
+                    "failed",
+                }:
+                    end = (
+                        job.finished_at
+                        if job.finished_at is not None
+                        else self._clock()
+                    )
+                    self.stats.wasted_speculative_service_s += max(
+                        0.0, end - job.started_at
+                    )
+
+                runner: asyncio.Task[None] | None = None
+                if job.state in {"queued", "running"}:
+                    job.state = (
+                        "cancelling" if job.state == "running" else "cancelled"
+                    )
+                    job.generation += 1
+                    runner = job.runner
+                    if runner is None and not job.future.done():
+                        job.future.cancel()
+                if runner is None:
+                    self._jobs.pop(job.job_id, None)
+                else:
+                    running.append((job, runner))
+
+                expiry_task = job.expiry_task
+                if (
+                    expiry_task is not None
+                    and expiry_task is not current
+                    and not expiry_task.done()
+                ):
+                    expiry_tasks.append(expiry_task)
+
+            # Every job selected at ``cutoff`` is now lazy-invalidated.  Only
+            # work outside that expired set may become dispatchable.
             self._dispatch_locked()
+            self._touch_locked()
+
+        for _, runner in running:
+            if runner is not current and not runner.done():
+                runner.cancel()
+        if running:
+            await asyncio.gather(
+                *(runner for _, runner in running if runner is not current),
+                return_exceptions=True,
+            )
+            async with self._lock:
+                for job, runner in running:
+                    if runner is not current:
+                        self._jobs.pop(job.job_id, None)
+                self._touch_locked()
+
+        for expiry_task in expiry_tasks:
+            expiry_task.cancel()
+        if expiry_tasks:
+            await asyncio.gather(*expiry_tasks, return_exceptions=True)
         return removed
 
     def snapshot(self, *, session_id: str | None = None) -> dict[str, Any]:
@@ -1748,6 +2672,11 @@ class LiveToolBroker:
             estimated_remaining_s: float | None
             tool_name = job.invocation.tool_name
             tool_capacity = self._tool_capacity(tool_name)
+            tool_speculative_capacity = max(
+                0,
+                tool_capacity
+                - self._authoritative_tool_reserves.get(tool_name, 0),
+            )
             tool_min_start_interval_s = self._tool_min_start_interval(tool_name)
             rate_limit_next_eligible_at = self._tool_next_eligible_at.get(
                 tool_name, now
@@ -1801,7 +2730,10 @@ class LiveToolBroker:
                     now, rate_limit_next_eligible_at
                 ) + tool_queue_position * tool_min_start_interval_s
                 rate_limit_wait_s = max(0.0, rate_limit_eligible_at - now)
-                if self._max_speculative_workers <= 0:
+                if (
+                    self._max_speculative_workers <= 0
+                    or tool_speculative_capacity <= 0
+                ):
                     estimated_remaining_s = None
                     estimated_queue_s = math.inf
                     estimated_global_queue_s = math.inf
@@ -1816,7 +2748,8 @@ class LiveToolBroker:
                         )
                     ) / self._max_speculative_workers
                     speculative_tool_capacity = min(
-                        tool_capacity, self._max_speculative_workers
+                        tool_speculative_capacity,
+                        self._max_speculative_workers,
                     )
                     estimated_tool_queue_s = (
                         running_work_by_tool_s.get(tool_name, 0.0)
@@ -1848,12 +2781,22 @@ class LiveToolBroker:
                     "lane": job.lane,
                     "state": job.state,
                     "priority": job.priority,
+                    "start_deadline": job.start_deadline,
+                    "start_deadline_in_s": (
+                        None
+                        if job.start_deadline is None
+                        else max(0.0, job.start_deadline - now)
+                    ),
+                    "expires_at": (
+                        job.expires_at if math.isfinite(job.expires_at) else None
+                    ),
                     "queue_order": job.queue_order,
                     "age_s": max(0.0, now - job.created_at),
                     "service_estimate_s": estimate,
                     "queue_position": queue_position,
                     "tool_queue_position": tool_queue_position,
                     "tool_capacity": tool_capacity,
+                    "tool_speculative_capacity": tool_speculative_capacity,
                     "tool_min_start_interval_s": tool_min_start_interval_s,
                     "rate_limit_eligible_at": rate_limit_eligible_at,
                     "rate_limit_next_eligible_at": rate_limit_next_eligible_at,
@@ -1916,10 +2859,17 @@ class LiveToolBroker:
             "capacity": {
                 "max_workers": self._max_workers,
                 "max_speculative_workers": self._max_speculative_workers,
+                "max_authoritative_workers": self._max_authoritative_workers,
                 "min_speculative_workers": self._min_speculative_workers,
                 "max_speculative_pending": self._max_speculative_pending,
                 "default_tool_capacity": self._max_workers,
                 "tool_capacities": dict(sorted(self._tool_capacities.items())),
+                "authoritative_tool_capacities": dict(
+                    sorted(self._authoritative_tool_capacities.items())
+                ),
+                "authoritative_tool_reserves": dict(
+                    sorted(self._authoritative_tool_reserves.items())
+                ),
                 "tool_min_start_intervals_s": dict(
                     sorted(self._tool_min_start_intervals_s.items())
                 ),
