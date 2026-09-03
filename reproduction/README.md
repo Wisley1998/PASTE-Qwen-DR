@@ -25,6 +25,16 @@ a PASTE-only offline ablation and not as a Murakkab result; the online path
 shows that the component can execute causally in a live Qwen agent loop; the
 existing full-system path remains the end-to-end reproduction.
 
+## External Speculative Action reference
+
+A source-only snapshot of the external Speculative Action workloads is kept
+under
+[`external/speculative_action_minimal/`](external/speculative_action_minimal/PASTE_INTEGRATION.md).
+It pins the upstream commit and retains the required licenses, runners, and
+small fixtures while excluding generated results, bulk trajectories, and the
+full HotPotQA dataset. The code is comparison material and is not imported by
+the PASTE-Qwen-DR runtime.
+
 ## Reviewer Evidence Bundle
 
 The consolidated response to common comments 2, 3, and 5 is in

@@ -1,0 +1,14 @@
+{
+  "mode": "speculator_only",
+  "benchmark": "sysbench_cpu",
+  "latency_ns": 1000,
+  "min_granularity_range_ns": [50000, 50000000],
+  "window_duration_s": 1,
+  "run_duration_s": 20,
+  "pin_to_cores": "0-9",
+  "sysbench_threads": 40,
+  "sysbench_cpu_max_prime": 50000,
+  "results_dir": "results/use_case/reaction/speculator_only",
+  "perturbation_min_granularity_ns": 10000000,
+  "run_kind": "reaction"
+}

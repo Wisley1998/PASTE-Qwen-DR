@@ -1,0 +1,9 @@
+{
+    "type": "single",
+    "model": {
+        "model": "gpt-5-nano",
+        "provider": "openai",
+        "temperature": 1,
+        "reasoning": "low"
+    }
+}

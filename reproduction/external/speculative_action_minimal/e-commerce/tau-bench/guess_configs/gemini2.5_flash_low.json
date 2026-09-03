@@ -1,0 +1,9 @@
+{
+    "type": "single",
+    "model": {
+        "model": "gemini-2.5-flash",
+        "provider": "gemini",
+        "temperature": 1,
+        "reasoning": "low"
+    }
+}
