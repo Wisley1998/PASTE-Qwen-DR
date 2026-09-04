@@ -1,0 +1,15 @@
+{
+  "cell": "B",
+  "files": {
+    "prediction_decisions.json": "a46842bd9202a6e4a7709c92fb2376c039a8a659594de20e83019c6501412050",
+    "prediction_outcomes.json": "e7782b6cc7875e8a8c976eb703f6e4325086efa94846d70e1d6b98f6cf28c0c9",
+    "request_events.json": "f11b4347179d7935369486efb572f66a9764c543268b7f36215147552ebd857b",
+    "speculation_execution_events.json": "ffda8395aba95df3656088c041bb97130edf6ba1d0c6d60aa37acca91a0a199f",
+    "summary.json": "4c35ec3c79c27948bb523d94cd0cebcd250abce947256e2090224a583d7bd94d",
+    "task_results.json": "45fcb9cec6f03f6dce699ed5a6ba3e02426e2d9cdee326e1755ee7e5c60480cd",
+    "tool_events.json": "f9be63850cb6e7b71c29ba54a9a6a6ad9cab3876f12f949568a18ffacb1ad418"
+  },
+  "manifest_sha256": "d02afb003e1b6fa955d57d76a7771d52377dcbcdf28e02ac00376c74d7a89767",
+  "result_sha256": "93a7a606b97c4b8d80394915989fc89781cac530f0f4410f70cd35a4c8d2df25",
+  "schema": "paste_repro.pattern_v2_strict_result_manifest.v1"
+}

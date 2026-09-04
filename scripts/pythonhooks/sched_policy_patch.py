@@ -18,7 +18,8 @@ import sys
 import time
 from collections import deque
 from functools import wraps
-from typing import Any, Callable, Iterable, Optional
+from pathlib import Path
+from typing import Any, Callable, Iterable, NamedTuple, Optional
 
 
 _META_RE = re.compile(r"schedx([0-9a-f]+)z")
@@ -33,6 +34,10 @@ _prev_running_ids: set[str] = set()
 _oracle_last_log_s: float = 0.0
 _v2_started_sessions: set[str] = set()
 _v2_completed_sessions: set[str] = set()
+_runtime_policy_evidence_emitted: set[tuple[int, str]] = set()
+
+_RUNTIME_POLICY_EVIDENCE_SCHEMA = "paste.vllm.scheduler_runtime_use.v1"
+_RUNTIME_POLICY_EVIDENCE_ENV = "VLLM_SCHEDULER_RUNTIME_EVIDENCE"
 
 _SUPPORTED_POLICIES = {
     "fcfs",
@@ -79,6 +84,108 @@ _SUPPORTED_POLICIES = {
     "online_joint_pacer_v2",
     "oracle_tool_return_admission",
 }
+
+
+def _process_start_ticks() -> int:
+    """Return Linux /proc start ticks so a runtime marker cannot reuse a PID."""
+
+    stat = Path("/proc/self/stat").read_text(encoding="utf-8")
+    tail = stat.rsplit(") ", 1)[1].split()
+    # Field 22 in proc_pid_stat; ``tail`` starts at field 3.
+    return int(tail[19])
+
+
+def _record_runtime_policy_use(scheduler_api: str, installed_policy: str) -> None:
+    """Atomically attest the first call through a patched scheduler method.
+
+    Merely importing or installing this module is not execution evidence. The
+    strict paper harness supplies a fresh per-server path and validates this
+    marker after its standardized live request. Other reproduction entry
+    points that do not request runtime evidence retain their historical
+    behavior.
+    """
+
+    evidence_path_raw = os.getenv(_RUNTIME_POLICY_EVIDENCE_ENV)
+    if not evidence_path_raw:
+        return
+    pid = os.getpid()
+    key = (pid, scheduler_api)
+    if key in _runtime_policy_evidence_emitted:
+        return
+    observed_policy = _policy()
+    if observed_policy != installed_policy:
+        raise RuntimeError(
+            "scheduler policy changed after hook installation: "
+            f"installed={installed_policy!r} observed={observed_policy!r}"
+        )
+    hook_path = Path(__file__).resolve(strict=True)
+    hook_sha256 = hashlib.sha256(hook_path.read_bytes()).hexdigest()
+    working_directory = str(Path.cwd().resolve())
+    working_directory_on_sys_path = any(
+        entry == "" or (
+            isinstance(entry, str)
+            and Path(entry).resolve() == Path(working_directory)
+        )
+        for entry in sys.path
+    )
+    payload = {
+        "schema": _RUNTIME_POLICY_EVIDENCE_SCHEMA,
+        "pid": pid,
+        "ppid": os.getppid(),
+        "process_start_ticks": _process_start_ticks(),
+        "policy": observed_policy,
+        "scheduler_api": scheduler_api,
+        "scheduler_hook_path": str(hook_path),
+        "scheduler_hook_sha256": hook_sha256,
+        "safe_working_directory": os.getenv("VLLM_SAFE_WORKING_DIR"),
+        "python_safe_path_enforced": (
+            os.getenv("PASTE_STRICT_SAFE_PATH_ENFORCED") == "1"
+        ),
+        "cwd_import_filter_enforced": (
+            os.getenv("PASTE_STRICT_CWD_IMPORT_FILTER_ENFORCED") == "1"
+        ),
+        "working_directory": working_directory,
+        "working_directory_on_sys_path": working_directory_on_sys_path,
+        "working_directory_importable": (
+            working_directory_on_sys_path
+            and os.getenv("PASTE_STRICT_CWD_IMPORT_FILTER_ENFORCED") != "1"
+        ),
+        "python_version": sys.version.split()[0],
+        "recorded_at_unix_ns": time.time_ns(),
+        "recorded_at_monotonic_ns": time.monotonic_ns(),
+    }
+    encoded = (
+        json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+        + "\n"
+    ).encode("utf-8")
+    evidence_path = Path(evidence_path_raw)
+    if not evidence_path.is_absolute():
+        raise RuntimeError(f"{_RUNTIME_POLICY_EVIDENCE_ENV} must be absolute")
+    evidence_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        fd = os.open(
+            str(evidence_path),
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600,
+        )
+    except FileExistsError:
+        # One physical scheduler process wins the global first-call marker.
+        _runtime_policy_evidence_emitted.add(key)
+        return
+    try:
+        written = os.write(fd, encoded)
+        if written != len(encoded):
+            raise RuntimeError("short write for scheduler runtime evidence")
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    _runtime_policy_evidence_emitted.add(key)
+    print(
+        "[sched_policy_patch] runtime-use "
+        f"schema={_RUNTIME_POLICY_EVIDENCE_SCHEMA} pid={pid} "
+        f"policy={observed_policy} api={scheduler_api} hook_sha256={hook_sha256}",
+        file=sys.stderr,
+    )
 
 
 def _prefill_tokens_per_s_v2() -> float:
@@ -614,7 +721,9 @@ _JOINT_V2_UNKNOWN_REMAINING_CALLS = 8
 def _joint_v2_soft_remaining_calls(meta: dict[str, Any]) -> int:
     """Return a finite, conservative stage estimate for the soft cost."""
 
-    raw = meta.get("rc")
+    raw = meta.get(
+        "remaining_calls_hat" if _strict_causal_metadata(meta) else "rc"
+    )
     try:
         remaining_calls = int(raw)
     except (TypeError, ValueError, OverflowError):
@@ -653,6 +762,25 @@ def _joint_v2_physical_kv_admission_enabled() -> bool:
 
     return os.getenv(
         "VLLM_SCHED_JOINT_V2_PHYSICAL_KV_ADMISSION", "0"
+    ).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def _joint_v2_physical_respect_joint_limits_enabled() -> bool:
+    """Combine physical-KV safety with the foreground/decode working set.
+
+    Historical physical admission considered every waiting request that fit
+    KV, which could bypass Joint-v2's admissible prefix and fill the native
+    sequence limit whenever KV was plentiful.  The combined controller is
+    opt-in so existing physical-KV experiment profiles remain reproducible.
+    """
+
+    return os.getenv(
+        "VLLM_SCHED_JOINT_V2_PHYSICAL_RESPECT_JOINT_LIMITS", "0"
     ).strip().lower() in {
         "1",
         "true",
@@ -874,6 +1002,39 @@ def _joint_v2_remaining_tool_weight() -> float:
         return 0.35
 
 
+def _joint_v2_remaining_llm_weight() -> float:
+    """Weight for trace/predictor-derived remaining completion work.
+
+    The ``rlmt`` metadata field is measured in completion tokens and includes
+    the current request.  Convert it to isolated decode seconds before applying
+    this dimensionless weight.  Zero deliberately preserves legacy scores.
+    """
+
+    raw = os.getenv("VLLM_SCHED_JOINT_V2_REMAINING_LLM_WEIGHT", "0")
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return 0.0
+    return value if math.isfinite(value) and value > 0.0 else 0.0
+
+
+def _joint_v2_realized_gain_weight() -> float:
+    """Weight for preserved exposed tool gain carried in ``eg`` metadata.
+
+    FULL replay shortens ``nw`` after an exact speculative hit.  Subtracting
+    this separate seconds-valued gain bonus retains the cross-stage benefit in
+    the priority score instead of making successful speculation look less
+    valuable.  It is opt-in because ``eg`` may be an offline trace label.
+    """
+
+    raw = os.getenv("VLLM_SCHED_JOINT_V2_REALIZED_GAIN_WEIGHT", "0")
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return 0.0
+    return value if math.isfinite(value) and value > 0.0 else 0.0
+
+
 def _joint_v2_context_alpha() -> float:
     raw = os.getenv("VLLM_SCHED_JOINT_V2_CONTEXT_ALPHA", "1.4")
     try:
@@ -948,6 +1109,77 @@ def _avg_call_service_s() -> float:
         return max(0.0, float(raw))
     except ValueError:
         return 25.0
+
+
+class _JointV2ScoreConfig(NamedTuple):
+    """Immutable score knobs sampled once for one Joint-v2 scheduler tick.
+
+    vLLM calls the scheduler once per decode iteration.  Reading every knob
+    from ``os.environ`` for every waiting request (and again during virtual
+    admission) adds thousands of Python mapping lookups to a busy tick.  A
+    per-tick snapshot keeps environment changes observable on the next tick
+    while making every comparison within a tick use one coherent config.
+    """
+
+    prefix_locality_weight: float
+    remaining_call_soft_weight_s: float
+    target_context_tokens: float
+    virtual_fill_ratio: float
+    prefill_tokens_per_s: float
+    decode_tokens_per_s: float
+    default_predicted_output_tokens: float
+    context_tokens_per_s: float
+    context_alpha: float
+    tool_wait_cap_s: float
+    avg_call_service_s: float
+    remaining_tool_weight: float
+    context_ref_tokens: float
+    final_bonus_s: float
+    progress_bonus_s: float
+    tool_beta: float
+    remaining_llm_weight: float
+    realized_gain_weight: float
+    long_context_tokens: float
+    max_long_running: int
+    over_budget_penalty_s: float
+    new_session_penalty_s: float
+    tail_beta: float
+    time_aging_alpha: float
+
+
+def _joint_v2_score_config_snapshot() -> _JointV2ScoreConfig:
+    """Read Joint-v2's static score configuration exactly once per tick."""
+
+    return _JointV2ScoreConfig(
+        prefix_locality_weight=_joint_v2_prefix_locality_weight(),
+        remaining_call_soft_weight_s=(
+            _joint_v2_remaining_call_soft_weight_s()
+        ),
+        target_context_tokens=_hbm_target_context_tokens(),
+        virtual_fill_ratio=_hbm_virtual_fill_ratio(),
+        prefill_tokens_per_s=_prefill_tokens_per_s_v2(),
+        decode_tokens_per_s=_decode_tokens_per_s_v2(),
+        default_predicted_output_tokens=(
+            _default_predicted_output_tokens()
+        ),
+        context_tokens_per_s=_oas_v3_context_tokens_per_s(),
+        context_alpha=_joint_v2_context_alpha(),
+        tool_wait_cap_s=_joint_v2_tool_wait_cap_s(),
+        avg_call_service_s=_avg_call_service_s(),
+        remaining_tool_weight=_joint_v2_remaining_tool_weight(),
+        context_ref_tokens=_joint_v2_context_ref_tokens(),
+        final_bonus_s=_joint_v2_final_bonus_s(),
+        progress_bonus_s=_joint_v2_progress_bonus_s(),
+        tool_beta=_joint_v2_tool_beta(),
+        remaining_llm_weight=_joint_v2_remaining_llm_weight(),
+        realized_gain_weight=_joint_v2_realized_gain_weight(),
+        long_context_tokens=_hbm_long_context_tokens(),
+        max_long_running=_hbm_max_long_running(),
+        over_budget_penalty_s=_joint_v2_over_budget_penalty_s(),
+        new_session_penalty_s=_joint_v2_new_session_penalty_s(),
+        tail_beta=_joint_v2_tail_beta(),
+        time_aging_alpha=_time_aging_alpha(),
+    )
 
 
 def _prefill_tokens_per_s() -> float:
@@ -1099,10 +1331,53 @@ def _meta_int(meta: dict[str, Any], key: str, default: int) -> int:
         return default
 
 
+_STRICT_CAUSAL_METADATA_SCHEMA = "paste.schedx.causal_prediction.v1"
+
+
+def _strict_causal_metadata(meta: dict[str, Any]) -> bool:
+    """Return whether *meta* uses the fail-closed paper prediction schema.
+
+    Historical runners used compact fields such as ``po``, ``rc`` and ``nw``
+    for a mixture of predictions and trace suffix truth.  The strict runner
+    deliberately does not emit those ambiguous names.  Keeping the aliasing
+    here, behind an exact schema check, lets old artifacts remain reproducible
+    without allowing a strict result to silently fall back to an oracle field.
+    """
+
+    return meta.get("ms") == _STRICT_CAUSAL_METADATA_SCHEMA
+
+
+def _causal_meta_float(
+    meta: dict[str, Any],
+    *,
+    predicted_key: str,
+    legacy_key: str,
+    default: float,
+) -> float:
+    key = predicted_key if _strict_causal_metadata(meta) else legacy_key
+    return _meta_float(meta, key, default)
+
+
+def _causal_meta_int(
+    meta: dict[str, Any],
+    *,
+    predicted_key: str,
+    legacy_key: str,
+    default: int,
+) -> int:
+    key = predicted_key if _strict_causal_metadata(meta) else legacy_key
+    return _meta_int(meta, key, default)
+
+
 def _next_tool_wait_reliability(meta: dict[str, Any]) -> float:
     """Return a bounded confidence gate, preserving legacy metadata behavior."""
 
-    reliability = _meta_float(meta, "nwc", 1.0)
+    reliability = _causal_meta_float(
+        meta,
+        predicted_key="tool_hit_probability_hat",
+        legacy_key="nwc",
+        default=1.0,
+    )
     if not math.isfinite(reliability):
         return 0.0
     return min(1.0, max(0.0, reliability))
@@ -1132,7 +1407,12 @@ def _service_estimate_v2_s(
     prompt_len: int,
     max_tokens: int,
 ) -> float:
-    po = _meta_float(meta, "po", -1.0)
+    po = _causal_meta_float(
+        meta,
+        predicted_key="po_hat",
+        legacy_key="po",
+        default=-1.0,
+    )
     if po < 0:
         po = float(max_tokens) if max_tokens > 0 else _default_predicted_output_tokens()
     prompt_tokens = _meta_int(meta, "pt", prompt_len)
@@ -1184,7 +1464,12 @@ def _estimated_kv_tokens(
     max_tokens: int,
 ) -> int:
     prompt_tokens = _meta_int(meta, "pt", prompt_len)
-    po = _meta_float(meta, "po", -1.0)
+    po = _causal_meta_float(
+        meta,
+        predicted_key="po_hat",
+        legacy_key="po",
+        default=-1.0,
+    )
     if po < 0:
         po = float(max_tokens) if max_tokens > 0 else _default_predicted_output_tokens()
     return max(0, int(prompt_tokens + max(0.0, po)))
@@ -1268,7 +1553,12 @@ def _oas_v5_score_s(
     if long_over_cap:
         over_penalty_s += _oas_v5_over_budget_penalty_s()
 
-    remaining_calls = _meta_int(meta, "rc", 10**9)
+    remaining_calls = _causal_meta_int(
+        meta,
+        predicted_key="remaining_calls_hat",
+        legacy_key="rc",
+        default=1 if _strict_causal_metadata(meta) else 10**9,
+    )
     capped_tool_wait_s = 0.0
     if remaining_calls > 0:
         capped_tool_wait_s = min(max(0.0, next_tool_wait), _oas_v5_tool_wait_cap_s())
@@ -1300,7 +1590,12 @@ def _tool_queue_key_s(
     next_tool_wait: float,
     waited_s: float,
 ) -> float:
-    remaining_calls = _meta_int(meta, "rc", 10**9)
+    remaining_calls = _causal_meta_int(
+        meta,
+        predicted_key="remaining_calls_hat",
+        legacy_key="rc",
+        default=1 if _strict_causal_metadata(meta) else 10**9,
+    )
     service_s = _service_estimate_v2_s(meta, prompt_len, max_tokens)
     capped_tool_wait_s = (
         min(max(0.0, next_tool_wait), _tool_queue_wait_cap_s())
@@ -1332,7 +1627,12 @@ def _joint_tool_queue_key_s(
         next_tool_wait=next_tool_wait,
         waited_s=waited_s,
     )
-    remaining_calls = _meta_int(meta, "rc", 10**9)
+    remaining_calls = _causal_meta_int(
+        meta,
+        predicted_key="remaining_calls_hat",
+        legacy_key="rc",
+        default=1 if _strict_causal_metadata(meta) else 10**9,
+    )
     window_s = _joint_quick_return_window_s()
     if remaining_calls > 0 and window_s > 0 and 0.0 <= next_tool_wait <= window_s:
         proximity = (window_s - next_tool_wait) / window_s
@@ -1349,6 +1649,7 @@ def _hbm_feature(
     prompt_len_fn: Callable[[Any], int],
     *,
     joint_pacer: bool = False,
+    include_tool_key: bool = True,
 ) -> dict[str, Any]:
     arrival = _arrival_time(obj)
     waited_s = max(0.0, now_s - arrival) if arrival > 0 else 0.0
@@ -1356,13 +1657,19 @@ def _hbm_feature(
     max_tokens = _sampling_max_tokens(obj)
     meta = _decode_meta(obj)
     prompt_tokens = _meta_int(meta, "pt", prompt_len)
-    remaining_calls = _meta_int(meta, "rc", 10**9)
-    next_tool_wait = _meta_float(
+    remaining_calls = _causal_meta_int(
         meta,
-        "nw",
-        0.0 if remaining_calls == 0 else _tool_queue_wait_cap_s(),
+        predicted_key="remaining_calls_hat",
+        legacy_key="rc",
+        default=1 if _strict_causal_metadata(meta) else 10**9,
     )
-    return {
+    next_tool_wait = _causal_meta_float(
+        meta,
+        predicted_key="tool_eta_s_hat",
+        legacy_key="nw",
+        default=0.0 if remaining_calls == 0 else _tool_queue_wait_cap_s(),
+    )
+    feature = {
         "arrival": arrival,
         "rid": _request_id(obj),
         "waited_s": waited_s,
@@ -1372,7 +1679,9 @@ def _hbm_feature(
         "prompt_tokens": prompt_tokens,
         "kv_tokens": _estimated_kv_tokens(meta, prompt_len, max_tokens),
         "next_tool_wait": next_tool_wait,
-        "tool_key": (
+    }
+    if include_tool_key:
+        feature["tool_key"] = (
             _joint_tool_queue_key_s if joint_pacer else _tool_queue_key_s
         )(
             meta=meta,
@@ -1380,8 +1689,8 @@ def _hbm_feature(
             max_tokens=max_tokens,
             next_tool_wait=next_tool_wait,
             waited_s=waited_s,
-        ),
-    }
+        )
+    return feature
 
 
 def _hbm_cost_key(f: dict[str, Any]) -> tuple[Any, ...]:
@@ -1873,7 +2182,12 @@ def _joint_v2_score_s(
     live_long_count: int,
     virtual_long_count: int,
     is_new_session: bool,
+    score_config: Optional[_JointV2ScoreConfig] = None,
 ) -> tuple[float, bool]:
+    config = (
+        _joint_v2_score_config_snapshot()
+        if score_config is None else score_config
+    )
     meta = f["meta"]
     prompt_tokens = max(0, int(f["prompt_tokens"]))
     kv_tokens = max(0, int(f["kv_tokens"]))
@@ -1882,7 +2196,7 @@ def _joint_v2_score_s(
         0,
         int(f.get("marginal_kv_tokens", kv_tokens)),
     )
-    prefix_weight = _joint_v2_prefix_locality_weight()
+    prefix_weight = config.prefix_locality_weight
     prefix_discount_tokens = min(
         float(prompt_tokens),
         float(cached_tokens) * prefix_weight,
@@ -1899,8 +2213,13 @@ def _joint_v2_score_s(
         0.0,
         float(prompt_tokens) - prefix_discount_tokens,
     )
-    remaining_calls = _meta_int(meta, "rc", 10**9)
-    remaining_call_soft_weight_s = _joint_v2_remaining_call_soft_weight_s()
+    remaining_calls = _causal_meta_int(
+        meta,
+        predicted_key="remaining_calls_hat",
+        legacy_key="rc",
+        default=1 if _strict_causal_metadata(meta) else 10**9,
+    )
+    remaining_call_soft_weight_s = config.remaining_call_soft_weight_s
     soft_remaining_calls = (
         _joint_v2_soft_remaining_calls(meta)
         if remaining_call_soft_weight_s > 0.0
@@ -1909,17 +2228,18 @@ def _joint_v2_score_s(
     next_tool_wait = max(0.0, float(f["next_tool_wait"]))
     remaining_tool_wait = max(
         0.0,
-        _meta_float(
+        _causal_meta_float(
             meta,
-            "rtw",
-            next_tool_wait * max(0, soft_remaining_calls),
+            predicted_key="remaining_tool_wait_s_hat",
+            legacy_key="rtw",
+            default=next_tool_wait * max(0, soft_remaining_calls),
         ),
     )
     prompt_len = int(f["prompt_len"])
     max_tokens = int(f["max_tokens"])
 
-    target_tokens = _hbm_target_context_tokens()
-    fill_target = target_tokens * _hbm_virtual_fill_ratio()
+    target_tokens = config.target_context_tokens
+    fill_target = target_tokens * config.virtual_fill_ratio
     projected_tokens = live_tokens + virtual_tokens + float(kv_tokens)
     projected_pressure = max(0.0, projected_tokens / max(1.0, target_tokens))
     marginal_projected_tokens = (
@@ -1936,21 +2256,37 @@ def _joint_v2_score_s(
     # conservative physical-KV forecast.  The marginal pressure below is only
     # an ordering cost.  Admission and over-budget checks retain the full
     # ``kv_tokens`` footprint.
+    predicted_output_tokens = _causal_meta_float(
+        meta,
+        predicted_key="po_hat",
+        legacy_key="po",
+        default=-1.0,
+    )
+    if predicted_output_tokens < 0:
+        predicted_output_tokens = (
+            float(max_tokens)
+            if max_tokens > 0 else config.default_predicted_output_tokens
+        )
     service_s = max(
         0.0,
-        _service_estimate_v2_s(meta, prompt_len, max_tokens)
-        - prefix_discount_tokens / _prefill_tokens_per_s_v2(),
+        (
+            max(0, _meta_int(meta, "pt", prompt_len))
+            / config.prefill_tokens_per_s
+            + max(0.0, predicted_output_tokens)
+            / config.decode_tokens_per_s
+        )
+        - prefix_discount_tokens / config.prefill_tokens_per_s,
     )
-    prompt_cost_s = marginal_prefill_tokens / _oas_v3_context_tokens_per_s()
+    prompt_cost_s = marginal_prefill_tokens / config.context_tokens_per_s
     context_penalty_s = (
-        _joint_v2_context_alpha()
+        config.context_alpha
         * (marginal_projected_pressure ** 1.35)
         * prompt_cost_s
     )
 
     capped_remaining_tool_s = min(
         remaining_tool_wait,
-        _joint_v2_tool_wait_cap_s() * max(1, soft_remaining_calls),
+        config.tool_wait_cap_s * max(1, soft_remaining_calls),
     )
     # In legacy mode the task-tail and reciprocal progress terms both encode
     # remaining-call stage.  A positive soft weight replaces both of those
@@ -1958,14 +2294,14 @@ def _joint_v2_score_s(
     # The observed remaining-tool duration is retained because it represents
     # downstream work, not merely a second spelling of the call count.
     legacy_remaining_service_s = (
-        max(0, remaining_calls) * _avg_call_service_s()
+        max(0, remaining_calls) * config.avg_call_service_s
         if remaining_call_soft_weight_s <= 0.0
         else 0.0
     )
     task_tail_s = (
         service_s
         + legacy_remaining_service_s
-        + _joint_v2_remaining_tool_weight() * capped_remaining_tool_s
+        + config.remaining_tool_weight * capped_remaining_tool_s
     )
     remaining_call_soft_cost_s = (
         remaining_call_soft_weight_s * soft_remaining_calls
@@ -1973,59 +2309,91 @@ def _joint_v2_score_s(
         else 0.0
     )
 
-    context_ref = _joint_v2_context_ref_tokens()
+    context_ref = config.context_ref_tokens
     context_damp = 1.0 + prompt_tokens / context_ref
     final_bonus_s = (
-        _joint_v2_final_bonus_s() / context_damp
+        config.final_bonus_s / context_damp
         if soft_remaining_calls == 0 else 0.0
     )
     progress_bonus_s = (
-        _joint_v2_progress_bonus_s()
+        config.progress_bonus_s
         / float(max(1, remaining_calls + 1))
         / context_damp
         if remaining_call_soft_weight_s <= 0.0
         else 0.0
     )
     capped_next_tool_s = (
-        min(next_tool_wait, _joint_v2_tool_wait_cap_s())
+        min(next_tool_wait, config.tool_wait_cap_s)
         if soft_remaining_calls > 0 else 0.0
     )
     tool_damp = 1.0 + projected_pressure * prompt_tokens / context_ref
     tool_bonus_s = (
-        _joint_v2_tool_beta()
+        config.tool_beta
         * _next_tool_wait_reliability(meta)
         * capped_next_tool_s
         / tool_damp
     )
+    raw_remaining_llm_tokens = _causal_meta_float(
+        meta,
+        predicted_key="remaining_llm_tokens_hat",
+        legacy_key="rlmt",
+        default=0.0,
+    )
+    remaining_llm_tokens = (
+        max(0.0, raw_remaining_llm_tokens)
+        if math.isfinite(raw_remaining_llm_tokens) else 0.0
+    )
+    remaining_llm_cost_s = (
+        config.remaining_llm_weight
+        * remaining_llm_tokens
+        / config.decode_tokens_per_s
+    )
+    raw_realized_gain_s = _causal_meta_float(
+        meta,
+        predicted_key="expected_gain_s_hat",
+        legacy_key="eg",
+        default=0.0,
+    )
+    realized_gain_s = (
+        max(0.0, raw_realized_gain_s)
+        if math.isfinite(raw_realized_gain_s) else 0.0
+    )
+    realized_gain_bonus_s = (
+        config.realized_gain_weight * realized_gain_s
+    )
 
-    long_threshold = _hbm_long_context_tokens()
+    long_threshold = config.long_context_tokens
     is_long = prompt_tokens >= long_threshold
     long_over_cap = (
         is_long
-        and _hbm_max_long_running() > 0
-        and live_long_count + virtual_long_count >= _hbm_max_long_running()
+        and config.max_long_running > 0
+        and live_long_count + virtual_long_count >= config.max_long_running
     )
     token_over_budget = projected_tokens > fill_target
     over_budget = token_over_budget or long_over_cap
     over_penalty_s = 0.0
     if token_over_budget:
         over_ratio = max(0.0, projected_tokens / max(1.0, fill_target) - 1.0)
-        over_penalty_s += _joint_v2_over_budget_penalty_s() * (1.0 + over_ratio) ** 2
+        over_penalty_s += config.over_budget_penalty_s * (1.0 + over_ratio) ** 2
     if long_over_cap:
-        over_penalty_s += _joint_v2_over_budget_penalty_s()
+        over_penalty_s += config.over_budget_penalty_s
 
-    new_session_penalty_s = _joint_v2_new_session_penalty_s() if is_new_session else 0.0
+    new_session_penalty_s = (
+        config.new_session_penalty_s if is_new_session else 0.0
+    )
     aged_score_s = (
         service_s
         + context_penalty_s
-        + _joint_v2_tail_beta() * task_tail_s
+        + config.tail_beta * task_tail_s
         + remaining_call_soft_cost_s
+        + remaining_llm_cost_s
         + over_penalty_s
         + new_session_penalty_s
         - tool_bonus_s
+        - realized_gain_bonus_s
         - final_bonus_s
         - progress_bonus_s
-        - _time_aging_alpha() * float(f["waited_s"])
+        - config.time_aging_alpha * float(f["waited_s"])
     )
     return aged_score_s, over_budget
 
@@ -2040,12 +2408,13 @@ def _order_joint_pacer_v2_waiting(
 ) -> tuple[list[Any], int, float]:
     waiting = list(waiting_items)
     running = list(running_items)
+    score_config = _joint_v2_score_config_snapshot()
     live_tokens = float(
         sum(_active_context_tokens(item, prompt_len_fn) for item in running)
     )
     running_count = len(running)
-    budget = _hbm_target_context_tokens()
-    long_threshold = _hbm_long_context_tokens()
+    budget = score_config.target_context_tokens
+    long_threshold = score_config.long_context_tokens
     live_long_count = sum(
         1 for item in running
         if _active_context_tokens(item, prompt_len_fn) >= long_threshold
@@ -2057,6 +2426,10 @@ def _order_joint_pacer_v2_waiting(
             now_s,
             prompt_len_fn,
             joint_pacer=True,
+            # Joint-v2 computes its own continuous score below and never
+            # consumes the legacy tool-queue key.  Avoid building that dead
+            # key (and its environment-backed service estimate) every tick.
+            include_tool_key=False,
         )
         for item in waiting
     }
@@ -2101,7 +2474,7 @@ def _order_joint_pacer_v2_waiting(
     )
     final_lane_enabled = _joint_v2_final_lane_enabled()
     soft_remaining_call_enabled = (
-        _joint_v2_remaining_call_soft_weight_s() > 0.0
+        score_config.remaining_call_soft_weight_s > 0.0
     )
     # A soft stage cost is an alternative to, not an extra tie-breaker inside,
     # the exact/coarse stage lane.  FINAL_LANE remains independently available.
@@ -2124,13 +2497,21 @@ def _order_joint_pacer_v2_waiting(
             live_long_count=live_long_count,
             virtual_long_count=0,
             is_new_session=is_new,
+            score_config=score_config,
         )
         if id(item) == pinned_urgent_id:
             # HBM checks below still decide whether this one urgent request is
             # actually admissible; pinning changes priority, not capacity.
             return (0, f["arrival"], f["rid"])
         if final_lane_enabled or remaining_call_lane_enabled:
-            predicted_remaining_calls = _meta_int(f["meta"], "rc", 10**9)
+            predicted_remaining_calls = _causal_meta_int(
+                f["meta"],
+                predicted_key="remaining_calls_hat",
+                legacy_key="rc",
+                default=(
+                    1 if _strict_causal_metadata(f["meta"]) else 10**9
+                ),
+            )
             if predicted_remaining_calls < 0:
                 predicted_remaining_calls = 10**9
             lane_key: tuple[int, ...] = ()
@@ -2171,8 +2552,8 @@ def _order_joint_pacer_v2_waiting(
     admissible: list[Any] = []
     deferred: list[Any] = []
     gated_new: list[Any] = []
-    fill_budget = budget * _hbm_virtual_fill_ratio()
-    max_long = _hbm_max_long_running()
+    fill_budget = budget * score_config.virtual_fill_ratio
+    max_long = score_config.max_long_running
     max_admit = _hbm_max_admit_per_step()
 
     for item in base_order:
@@ -2195,6 +2576,7 @@ def _order_joint_pacer_v2_waiting(
             live_long_count=live_long_count,
             virtual_long_count=virtual_long_count,
             is_new_session=is_new,
+            score_config=score_config,
         )
         projected_tokens = live_tokens + virtual_tokens + float(f["kv_tokens"])
         prompt_tokens = float(f["prompt_tokens"])
@@ -2639,6 +3021,8 @@ def _maybe_log_joint_v2_physical_kv(
         "predicted_admit_tokens",
         "waiting",
         "running",
+        "joint_admissible",
+        "joint_limit_slots",
         "fit_admit",
         "admit",
         "effective_cap",
@@ -2675,16 +3059,17 @@ def _apply_joint_v2_physical_kv_admission(
     running_items: Iterable[Any],
     prompt_len_fn: Callable[[Any], int],
     reserved_kv: float,
+    admissible_count: Optional[int] = None,
     now_s: Optional[float] = None,
 ) -> dict[str, Any]:
     """Set a forecast-driven admission cap from vLLM's physical KV shape.
 
-    There is no configured running-count target, minimum, or per-step maximum.
-    Every request whose predicted footprint fits the physical-token budget is
-    eligible, bounded only by vLLM's native ``max_num_seqs`` safety ceiling.
-    One aged request may consume the utilization reserve (but never projected
-    physical capacity), and an empty engine admits one physically feasible
-    request to guarantee progress.
+    In legacy mode every request whose predicted footprint fits the physical
+    token budget is eligible, bounded only by vLLM's native ``max_num_seqs``
+    safety ceiling.  With ``PHYSICAL_RESPECT_JOINT_LIMITS=1``, candidates are
+    restricted to the Joint-v2 admissible prefix and its decode-pressure
+    allowance.  This composes physical safety with the persistent foreground
+    working set instead of letting plentiful KV bypass it.
 
     The function is an explicit Joint-v2 opt-in.  ``NATIVE_ADMISSION=1`` takes
     precedence and returns before any write to ``max_num_running_reqs``.
@@ -2724,16 +3109,45 @@ def _apply_joint_v2_physical_kv_admission(
         _maybe_log_joint_v2_physical_kv(self, decision, tick_s, force=True)
         return decision
 
+    native_slots = max(0, native_cap - len(running))
+    respect_joint_limits = _joint_v2_physical_respect_joint_limits_enabled()
+    raw_joint_admissible = (
+        (0 if respect_joint_limits else len(ordered))
+        if admissible_count is None else int(admissible_count)
+    )
+    joint_admissible = min(len(ordered), max(0, raw_joint_admissible))
+    if respect_joint_limits:
+        decode_allowance = _joint_v2_decode_admit_allowance(
+            running_count=len(running),
+            waiting_items=ordered[:joint_admissible],
+            now_s=tick_s,
+            native_max_running=native_cap,
+        )
+        joint_limit_slots = min(
+            native_slots,
+            joint_admissible,
+            decode_allowance,
+        )
+    else:
+        joint_limit_slots = native_slots
+
     physical_state = _joint_v2_physical_kv_state(self)
     if physical_state is None:
         # If a prior valid tick installed a smaller dynamic cap, restore the
-        # captured engine ceiling rather than leaving a stale private limit.
-        write_count = _write_joint_v2_physical_kv_cap(self, native_cap)
+        # captured engine ceiling in legacy mode.  The composed mode must keep
+        # its causal working-set/decode bound even if physical telemetry fails.
+        fallback_cap = min(
+            native_cap,
+            len(running) + joint_limit_slots,
+        )
+        write_count = _write_joint_v2_physical_kv_cap(self, fallback_cap)
         decision = {
             **common,
             "decision": "fail_closed",
             "reason": "physical_kv_api_unavailable",
-            "effective_cap": native_cap,
+            "joint_admissible": joint_admissible,
+            "joint_limit_slots": joint_limit_slots,
+            "effective_cap": fallback_cap,
             "capacity_write_source": "physical_kv",
             "capacity_write_count": write_count,
         }
@@ -2767,11 +3181,14 @@ def _apply_joint_v2_physical_kv_admission(
         + reserved_tokens
     )
     remaining_tokens = max(0, budget_tokens - committed_tokens)
-    native_slots = max(0, native_cap - len(running))
 
     candidates: list[tuple[Any, int]] = []
     try:
-        for item in ordered:
+        candidate_items = (
+            ordered[:joint_admissible]
+            if respect_joint_limits else ordered
+        )
+        for item in candidate_items:
             predicted_tokens = _joint_v2_predicted_kv_tokens(
                 item,
                 prompt_len_fn,
@@ -2781,7 +3198,11 @@ def _apply_joint_v2_physical_kv_admission(
                 raise ValueError("non-positive request KV forecast")
             candidates.append((item, predicted_tokens))
     except Exception:
-        write_count = _write_joint_v2_physical_kv_cap(self, native_cap)
+        fallback_cap = min(
+            native_cap,
+            len(running) + joint_limit_slots,
+        )
+        write_count = _write_joint_v2_physical_kv_cap(self, fallback_cap)
         decision = {
             **common,
             "decision": "fail_closed",
@@ -2793,7 +3214,9 @@ def _apply_joint_v2_physical_kv_admission(
             "budget_tokens": budget_tokens,
             "usage": f"{usage:.6f}",
             "live_tokens": live_tokens,
-            "effective_cap": native_cap,
+            "joint_admissible": joint_admissible,
+            "joint_limit_slots": joint_limit_slots,
+            "effective_cap": fallback_cap,
             "capacity_write_source": "physical_kv",
             "capacity_write_count": write_count,
         }
@@ -2820,14 +3243,15 @@ def _apply_joint_v2_physical_kv_admission(
         else None
     )
 
-    if native_slots > 0 and oldest_due is not None:
+    if joint_limit_slots > 0 and oldest_due is not None:
         due_item, due_tokens = oldest_due
         if due_tokens <= remaining_tokens:
             selected.append(oldest_due)
             selected_ids.add(id(due_item))
             remaining_tokens -= due_tokens
-        elif live_tokens + due_tokens <= capacity_tokens:
-            # Bypass only the configured utilization reserve/forecasts.  The
+        elif committed_tokens + due_tokens <= capacity_tokens:
+            # Bypass only the configured utilization reserve.  Running growth
+            # and return reservations remain committed forecasts, and the
             # physical 100% boundary remains non-negotiable.
             selected.append(oldest_due)
             selected_ids.add(id(due_item))
@@ -2836,7 +3260,7 @@ def _apply_joint_v2_physical_kv_admission(
 
     if not rescue:
         for item, predicted_tokens in candidates:
-            if len(selected) >= native_slots:
+            if len(selected) >= joint_limit_slots:
                 break
             if id(item) in selected_ids:
                 continue
@@ -2847,15 +3271,18 @@ def _apply_joint_v2_physical_kv_admission(
 
     if (
         not selected
-        and native_slots > 0
+        and joint_limit_slots > 0
         and not running
         and candidates
     ):
-        # A forecast may consume all reserve even while no request can release
-        # KV.  Admit the smallest physically feasible request to avoid a
-        # controller-created deadlock.
+        # A forecast may consume all utilization reserve even while no running
+        # request can release KV.  Admit the smallest request that still fits
+        # beside every committed return reservation; never trade the physical
+        # 100% boundary for controller progress.
         feasible = [
-            pair for pair in candidates if live_tokens + pair[1] <= capacity_tokens
+            pair
+            for pair in candidates
+            if committed_tokens + pair[1] <= capacity_tokens
         ]
         if feasible:
             progress_item = min(
@@ -2869,17 +3296,21 @@ def _apply_joint_v2_physical_kv_admission(
 
     if selected:
         ordered[:] = [item for item, _ in selected] + [
-            item for item, _ in candidates if id(item) not in selected_ids
+            item for item in ordered if id(item) not in selected_ids
         ]
     admit_count = len(selected)
     predicted_admit_tokens = sum(tokens for _, tokens in selected)
     effective_cap = min(native_cap, len(running) + admit_count)
     write_count = _write_joint_v2_physical_kv_cap(self, effective_cap)
 
-    if not candidates:
+    if not ordered:
         reason = "no_waiting"
     elif native_slots <= 0:
         reason = "native_full"
+    elif respect_joint_limits and joint_limit_slots <= 0:
+        reason = "joint_limit"
+    elif not candidates:
+        reason = "no_candidates"
     elif not selected:
         reason = "forecast_hold"
     decision = {
@@ -2898,6 +3329,8 @@ def _apply_joint_v2_physical_kv_admission(
         "reserved_tokens": reserved_tokens,
         "committed_tokens": committed_tokens,
         "predicted_admit_tokens": predicted_admit_tokens,
+        "joint_admissible": joint_admissible,
+        "joint_limit_slots": joint_limit_slots,
         "fit_admit": admit_count - (1 if rescue else 0),
         "admit": admit_count,
         "effective_cap": effective_cap,
@@ -3489,6 +3922,7 @@ def _install_v0(policy: str) -> bool:
 
     @wraps(original)
     def wrapped_schedule_prefills(self: Any, *args: Any, **kwargs: Any) -> Any:
+        _record_runtime_policy_use("v0.Scheduler._schedule_prefills", policy)
         waiting = getattr(self, "waiting", None)
         current_policy = _policy()
         # Ordering needs two requests, but v2 admission control must also run
@@ -3570,6 +4004,7 @@ def _install_v0(policy: str) -> bool:
                             _apply_joint_v2_physical_kv_admission(
                                 self,
                                 ordered=ordered,
+                                admissible_count=admissible_count,
                                 running_items=running,
                                 prompt_len_fn=_prompt_len_v0,
                                 reserved_kv=reserved_kv,
@@ -3630,6 +4065,7 @@ def _install_v1(policy: str) -> bool:
 
     @wraps(original)
     def wrapped_schedule(self: Any, *args: Any, **kwargs: Any) -> Any:
+        _record_runtime_policy_use("v1.Scheduler.schedule", policy)
         waiting = getattr(self, "waiting", None)
         current_policy = _policy()
 
@@ -3702,6 +4138,7 @@ def _install_v1(policy: str) -> bool:
                         _apply_joint_v2_physical_kv_admission(
                             self,
                             ordered=ordered,
+                            admissible_count=admissible_count,
                             running_items=running,
                             prompt_len_fn=_prompt_len_v1,
                             reserved_kv=reserved_kv,

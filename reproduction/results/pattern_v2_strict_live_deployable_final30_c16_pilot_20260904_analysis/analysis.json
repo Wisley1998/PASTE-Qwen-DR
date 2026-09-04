@@ -1,0 +1,133 @@
+{
+  "analysis_sha256": "f6926c60a8b299bbc7e7be8404793df4db3b17926c336504dad5a59e6be7841a",
+  "blocks": [
+    "block-01"
+  ],
+  "bootstrap": {
+    "samples": 20000,
+    "seed": 20260904,
+    "unit": "paired_independent_source_root"
+  },
+  "cells": {
+    "A": {
+      "blocks": 1,
+      "mean_makespan_s": 812.6568756370107,
+      "mean_p95_task_flow_s": 757.928713056026,
+      "mean_saved_tool_service_s_per_task": 0.0,
+      "mean_task_flow_s": 420.7794823187148,
+      "mean_tool_exposed_s_per_task": 29.369514371469684,
+      "realized_visit_hit_rate": 0.0,
+      "scheduler": "native_fcfs",
+      "speculation": false,
+      "visit_call_amplification": 1.0
+    },
+    "B": {
+      "blocks": 1,
+      "mean_makespan_s": 646.4410149139585,
+      "mean_p95_task_flow_s": 629.0303783980198,
+      "mean_saved_tool_service_s_per_task": 14.887775353439862,
+      "mean_task_flow_s": 347.8569248521739,
+      "mean_tool_exposed_s_per_task": 14.48382453719775,
+      "realized_visit_hit_rate": 0.769656699889258,
+      "scheduler": "native_fcfs",
+      "speculation": true,
+      "visit_call_amplification": 6.888150609080841
+    },
+    "E": {
+      "blocks": 1,
+      "mean_makespan_s": 831.3741055900464,
+      "mean_p95_task_flow_s": 780.5796558019938,
+      "mean_saved_tool_service_s_per_task": 0.0,
+      "mean_task_flow_s": 434.21705207010353,
+      "mean_tool_exposed_s_per_task": 29.36951647795892,
+      "realized_visit_hit_rate": 0.0,
+      "scheduler": "causal_joint",
+      "speculation": false,
+      "visit_call_amplification": 1.0
+    },
+    "F": {
+      "blocks": 1,
+      "mean_makespan_s": 652.2962339810329,
+      "mean_p95_task_flow_s": 631.6890373920323,
+      "mean_saved_tool_service_s_per_task": 14.93589292502452,
+      "mean_task_flow_s": 351.5761223305166,
+      "mean_tool_exposed_s_per_task": 14.436946740266423,
+      "realized_visit_hit_rate": 0.7718715393133998,
+      "scheduler": "causal_joint",
+      "speculation": true,
+      "visit_call_amplification": 6.883720930232558
+    }
+  },
+  "confirmatory_claim_allowed": false,
+  "contrasts": {
+    "B_vs_A_tool_only": {
+      "baseline": "A",
+      "independent_roots": 30,
+      "load_replicas_per_root": 7,
+      "makespan_speedup_fraction": 0.20453387611193458,
+      "paired_root_bootstrap_95ci": [
+        0.16417249480925836,
+        0.18305734640872562
+      ],
+      "paired_root_mean_flow_speedup_fraction": 0.17330350107543155,
+      "treatment": "B"
+    },
+    "E_vs_A_scheduler_only": {
+      "baseline": "A",
+      "independent_roots": 30,
+      "load_replicas_per_root": 7,
+      "makespan_speedup_fraction": -0.023032143717930144,
+      "paired_root_bootstrap_95ci": [
+        -0.03252975360160545,
+        -0.03138452600206583
+      ],
+      "paired_root_mean_flow_speedup_fraction": -0.031934945300423574,
+      "treatment": "E"
+    },
+    "F_vs_A_combined": {
+      "baseline": "A",
+      "independent_roots": 30,
+      "load_replicas_per_root": 7,
+      "makespan_speedup_fraction": 0.1973288437758891,
+      "paired_root_bootstrap_95ci": [
+        0.15509061704095883,
+        0.17399833115066132
+      ],
+      "paired_root_mean_flow_speedup_fraction": 0.16446467305594734,
+      "treatment": "F"
+    },
+    "F_vs_B_scheduler_incremental": {
+      "baseline": "B",
+      "independent_roots": 30,
+      "load_replicas_per_root": 7,
+      "makespan_speedup_fraction": -0.009057623096290835,
+      "paired_root_bootstrap_95ci": [
+        -0.011166980402019331,
+        -0.010232951739786963
+      ],
+      "paired_root_mean_flow_speedup_fraction": -0.010691744831364907,
+      "treatment": "F"
+    },
+    "F_vs_E_tool_incremental": {
+      "baseline": "E",
+      "independent_roots": 30,
+      "load_replicas_per_root": 7,
+      "makespan_speedup_fraction": 0.21539986680474923,
+      "paired_root_bootstrap_95ci": [
+        0.18169566665496245,
+        0.19958338578806933
+      ],
+      "paired_root_mean_flow_speedup_fraction": 0.19032170511406973,
+      "treatment": "F"
+    }
+  },
+  "evidence_scope": "retrospective_internal_holdout_live_pilot",
+  "run_root": "/home/aiscuser/PASTE-Qwen-DR/reproduction/results/pattern_v2_strict_live_deployable_final30_c16_pilot_20260904",
+  "schema": "paste_repro.pattern_v2_strict_abef_analysis.v1",
+  "work_equivalence": {
+    "authority_tools": 1302,
+    "identical_across_all_cells": true,
+    "requests": 1785,
+    "tasks": 210
+  }
+}

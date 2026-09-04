@@ -1,0 +1,15 @@
+{
+  "cell": "E",
+  "files": {
+    "prediction_decisions.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "prediction_outcomes.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "request_events.json": "ec49597c32271ec7fce1dafac71a3819acc83705bb78689efa3970b43b077632",
+    "speculation_execution_events.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "summary.json": "24b2ed9e6510c99c41ca708fcea99d433d5f8fa34df67758867f8d17560ab8e8",
+    "task_results.json": "78de759224380bede5544a14601fa0de862962eff794eb1d1d2d67e11418a3f1",
+    "tool_events.json": "d7af992bf142cbd155cc890c4407b18260313e238219384953875a1920037e44"
+  },
+  "manifest_sha256": "4dc9a62361a47757b62355a86cf34d612978cf712d01d9ba418143247abbba0e",
+  "result_sha256": "56561e9d2f9dcc5125cd9824f90352916f990aeac3bbb6852f38e13b9e178ed8",
+  "schema": "paste_repro.pattern_v2_strict_result_manifest.v1"
+}

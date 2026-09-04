@@ -36,7 +36,16 @@ HF_HOME="${HF_HOME:-${HOME}/hf_cache}"
 MODEL_ID="${MODEL_ID:-Alibaba-NLP/Tongyi-DeepResearch-30B-A3B}"
 MODEL_REVISION="${MODEL_REVISION:-4b0ac5767427a55d08a254f0367e2934976598e0}"
 MODEL_CACHE_KEY="models--${MODEL_ID//\//--}"
-MODEL_SNAPSHOT="${MODEL_SNAPSHOT:-${HF_HOME}/${MODEL_CACHE_KEY}/snapshots/${MODEL_REVISION}}"
+if [[ ${MODEL_SNAPSHOT+x} ]]; then
+  echo "error: MODEL_SNAPSHOT is not a registered input; it must be derived from HF_HOME/MODEL_ID/MODEL_REVISION" >&2
+  exit 1
+fi
+if [[ "${HF_HOME}" != /* || ! -d "${HF_HOME}" ]]; then
+  echo "error: HF_HOME must be an existing absolute directory: ${HF_HOME}" >&2
+  exit 1
+fi
+HF_HOME="$(cd -- "${HF_HOME}" && pwd -P)"
+MODEL_SNAPSHOT="${HF_HOME}/${MODEL_CACHE_KEY}/snapshots/${MODEL_REVISION}"
 VLLM_HOST="${VLLM_HOST:-127.0.0.1}"
 VLLM_PROBE_HOST="${VLLM_PROBE_HOST:-${VLLM_HOST}}"
 VLLM_PORT="${VLLM_PORT:-8000}"
@@ -64,6 +73,10 @@ if [[ ! -x "${ENV_PYTHON}" ]]; then
 fi
 if [[ -d "${MODEL_SNAPSHOT}" ]]; then
   MODEL_SNAPSHOT="$(cd -- "${MODEL_SNAPSHOT}" && pwd -P)"
+fi
+if [[ "${MODEL_SNAPSHOT}" != "${HF_HOME}/${MODEL_CACHE_KEY}/snapshots/${MODEL_REVISION}" ]]; then
+  echo "error: pinned model snapshot resolves outside its exact revision path" >&2
+  exit 1
 fi
 
 mkdir -p -- "${VLLM_STATE_DIR}"

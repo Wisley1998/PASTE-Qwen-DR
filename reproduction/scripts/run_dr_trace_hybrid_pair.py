@@ -6,6 +6,11 @@ recorded messages/token cadence.  LLM calls execute on live vLLM.  Baseline
 replays every recorded tool duration; FULL subtracts only exact URL hits from
 the frozen, out-of-fold Pattern-v2 session cache.  Both cells share the same
 arrival process and tool concurrency limit.
+
+``--preengine-policy gain-pressure`` optionally ranks coalesced cold sessions
+by remaining LLM work, pressure-adjusted preserved tool gain, and aging.  Once
+admitted, a session holds its slot through every LLM/tool turn; the default
+``fifo`` policy retains the historical semaphore path.
 """
 
 from __future__ import annotations
@@ -13,6 +18,8 @@ from __future__ import annotations
 import argparse
 import asyncio
 import copy
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -28,6 +35,241 @@ import aiohttp
 
 PLAN_SCHEMA = "paste_repro.dr_trace_hybrid_plan.v1"
 RESULT_SCHEMA = "paste_repro.dr_trace_hybrid_result.v1"
+SCHEDULER_METADATA_SCHEMA = "paste.schedx.remaining_llm_work.v1"
+
+
+@dataclass(frozen=True)
+class SessionAdmissionFeatures:
+    """Frozen task-level inputs to cold-session gain/pressure admission."""
+
+    remaining_completion_tokens: int
+    prompt_pressure_tokens: int
+    expected_tool_gain_s: float
+
+
+@dataclass
+class _AdmissionTicket:
+    task_id: str
+    features: SessionAdmissionFeatures
+    arrived_s: float
+    sequence: int
+    ready: asyncio.Future[None]
+
+
+def session_admission_features(
+    trace: Mapping[str, Any], *, full: bool
+) -> SessionAdmissionFeatures:
+    """Derive immutable work and saved-tool-gain from the frozen trace."""
+
+    steps = list(trace["steps"])
+    if not steps:
+        raise ValueError("session admission requires a non-empty fixed trace")
+    remaining_completion_tokens = sum(
+        int(step["request"]["fixed_completion_tokens"])
+        for step in steps
+    )
+    # Multi-turn prompts are nested context envelopes, so their maximum is a
+    # pressure proxy without charging the same prefix repeatedly.
+    prompt_pressure_tokens = max(
+        int(step["request"]["prompt_tokens"]) for step in steps
+    )
+    if remaining_completion_tokens < 1 or prompt_pressure_tokens < 1:
+        raise ValueError("session admission token work must be positive")
+    expected_tool_gain_s = (
+        sum(
+            max(0.0, float(tool["offline_saved_s"]))
+            for step in steps
+            for tool in step["tools_after"]
+        )
+        if full else 0.0
+    )
+    return SessionAdmissionFeatures(
+        remaining_completion_tokens=remaining_completion_tokens,
+        prompt_pressure_tokens=prompt_pressure_tokens,
+        expected_tool_gain_s=expected_tool_gain_s,
+    )
+
+
+def session_admission_score(
+    features: SessionAdmissionFeatures,
+    *,
+    wait_s: float,
+    pressure: float,
+    prefill_tokens_per_s: float,
+    decode_tokens_per_s: float,
+    pressure_weight: float,
+    tool_gain_beta: float,
+    aging_alpha: float,
+) -> float:
+    """Return the lower-is-better cold-session gain/pressure score."""
+
+    if prefill_tokens_per_s <= 0 or decode_tokens_per_s <= 0:
+        raise ValueError("admission token rates must be positive")
+    bounded_pressure = max(0.0, min(1.0, pressure))
+    pressure_scale = 1.0 + max(0.0, pressure_weight) * bounded_pressure
+    remaining_llm_s = (
+        features.prompt_pressure_tokens / prefill_tokens_per_s
+        + features.remaining_completion_tokens / decode_tokens_per_s
+    )
+    exposed_gain_s = (
+        max(0.0, tool_gain_beta)
+        * features.expected_tool_gain_s
+        / pressure_scale
+    )
+    # Unbounded aging eventually overrides any finite work/gain difference.
+    return (
+        remaining_llm_s
+        - exposed_gain_s
+        - max(0.0, aging_alpha) * max(0.0, wait_s)
+    )
+
+
+class AsyncSessionAdmissionPool:
+    """Coalescing, priority-ranked, session-persistent admission slots."""
+
+    def __init__(
+        self,
+        *,
+        capacity: int,
+        coalesce_s: float,
+        prefill_tokens_per_s: float,
+        decode_tokens_per_s: float,
+        pressure_weight: float,
+        tool_gain_beta: float,
+        aging_alpha: float,
+    ) -> None:
+        if capacity < 1:
+            raise ValueError("session admission capacity must be positive")
+        numeric_options = {
+            "coalesce_s": coalesce_s,
+            "prefill_tokens_per_s": prefill_tokens_per_s,
+            "decode_tokens_per_s": decode_tokens_per_s,
+            "pressure_weight": pressure_weight,
+            "tool_gain_beta": tool_gain_beta,
+            "aging_alpha": aging_alpha,
+        }
+        if not all(math.isfinite(value) for value in numeric_options.values()):
+            raise ValueError("session admission options must be finite")
+        if coalesce_s < 0:
+            raise ValueError("admission coalescing window cannot be negative")
+        if prefill_tokens_per_s <= 0 or decode_tokens_per_s <= 0:
+            raise ValueError("admission token rates must be positive")
+        self.capacity = capacity
+        self.coalesce_s = coalesce_s
+        self.prefill_tokens_per_s = prefill_tokens_per_s
+        self.decode_tokens_per_s = decode_tokens_per_s
+        self.pressure_weight = pressure_weight
+        self.tool_gain_beta = tool_gain_beta
+        self.aging_alpha = aging_alpha
+        self._lock = asyncio.Lock()
+        self._pending: dict[str, _AdmissionTicket] = {}
+        self._active: set[str] = set()
+        self._sequence = 0
+        self._dispatch_task: asyncio.Task[None] | None = None
+
+    @property
+    def active(self) -> int:
+        return len(self._active)
+
+    @property
+    def pending(self) -> int:
+        return len(self._pending)
+
+    def _schedule_dispatch_locked(self) -> None:
+        if not self._pending or len(self._active) >= self.capacity:
+            return
+        if self._dispatch_task is not None and not self._dispatch_task.done():
+            return
+        loop = asyncio.get_running_loop()
+        oldest = min(ticket.arrived_s for ticket in self._pending.values())
+        delay_s = max(0.0, oldest + self.coalesce_s - loop.time())
+        self._dispatch_task = loop.create_task(self._dispatch_after(delay_s))
+
+    async def _dispatch_after(self, delay_s: float) -> None:
+        try:
+            if delay_s > 0:
+                await asyncio.sleep(delay_s)
+            async with self._lock:
+                if self._dispatch_task is asyncio.current_task():
+                    self._dispatch_task = None
+                try:
+                    loop = asyncio.get_running_loop()
+                    while self._pending and len(self._active) < self.capacity:
+                        now_s = loop.time()
+                        pressure = len(self._active) / self.capacity
+                        ticket = min(
+                            self._pending.values(),
+                            key=lambda item: (
+                                session_admission_score(
+                                    item.features,
+                                    wait_s=now_s - item.arrived_s,
+                                    pressure=pressure,
+                                    prefill_tokens_per_s=self.prefill_tokens_per_s,
+                                    decode_tokens_per_s=self.decode_tokens_per_s,
+                                    pressure_weight=self.pressure_weight,
+                                    tool_gain_beta=self.tool_gain_beta,
+                                    aging_alpha=self.aging_alpha,
+                                ),
+                                item.arrived_s,
+                                item.sequence,
+                            ),
+                        )
+                        self._pending.pop(ticket.task_id)
+                        self._active.add(ticket.task_id)
+                        if not ticket.ready.done():
+                            ticket.ready.set_result(None)
+                    self._schedule_dispatch_locked()
+                except Exception as exc:
+                    pending = tuple(self._pending.values())
+                    self._pending.clear()
+                    for ticket in pending:
+                        if not ticket.ready.done():
+                            ticket.ready.set_exception(exc)
+        except asyncio.CancelledError:
+            async with self._lock:
+                if self._dispatch_task is asyncio.current_task():
+                    self._dispatch_task = None
+                pending = tuple(self._pending.values())
+                self._pending.clear()
+                for ticket in pending:
+                    if not ticket.ready.done():
+                        ticket.ready.cancel()
+            raise
+
+    async def acquire(
+        self, task_id: str, features: SessionAdmissionFeatures
+    ) -> None:
+        loop = asyncio.get_running_loop()
+        ready: asyncio.Future[None] = loop.create_future()
+        async with self._lock:
+            if task_id in self._pending or task_id in self._active:
+                raise ValueError(f"duplicate admission task id: {task_id}")
+            self._pending[task_id] = _AdmissionTicket(
+                task_id=task_id,
+                features=features,
+                arrived_s=loop.time(),
+                sequence=self._sequence,
+                ready=ready,
+            )
+            self._sequence += 1
+            self._schedule_dispatch_locked()
+        try:
+            await ready
+        except asyncio.CancelledError:
+            async with self._lock:
+                self._pending.pop(task_id, None)
+                self._active.discard(task_id)
+                self._schedule_dispatch_locked()
+            raise
+
+    async def release(self, task_id: str) -> None:
+        async with self._lock:
+            if task_id not in self._active:
+                raise ValueError(
+                    f"session admission task is not active: {task_id}"
+                )
+            self._active.remove(task_id)
+            self._schedule_dispatch_locked()
 
 
 def canonical_hash(value: Any) -> str:
@@ -225,10 +467,101 @@ def schedx_id(metadata: Mapping[str, Any]) -> str:
     return f"schedx{encoded}z"
 
 
+def build_scheduler_metadata(
+    trace: Mapping[str, Any],
+    request_index: int,
+    *,
+    full: bool,
+    po_ema: float,
+) -> dict[str, Any]:
+    """Build the frozen trace-derived signals carried in a request ID.
+
+    ``rlmt`` is the remaining completion-token work for the whole task,
+    including the current request.  ``npt`` and ``nmt`` describe the next
+    request and are zero on the final request.  These fields are scheduling
+    hints only; the live request still uses the recorded messages and fixed
+    completion-token count below.
+    """
+
+    steps = list(trace["steps"])
+    step = steps[request_index]
+    request = step["request"]
+    remaining_calls = len(steps) - request_index - 1
+    remaining_tool_s = sum(
+        max(
+            0.0,
+            float(tool["duration_s"])
+            - (float(tool["offline_saved_s"]) if full else 0.0),
+        )
+        for future in steps[request_index:]
+        for tool in future["tools_after"]
+    )
+    next_tools = list(step["tools_after"])
+    next_wait = sum(
+        max(
+            0.0,
+            float(tool["duration_s"])
+            - (float(tool["offline_saved_s"]) if full else 0.0),
+        )
+        for tool in next_tools
+    )
+    fixed_completion = int(request["fixed_completion_tokens"])
+    remaining_llm_tokens = sum(
+        int(future["request"]["fixed_completion_tokens"])
+        for future in steps[request_index:]
+    )
+    next_request = (
+        steps[request_index + 1]["request"] if remaining_calls > 0 else None
+    )
+    return {
+        "t": str(trace["task_id"]),
+        "c": int(request["call_index"]),
+        "i": request_index,
+        "n": len(steps),
+        "rc": remaining_calls,
+        "pt": int(request["prompt_tokens"]),
+        "mt": fixed_completion,
+        "po": int(max(1, min(po_ema, fixed_completion))),
+        "rlmt": remaining_llm_tokens,
+        "npt": int(next_request["prompt_tokens"]) if next_request else 0,
+        "nmt": (
+            int(next_request["fixed_completion_tokens"])
+            if next_request else 0
+        ),
+        "nw": next_wait,
+        "nwc": 1.0 if next_tools else 0.0,
+        "rtw": remaining_tool_s,
+        "eg": (
+            sum(
+                float(tool["offline_saved_s"])
+                for future in steps[request_index:]
+                for tool in future["tools_after"]
+            )
+            if full else 0.0
+        ),
+        "ms": "real_dr_trace_offline_pattern_v2",
+    }
+
+
 async def run_cell(args: argparse.Namespace) -> int:
     plan = checked_plan(args.plan)
     full = args.system == "full"
-    task_gate = asyncio.Semaphore(args.max_active_tasks)
+    task_gate = (
+        asyncio.Semaphore(args.max_active_tasks)
+        if args.preengine_policy == "fifo" else None
+    )
+    session_admission = (
+        AsyncSessionAdmissionPool(
+            capacity=args.max_active_tasks,
+            coalesce_s=args.preengine_coalesce_s,
+            prefill_tokens_per_s=args.preengine_prefill_tokens_per_s,
+            decode_tokens_per_s=args.preengine_decode_tokens_per_s,
+            pressure_weight=args.preengine_pressure_weight,
+            tool_gain_beta=args.preengine_tool_gain_beta,
+            aging_alpha=args.preengine_aging_alpha,
+        )
+        if args.preengine_policy == "gain-pressure" else None
+    )
     tool_gate = asyncio.Semaphore(args.tool_capacity)
     result_lock = asyncio.Lock()
     task_rows: list[dict[str, Any]] = []
@@ -238,6 +571,27 @@ async def run_cell(args: argparse.Namespace) -> int:
     started_wall = time.time()
     request_url = args.base_url.rstrip("/") + "/chat/completions"
 
+    @asynccontextmanager
+    async def admitted_session(
+        task_id: str, trace: Mapping[str, Any]
+    ) -> Any:
+        if session_admission is not None:
+            await session_admission.acquire(
+                task_id,
+                session_admission_features(trace, full=full),
+            )
+        else:
+            assert task_gate is not None
+            await task_gate.acquire()
+        try:
+            yield
+        finally:
+            if session_admission is not None:
+                await session_admission.release(task_id)
+            else:
+                assert task_gate is not None
+                task_gate.release()
+
     async def run_one(trace: Mapping[str, Any], http: aiohttp.ClientSession) -> None:
         release = float(trace["release_offset_s"])
         deadline = started_mono + release
@@ -245,7 +599,7 @@ async def run_cell(args: argparse.Namespace) -> int:
         released = time.monotonic()
         task_id = str(trace["task_id"])
         session_id = str(trace["session_id"])
-        async with task_gate:
+        async with admitted_session(task_id, trace):
             acquired = time.monotonic()
             error: str | None = None
             completed_requests = 0
@@ -258,45 +612,14 @@ async def run_cell(args: argparse.Namespace) -> int:
                 steps = list(trace["steps"])
                 for request_index, step in enumerate(steps):
                     request = step["request"]
-                    remaining_calls = len(steps) - request_index - 1
-                    remaining_tool_s = sum(
-                        max(
-                            0.0,
-                            float(tool["duration_s"])
-                            - (float(tool["offline_saved_s"]) if full else 0.0),
-                        )
-                        for future in steps[request_index:]
-                        for tool in future["tools_after"]
-                    )
                     next_tools = list(step["tools_after"])
-                    next_wait = sum(
-                        max(
-                            0.0,
-                            float(tool["duration_s"])
-                            - (float(tool["offline_saved_s"]) if full else 0.0),
-                        )
-                        for tool in next_tools
-                    )
                     fixed_completion = int(request["fixed_completion_tokens"])
-                    metadata: dict[str, Any] = {
-                        "t": task_id,
-                        "c": int(request["call_index"]),
-                        "i": request_index,
-                        "n": len(steps),
-                        "rc": remaining_calls,
-                        "pt": int(request["prompt_tokens"]),
-                        "mt": fixed_completion,
-                        "po": int(max(1, min(po_ema, fixed_completion))),
-                        "nw": next_wait,
-                        "nwc": 1.0 if next_tools else 0.0,
-                        "rtw": remaining_tool_s,
-                        "eg": sum(
-                            float(tool["offline_saved_s"])
-                            for future in steps[request_index:]
-                            for tool in future["tools_after"]
-                        ) if full else 0.0,
-                        "ms": "real_dr_trace_offline_pattern_v2",
-                    }
+                    metadata = build_scheduler_metadata(
+                        trace,
+                        request_index,
+                        full=full,
+                        po_ema=po_ema,
+                    )
                     request_id = schedx_id(metadata)
                     payload = {
                         "model": args.model,
@@ -408,6 +731,8 @@ async def run_cell(args: argparse.Namespace) -> int:
                         "release_offset_s": release,
                         "release_lag_s": released - deadline,
                         "client_gate_wait_s": acquired - released,
+                        "preengine_gate_wait_s": acquired - released,
+                        "preengine_policy": args.preengine_policy,
                         "e2e_s": ended - deadline,
                         "llm_s": task_llm_s,
                         "exposed_tool_s": task_tool_wait_s,
@@ -431,6 +756,7 @@ async def run_cell(args: argparse.Namespace) -> int:
     good = [row for row in task_rows if row["ok"]]
     e2e = [float(row["e2e_s"]) for row in good]
     latencies = [float(row["latency_s"]) for row in llm_events]
+    gate_waits = [float(row["preengine_gate_wait_s"]) for row in task_rows]
     summary = {
         "tasks": len(task_rows),
         "successful_tasks": len(good),
@@ -442,6 +768,10 @@ async def run_cell(args: argparse.Namespace) -> int:
         "makespan_s": ended_mono - started_mono,
         "mean_llm_request_s": statistics.fmean(latencies) if latencies else None,
         "p95_llm_request_s": percentile(latencies, 0.95),
+        "mean_preengine_gate_wait_s": (
+            statistics.fmean(gate_waits) if gate_waits else None
+        ),
+        "p95_preengine_gate_wait_s": percentile(gate_waits, 0.95),
         "full_tool_service_s": sum(float(row["full_service_s"]) for row in tool_events),
         "executed_tool_service_s": sum(float(row["executed_service_s"]) for row in tool_events),
         "exposed_tool_wait_s": sum(float(row["exposed_wait_s"]) for row in tool_events),
@@ -462,6 +792,21 @@ async def run_cell(args: argparse.Namespace) -> int:
             "max_active_tasks": args.max_active_tasks,
             "tool_capacity": args.tool_capacity,
             "scheduler": "native_fcfs" if not full else "online_joint_pacer_v2",
+            "scheduler_metadata_schema": SCHEDULER_METADATA_SCHEMA,
+            "preengine_policy": args.preengine_policy,
+            "session_persistent_admission": (
+                args.preengine_policy == "gain-pressure"
+            ),
+            "preengine_coalesce_s": args.preengine_coalesce_s,
+            "preengine_prefill_tokens_per_s": (
+                args.preengine_prefill_tokens_per_s
+            ),
+            "preengine_decode_tokens_per_s": (
+                args.preengine_decode_tokens_per_s
+            ),
+            "preengine_pressure_weight": args.preengine_pressure_weight,
+            "preengine_tool_gain_beta": args.preengine_tool_gain_beta,
+            "preengine_aging_alpha": args.preengine_aging_alpha,
             "tool_mechanism": (
                 "none" if not full else "offline_pattern_v2_oof_session_url_cache_exact_hits"
             ),
@@ -500,6 +845,12 @@ def server_log_audit(path: Path) -> dict[str, Any]:
         ),
         "fail_open_markers": text.count("fail_open"),
     }
+
+
+def all_validity_checks_pass(validity: Mapping[str, Any]) -> bool:
+    """Require every declared comparison invariant to be exactly true."""
+
+    return bool(validity) and all(value is True for value in validity.values())
 
 
 def compare(args: argparse.Namespace) -> int:
@@ -554,6 +905,42 @@ def compare(args: argparse.Namespace) -> int:
         "baseline": server_log_audit(args.baseline_server_log),
         "full": server_log_audit(args.full_server_log),
     }
+    validity = {
+        "same_frozen_plan": True,
+        "same_model": baseline["model"] == full["model"],
+        "all_tasks_successful": (
+            b["tasks"]
+            == b["successful_tasks"]
+            == f["tasks"]
+            == f["successful_tasks"]
+        ),
+        "request_counts_equal": b["llm_requests"] == f["llm_requests"],
+        "tool_counts_equal": b["tool_calls"] == f["tool_calls"],
+        "llm_token_work_and_status_equal": b_llm == f_llm,
+        "tool_trace_work_and_results_equal": b_tools == f_tools,
+        "server_http_counts_match_results": (
+            logs["baseline"]["http_200_chat_completions"]
+            == b["llm_requests"]
+            == logs["full"]["http_200_chat_completions"]
+        ),
+        "same_server_max_num_seqs": (
+            logs["baseline"]["max_num_seqs"] is not None
+            and logs["baseline"]["max_num_seqs"]
+            == logs["full"]["max_num_seqs"]
+        ),
+        "baseline_joint_hook_absent": (
+            logs["baseline"]["joint_hook_installations"] == 0
+        ),
+        "full_joint_hook_installed": (
+            logs["full"]["joint_hook_installations"] > 0
+        ),
+        "baseline_fail_open_free": logs["baseline"]["fail_open_markers"] == 0,
+        "full_fail_open_free": logs["full"]["fail_open_markers"] == 0,
+    }
+    valid = all_validity_checks_pass(validity)
+    invalid_checks = [
+        name for name, passed in validity.items() if passed is not True
+    ]
     report: dict[str, Any] = {
         "schema": "paste_repro.dr_trace_hybrid_comparison.v1",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -564,19 +951,10 @@ def compare(args: argparse.Namespace) -> int:
         "full_summary": f,
         "metrics": metrics,
         "server_logs": logs,
-        "validity": {
-            "same_frozen_plan": True,
-            "same_model": baseline["model"] == full["model"],
-            "all_tasks_successful": b["tasks"] == b["successful_tasks"] == f["tasks"] == f["successful_tasks"],
-            "request_counts_equal": b["llm_requests"] == f["llm_requests"],
-            "tool_counts_equal": b["tool_calls"] == f["tool_calls"],
-            "llm_token_work_and_status_equal": b_llm == f_llm,
-            "tool_trace_work_and_results_equal": b_tools == f_tools,
-            "server_http_counts_match_results": (
-                logs["baseline"]["http_200_chat_completions"]
-                == b["llm_requests"]
-                == logs["full"]["http_200_chat_completions"]
-            ),
+        "valid": valid,
+        "invalid_checks": invalid_checks,
+        "validity": validity,
+        "observations": {
             "real_server_queue_observed": (
                 logs["baseline"]["max_waiting"] > 0 and logs["full"]["max_waiting"] > 0
             ),
@@ -610,7 +988,15 @@ def compare(args: argparse.Namespace) -> int:
             f"Offline exact URL hits: {f['offline_url_hits']}; removed Visit service: {f['saved_tool_service_s']:.3f}s; residual executed tool service: {f['executed_tool_service_s']:.3f}s.",
             f"Paired tasks faster: {metrics['paired_tasks_faster']}/{metrics['paired_tasks']}.",
             "",
-            f"Work equivalence: {b['llm_requests']} live LLM requests and {b['tool_calls']} trace tool calls per cell; token/status and tool digest checks passed.",
+            (
+                f"Validation: PASS. Work equivalence covers {b['llm_requests']} "
+                f"live LLM requests and {b['tool_calls']} trace tool calls per "
+                "cell; all declared checks passed."
+                if valid
+                else "Validation: **FAIL**. Failed checks: "
+                + ", ".join(invalid_checks)
+                + ". Reported metrics are diagnostic only."
+            ),
             f"Frozen plan SHA-256: `{baseline['plan_sha256']}`.",
             "",
             f"Live queue: max_num_seqs={logs['baseline']['max_num_seqs']} in both cells; baseline max Running/Waiting={logs['baseline']['max_running']}/{logs['baseline']['max_waiting']}, FULL={logs['full']['max_running']}/{logs['full']['max_waiting']}.",
@@ -620,8 +1006,19 @@ def compare(args: argparse.Namespace) -> int:
         ]
     )
     args.markdown.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(json.dumps({"output": str(args.output), "markdown": str(args.markdown), **metrics}, indent=2))
-    return 0
+    print(
+        json.dumps(
+            {
+                "output": str(args.output),
+                "markdown": str(args.markdown),
+                "valid": valid,
+                "invalid_checks": invalid_checks,
+                **metrics,
+            },
+            indent=2,
+        )
+    )
+    return 0 if valid else 2
 
 
 def parser() -> argparse.ArgumentParser:
@@ -641,6 +1038,26 @@ def parser() -> argparse.ArgumentParser:
     cell.add_argument("--base-url", default="http://127.0.0.1:8100/v1")
     cell.add_argument("--model", default="Alibaba-NLP/Tongyi-DeepResearch-30B-A3B")
     cell.add_argument("--max-active-tasks", type=int, default=80)
+    cell.add_argument(
+        "--preengine-policy",
+        choices=("fifo", "gain-pressure"),
+        default="fifo",
+        help=(
+            "cold-session admission policy; fifo preserves the historical "
+            "Semaphore, while gain-pressure ranks a coalesced burst and holds "
+            "each selected slot for the complete trace"
+        ),
+    )
+    cell.add_argument("--preengine-coalesce-s", type=float, default=0.25)
+    cell.add_argument(
+        "--preengine-prefill-tokens-per-s", type=float, default=10_000.0
+    )
+    cell.add_argument(
+        "--preengine-decode-tokens-per-s", type=float, default=500.0
+    )
+    cell.add_argument("--preengine-pressure-weight", type=float, default=1.0)
+    cell.add_argument("--preengine-tool-gain-beta", type=float, default=1.0)
+    cell.add_argument("--preengine-aging-alpha", type=float, default=0.05)
     cell.add_argument("--tool-capacity", type=int, default=16)
     cell.add_argument("--request-timeout-s", type=float, default=900.0)
     cell.set_defaults(func=lambda value: asyncio.run(run_cell(value)))

@@ -46,9 +46,11 @@ class _VisitJob:
     runner: asyncio.Task[None] | None = None
     generation: int = 0
     authority_requested_s: float | None = None
+    authority_claimed_s: float | None = None
     origin_decision_id: str | None = None
     ever_claimed: bool = False
     executed_speculative_s: float = 0.0
+    executed_demand_s: float = 0.0
 
 
 class AsyncPreemptibleVisitPool:
@@ -66,6 +68,7 @@ class AsyncPreemptibleVisitPool:
         capacity: int,
         speculative_cap: int | None = None,
         clock: Callable[[], float] = time.monotonic,
+        job_event_callback: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         if capacity <= 0:
             raise ValueError("capacity must be positive")
@@ -76,6 +79,7 @@ class AsyncPreemptibleVisitPool:
         self.capacity = capacity
         self.speculative_cap = speculative_cap
         self._clock = clock
+        self._job_event_callback = job_event_callback
         self._lock = asyncio.Lock()
         self._next_job_id = 0
         self._running: dict[int, _VisitJob] = {}
@@ -83,11 +87,45 @@ class AsyncPreemptibleVisitPool:
         self._spec_queue: list[tuple[float, int, _VisitJob]] = []
         self._cache: dict[tuple[str, str], _VisitJob] = {}
         self._jobs: list[_VisitJob] = []
+        self._expired_decisions: set[str] = set()
         self._closed = False
         self.metrics: Counter[str] = Counter()
         self.authority_queue_wait_s = 0.0
         self.speculative_resource_s = 0.0
+        self.demand_resource_s = 0.0
         self.preempted_speculative_s = 0.0
+
+    def _emit_job_event_locked(
+        self, event: str, job: _VisitJob, *, at_s: float | None = None
+    ) -> None:
+        """Emit strict execution evidence without changing legacy behavior."""
+
+        if self._job_event_callback is None or job.origin_decision_id is None:
+            return
+        timestamp = self._clock() if at_s is None else float(at_s)
+        self._job_event_callback(
+            {
+                "event": event,
+                "job_id": job.job_id,
+                "session_id": job.session_id,
+                "url": job.url,
+                "prediction_id": job.origin_decision_id,
+                "at_monotonic_s": timestamp,
+                "state": job.state,
+                "created_at_monotonic_s": job.created_s,
+                "physical_started_at_monotonic_s": job.started_s,
+                "terminal_at_monotonic_s": job.finished_s,
+                "authority_claimed_at_monotonic_s": job.authority_claimed_s,
+                "assigned_service_s": job.duration_s,
+                "speculative_resource_s": job.executed_speculative_s,
+                "demand_resource_s": job.executed_demand_s,
+                "total_worker_service_s": (
+                    job.executed_speculative_s + job.executed_demand_s
+                ),
+                "service_s": job.executed_speculative_s + job.executed_demand_s,
+                "claimed_by_authority": job.ever_claimed,
+            }
+        )
 
     def _new_job(
         self,
@@ -132,6 +170,7 @@ class AsyncPreemptibleVisitPool:
         self.speculative_resource_s += elapsed
         self.preempted_speculative_s += elapsed
         job.state = "cancelled"
+        job.finished_s = now
         job.generation += 1
         self._running.pop(job.job_id, None)
         self._cache.pop((job.session_id, job.url), None)
@@ -140,6 +179,7 @@ class AsyncPreemptibleVisitPool:
         if not job.future.done():
             job.future.cancel()
         self.metrics["preempted_speculations"] += 1
+        self._emit_job_event_locked("cancelled_preempted", job, at_s=now)
 
     def _make_authority_room_locked(self) -> None:
         while self._authority_queue and len(self._running) >= self.capacity:
@@ -160,6 +200,7 @@ class AsyncPreemptibleVisitPool:
             if job.speculative
             else "physical_authority_starts"
         ] += 1
+        self._emit_job_event_locked("physical_started", job, at_s=job.started_s)
 
         async def run() -> None:
             try:
@@ -173,11 +214,20 @@ class AsyncPreemptibleVisitPool:
                 self._running.pop(job.job_id, None)
                 job.state = "completed"
                 job.finished_s = now
-                if job.origin_decision_id is not None:
-                    elapsed = max(0.0, now - (job.started_s or now))
+                elapsed = max(0.0, now - (job.started_s or now))
+                if job.origin_decision_id is not None and job.speculative:
                     job.executed_speculative_s += elapsed
                     self.speculative_resource_s += elapsed
                     self.metrics["completed_speculative_jobs"] += 1
+                elif job.origin_decision_id is not None:
+                    claimed = job.authority_claimed_s or now
+                    demand_elapsed = max(0.0, now - claimed)
+                    job.executed_demand_s += demand_elapsed
+                    self.demand_resource_s += demand_elapsed
+                    self.metrics["completed_promoted_jobs"] += 1
+                else:
+                    job.executed_demand_s += elapsed
+                    self.demand_resource_s += elapsed
                 if (
                     job.authority_requested_s is not None
                     and job.started_s is not None
@@ -187,6 +237,7 @@ class AsyncPreemptibleVisitPool:
                     )
                 if not job.future.done():
                     job.future.set_result(None)
+                self._emit_job_event_locked("completed", job, at_s=now)
                 self._dispatch_locked()
 
         job.runner = asyncio.create_task(run())
@@ -204,7 +255,24 @@ class AsyncPreemptibleVisitPool:
         ):
             _, _, job = heapq.heappop(self._spec_queue)
             if job.state == "queued":
+                if job.origin_decision_id in self._expired_decisions:
+                    now = self._clock()
+                    job.state = "cancelled"
+                    job.finished_s = now
+                    self._cache.pop((job.session_id, job.url), None)
+                    if not job.future.done():
+                        job.future.cancel()
+                    self.metrics["expired_queued_speculations"] += 1
+                    self._emit_job_event_locked(
+                        "cancelled_window_expired", job, at_s=now
+                    )
+                    continue
                 self._start_locked(job)
+
+    def expire_queued_decision(self, decision_id: str) -> None:
+        """Synchronously prevent queued work from starting after LLM completion."""
+
+        self._expired_decisions.add(str(decision_id))
 
     async def speculate_batch(
         self,
@@ -235,8 +303,46 @@ class AsyncPreemptibleVisitPool:
                 heapq.heappush(self._spec_queue, (-score, job.job_id, job))
                 self.metrics["speculative_admitted"] += 1
                 admitted[index] = True
+                self._emit_job_event_locked("admitted", job, at_s=job.created_s)
             self._dispatch_locked()
         return tuple(admitted)
+
+    async def resolve_prediction(
+        self, *, decision_id: str, authoritative_urls: set[str]
+    ) -> None:
+        """Cancel work disproved by a newly revealed authoritative call.
+
+        The decision and its candidates were sealed earlier.  This method is
+        called only after authority is causally revealed, and affects executor
+        state/evidence only; it never mutates the prediction record.
+        """
+
+        resolved_at = self._clock()
+        self._expired_decisions.add(str(decision_id))
+        async with self._lock:
+            for job in self._jobs:
+                if job.origin_decision_id != decision_id or not job.speculative:
+                    continue
+                if job.state == "running":
+                    if job.url not in authoritative_urls:
+                        self._cancel_running_speculation_locked(job)
+                elif job.state == "queued":
+                    job.state = "cancelled"
+                    job.finished_s = resolved_at
+                    self._cache.pop((job.session_id, job.url), None)
+                    if not job.future.done():
+                        job.future.cancel()
+                    self.metrics["resolved_queued_speculations"] += 1
+                    self._emit_job_event_locked(
+                        "cancelled_window_expired", job, at_s=resolved_at
+                    )
+                elif job.state == "completed" and job.url not in authoritative_urls:
+                    self._cache.pop((job.session_id, job.url), None)
+                    self.metrics["resolved_wrong_completed_speculations"] += 1
+                    self._emit_job_event_locked(
+                        "resolved_completed_miss", job, at_s=resolved_at
+                    )
+            self._dispatch_locked()
 
     async def authoritative(
         self,
@@ -255,6 +361,16 @@ class AsyncPreemptibleVisitPool:
             cached = self._cache.get(key)
             if cached is not None and cached.state == "completed":
                 cached.ever_claimed = True
+                # ``authority_claimed_s`` is the immutable boundary used to
+                # split this job's physical occupancy into speculative and
+                # promoted-demand work.  A completed result may be reused
+                # more than once; those later accesses must not move the
+                # original accounting boundary.
+                if cached.authority_claimed_s is None:
+                    cached.authority_claimed_s = requested_s
+                self._emit_job_event_locked(
+                    "authority_claimed_completed", cached, at_s=requested_s
+                )
                 self.metrics["cache_hits"] += 1
                 self.metrics["ready_cache_hits"] += 1
                 service_s = max(
@@ -265,20 +381,51 @@ class AsyncPreemptibleVisitPool:
                 return VisitResult("reused", 0.0, service_s, service_s)
             if cached is not None and cached.state == "running":
                 cached.ever_claimed = True
-                cached.speculative = False
-                cached.authority_requested_s = requested_s
+                if cached.speculative:
+                    if cached.authority_claimed_s is not None:
+                        raise RuntimeError(
+                            "running speculation already has an authority claim"
+                        )
+                    cached.authority_claimed_s = requested_s
+                    speculative_elapsed = max(
+                        0.0, requested_s - (cached.started_s or requested_s)
+                    )
+                    cached.executed_speculative_s += speculative_elapsed
+                    self.speculative_resource_s += speculative_elapsed
+                    cached.speculative = False
+                    cached.authority_requested_s = requested_s
+                    self._emit_job_event_locked(
+                        "authority_claimed_inflight", cached, at_s=requested_s
+                    )
+                    self.metrics["promoted_running_speculations"] += 1
+                else:
+                    # Another authoritative caller can reach the same URL
+                    # while the first promoted caller is still awaiting the
+                    # shared physical job.  Join that future without moving
+                    # the first-claim boundary or charging start-to-claim a
+                    # second time.
+                    if cached.authority_claimed_s is None:
+                        raise RuntimeError(
+                            "promoted running job lacks its first authority claim"
+                        )
+                    self._emit_job_event_locked(
+                        "authority_joined_inflight", cached, at_s=requested_s
+                    )
                 self.metrics["cache_hits"] += 1
                 self.metrics["inflight_cache_hits"] += 1
-                self.metrics["promoted_running_speculations"] += 1
                 source = "promoted_inflight"
                 job = cached
             else:
                 if cached is not None and cached.state == "queued":
                     cached.state = "cancelled"
+                    cached.finished_s = requested_s
                     self._cache.pop(key, None)
                     if not cached.future.done():
                         cached.future.cancel()
                     self.metrics["queued_predictions_superseded"] += 1
+                    self._emit_job_event_locked(
+                        "cancelled_authority_superseded", cached, at_s=requested_s
+                    )
                 job = self._new_job(
                     session_id=session_id,
                     url=url,
@@ -318,8 +465,10 @@ class AsyncPreemptibleVisitPool:
                     continue
                 if job.state == "queued":
                     job.state = "cancelled"
+                    job.finished_s = self._clock()
                     if not job.future.done():
                         job.future.cancel()
+                    self._emit_job_event_locked("cancelled_session_close", job)
                 self._cache.pop(key, None)
             self._dispatch_locked()
 
@@ -327,13 +476,27 @@ class AsyncPreemptibleVisitPool:
         async with self._lock:
             self._closed = True
             jobs = list(self._jobs)
+            closed_at = self._clock()
             for job in jobs:
                 if job.state == "running" and job.runner is not None:
+                    if job.origin_decision_id is not None and job.speculative:
+                        elapsed = max(0.0, closed_at - (job.started_s or closed_at))
+                        job.executed_speculative_s += elapsed
+                        self.speculative_resource_s += elapsed
+                    else:
+                        demand_start = job.authority_claimed_s or job.started_s or closed_at
+                        elapsed = max(0.0, closed_at - demand_start)
+                        job.executed_demand_s += elapsed
+                        self.demand_resource_s += elapsed
                     job.runner.cancel()
                 if not job.future.done():
                     job.future.cancel()
                 if job.state in {"queued", "running"}:
                     job.state = "cancelled"
+                    job.finished_s = closed_at
+                    self._emit_job_event_locked(
+                        "cancelled_pool_close", job, at_s=closed_at
+                    )
             self._running.clear()
             self._authority_queue.clear()
             self._spec_queue.clear()
@@ -347,14 +510,51 @@ class AsyncPreemptibleVisitPool:
         useful_s = sum(
             job.executed_speculative_s for job in self._jobs if job.ever_claimed
         )
+        ledger_speculative_s = sum(job.executed_speculative_s for job in self._jobs)
+        ledger_demand_s = sum(job.executed_demand_s for job in self._jobs)
+        promoted_demand_s = sum(
+            job.executed_demand_s
+            for job in self._jobs
+            if job.origin_decision_id is not None
+        )
+        direct_demand_s = sum(
+            job.executed_demand_s
+            for job in self._jobs
+            if job.origin_decision_id is None
+        )
+        metrics = dict(self.metrics)
+        for key in (
+            "policy_candidates",
+            "speculative_admitted",
+            "physical_speculative_starts",
+            "physical_authority_starts",
+            "completed_speculative_jobs",
+            "preempted_speculations",
+            "authority_requests",
+            "cache_hits",
+            "ready_cache_hits",
+            "inflight_cache_hits",
+        ):
+            metrics.setdefault(key, 0)
         return {
             "capacity": self.capacity,
             "speculative_cap": self.speculative_cap,
             "running": len(self._running),
             "cached": len(self._cache),
-            "metrics": dict(self.metrics),
+            "metrics": metrics,
             "authority_queue_wait_s": self.authority_queue_wait_s,
             "speculative_resource_s": self.speculative_resource_s,
+            "demand_resource_s": self.demand_resource_s,
+            "promoted_demand_resource_s": promoted_demand_s,
+            "direct_demand_resource_s": direct_demand_s,
+            "total_worker_service_s": (
+                self.speculative_resource_s + self.demand_resource_s
+            ),
+            "total_worker_occupancy_s": (
+                self.speculative_resource_s + self.demand_resource_s
+            ),
+            "ledger_speculative_service_s": ledger_speculative_s,
+            "ledger_demand_service_s": ledger_demand_s,
             "preempted_speculative_s": self.preempted_speculative_s,
             "useful_speculative_s": useful_s,
             "wasted_speculative_s": max(

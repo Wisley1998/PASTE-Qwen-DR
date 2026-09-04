@@ -1,0 +1,15 @@
+{
+  "cell": "B",
+  "files": {
+    "prediction_decisions.json": "349fcc0910ed8c7383ed7c5b9e0caeb18836a63739725fdb18d1afb3b4d9470b",
+    "prediction_outcomes.json": "2253a6b6c67f1c5b416f2340ff3d6ea378302452a28bdc95b7ab7b09d658f4db",
+    "request_events.json": "2ed8d3da69daf8ff8fdff506f054d280264397f09d0d7d963df26c29170b49b2",
+    "speculation_execution_events.json": "1276b5a065edf6fa545cfe6bf2ebb7ff0283d0959466eec7aa4704e2f0a2a9e0",
+    "summary.json": "65e25de64b84f0f537be90d155df55311ea9936d5d9313eb97b0a6dad180c751",
+    "task_results.json": "1522140a1a4b50949c40d9fdee1d39927c701917d5fe0019e99bc2203d52a128",
+    "tool_events.json": "4ddb88e617108ec28ab0cf4ddada1133998e026eec130a98a081e36e64207736"
+  },
+  "manifest_sha256": "3c70d69802e5275ed7a770f0abd07898765767c714a874d507e6384b248df198",
+  "result_sha256": "33ba774dc6f7fd846b2b3bd60690cd6cd30e747ad5248c1fec1591c49f9a0cec",
+  "schema": "paste_repro.pattern_v2_strict_result_manifest.v1"
+}

@@ -1,0 +1,15 @@
+{
+  "cell": "E",
+  "files": {
+    "prediction_decisions.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "prediction_outcomes.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "request_events.json": "77993b587d2556568e1e06901bfabed74b6e9af3c0646fd60fcd4daf8cf40836",
+    "speculation_execution_events.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "summary.json": "52f9440e41f10a35d5bc43ef82b4c410aa23c5f618b699587735f269fd9e04ad",
+    "task_results.json": "5089534f14beb331217e6ce66e7b5a9d55b47f6733e5dee6ac01b1dbf09da7a5",
+    "tool_events.json": "c7283b01e85503a2bd9d52ab22642811bf3f4892814cd6465cc8037963f3378a"
+  },
+  "manifest_sha256": "201e0bb4639ef50a2b9dbf6754c17b093e8ef9fbcc30cbb7c02c28af3ceb5f97",
+  "result_sha256": "65ca68772082fc3e2a608a5f85bfca2e5b6e315cf420bb9c65e345fe818125e5",
+  "schema": "paste_repro.pattern_v2_strict_result_manifest.v1"
+}

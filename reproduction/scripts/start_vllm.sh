@@ -34,11 +34,21 @@ REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd -P)"
 
 ENV_PREFIX="${PASTE_ENV_PREFIX:-${HOME}/.conda/envs/paste}"
 ENV_PYTHON="${ENV_PREFIX}/bin/python"
+PINNED_VLLM_VERSION="0.10.1"
 HF_HOME="${HF_HOME:-${HOME}/hf_cache}"
 MODEL_ID="${MODEL_ID:-Alibaba-NLP/Tongyi-DeepResearch-30B-A3B}"
 MODEL_REVISION="${MODEL_REVISION:-4b0ac5767427a55d08a254f0367e2934976598e0}"
 MODEL_CACHE_KEY="models--${MODEL_ID//\//--}"
-MODEL_SNAPSHOT="${MODEL_SNAPSHOT:-${HF_HOME}/${MODEL_CACHE_KEY}/snapshots/${MODEL_REVISION}}"
+if [[ ${MODEL_SNAPSHOT+x} ]]; then
+  echo "error: MODEL_SNAPSHOT is not a registered input; it must be derived from HF_HOME/MODEL_ID/MODEL_REVISION" >&2
+  exit 1
+fi
+if [[ "${HF_HOME}" != /* || ! -d "${HF_HOME}" ]]; then
+  echo "error: HF_HOME must be an existing absolute directory: ${HF_HOME}" >&2
+  exit 1
+fi
+HF_HOME="$(cd -- "${HF_HOME}" && pwd -P)"
+MODEL_SNAPSHOT="${HF_HOME}/${MODEL_CACHE_KEY}/snapshots/${MODEL_REVISION}"
 
 VLLM_HOST="${VLLM_HOST:-127.0.0.1}"
 VLLM_PORT="${VLLM_PORT:-8000}"
@@ -57,10 +67,13 @@ VLLM_START_CLEANUP_TIMEOUT="${VLLM_START_CLEANUP_TIMEOUT:-60}"
 VLLM_REQUIRE_NEW="${VLLM_REQUIRE_NEW:-0}"
 VLLM_PROBE_HOST="${VLLM_PROBE_HOST:-${VLLM_HOST}}"
 VLLM_HOOK_DIR="${VLLM_HOOK_DIR:-${REPO_ROOT}/scripts/pythonhooks}"
+VLLM_RUNTIME_HOOK_DIR="${VLLM_RUNTIME_HOOK_DIR:-${VLLM_HOOK_DIR}}"
+VLLM_SAFE_WORKING_DIR="${VLLM_SAFE_WORKING_DIR:-}"
 VLLM_STATE_DIR="${VLLM_STATE_DIR:-${REPO_ROOT}/reproduction/run}"
 VLLM_LOG_DIR="${VLLM_LOG_DIR:-${REPO_ROOT}/reproduction/logs}"
 PID_FILE="${VLLM_STATE_DIR}/vllm_${VLLM_PORT}.pid"
 POLICY_FILE="${VLLM_STATE_DIR}/vllm_${VLLM_PORT}.policy"
+SCHEDULER_RUNTIME_EVIDENCE_FILE="${VLLM_STATE_DIR}/vllm_${VLLM_PORT}.scheduler_runtime.json"
 LOG_FILE="${VLLM_LOG_DIR}/vllm_${VLLM_PORT}.log"
 LOCK_DIR="${PID_FILE}.lock"
 
@@ -122,6 +135,15 @@ if [[ ! -x "${ENV_PYTHON}" ]]; then
   echo "Run reproduction/scripts/setup_env.sh first." >&2
   exit 1
 fi
+if ! INSTALLED_VLLM_VERSION="$("${ENV_PYTHON}" -I -c \
+  'from importlib.metadata import version; print(version("vllm"))')"; then
+  echo "error: could not determine the vLLM distribution version in ${ENV_PREFIX}" >&2
+  exit 1
+fi
+if [[ "${INSTALLED_VLLM_VERSION}" != "${PINNED_VLLM_VERSION}" ]]; then
+  echo "error: vLLM ${PINNED_VLLM_VERSION} is required exactly (found ${INSTALLED_VLLM_VERSION})" >&2
+  exit 1
+fi
 if ! command -v curl >/dev/null 2>&1; then
   echo "error: curl is required for vLLM readiness checks" >&2
   exit 1
@@ -132,6 +154,10 @@ if [[ ! -d "${MODEL_SNAPSHOT}" ]]; then
   exit 1
 fi
 MODEL_SNAPSHOT="$(cd -- "${MODEL_SNAPSHOT}" && pwd -P)"
+if [[ "${MODEL_SNAPSHOT}" != "${HF_HOME}/${MODEL_CACHE_KEY}/snapshots/${MODEL_REVISION}" ]]; then
+  echo "error: pinned model snapshot resolves outside its exact revision path" >&2
+  exit 1
+fi
 if [[ ! -f "${MODEL_SNAPSHOT}/config.json" ]]; then
   echo "error: model snapshot has no config.json: ${MODEL_SNAPSHOT}" >&2
   exit 1
@@ -142,6 +168,56 @@ if [[ "${VLLM_SCHED_POLICY}" != "fcfs" ]]; then
     exit 1
   fi
 fi
+if [[ ! -d "${VLLM_RUNTIME_HOOK_DIR}" ]]; then
+  echo "error: runtime hook directory is missing: ${VLLM_RUNTIME_HOOK_DIR}" >&2
+  exit 1
+fi
+VLLM_HOOK_DIR="$(cd -- "${VLLM_HOOK_DIR}" && pwd -P)"
+VLLM_RUNTIME_HOOK_DIR="$(cd -- "${VLLM_RUNTIME_HOOK_DIR}" && pwd -P)"
+if [[ -z "${VLLM_SAFE_WORKING_DIR}" ]]; then
+  if [[ "${VLLM_REQUIRE_NEW}" == "1" ]]; then
+    echo "error: a fresh strict server requires VLLM_SAFE_WORKING_DIR" >&2
+    exit 1
+  fi
+else
+  if [[ "${VLLM_SAFE_WORKING_DIR}" != /* || ! -d "${VLLM_SAFE_WORKING_DIR}" ]]; then
+    echo "error: VLLM_SAFE_WORKING_DIR must be an existing absolute directory" >&2
+    exit 1
+  fi
+  VLLM_SAFE_WORKING_DIR="$(cd -- "${VLLM_SAFE_WORKING_DIR}" && pwd -P)"
+  if find "${VLLM_SAFE_WORKING_DIR}" -mindepth 1 -print -quit | grep -q .; then
+    echo "error: VLLM_SAFE_WORKING_DIR must be empty" >&2
+    exit 1
+  fi
+fi
+for hook_name in sitecustomize.py sched_policy_patch.py; do
+  if [[ ! -f "${VLLM_RUNTIME_HOOK_DIR}/${hook_name}" \
+     || "$(readlink -f -- "${VLLM_RUNTIME_HOOK_DIR}/${hook_name}")" \
+        != "$(readlink -f -- "${VLLM_HOOK_DIR}/${hook_name}")" ]]; then
+    echo "error: runtime hook ${hook_name} does not resolve to the frozen hook" >&2
+    exit 1
+  fi
+done
+shopt -s nullglob dotglob
+RUNTIME_HOOK_ENTRIES=("${VLLM_RUNTIME_HOOK_DIR}"/*)
+shopt -u nullglob dotglob
+for hook_entry in "${RUNTIME_HOOK_ENTRIES[@]}"; do
+  case "$(basename -- "${hook_entry}")" in
+    sitecustomize.py|sched_policy_patch.py) ;;
+    __pycache__)
+      if [[ ! -d "${hook_entry}" ]] || find "${hook_entry}" -mindepth 1 -maxdepth 1 \
+        ! -name 'sitecustomize.*.pyc' ! -name 'sched_policy_patch.*.pyc' \
+        -print -quit | grep -q .; then
+        echo "error: runtime hook __pycache__ contains an unregistered entry" >&2
+        exit 1
+      fi
+      ;;
+    *)
+      echo "error: runtime hook directory contains an unregistered entry: ${hook_entry}" >&2
+      exit 1
+      ;;
+  esac
+done
 
 mkdir -p -- "${VLLM_STATE_DIR}" "${VLLM_LOG_DIR}"
 if ! mkdir -- "${LOCK_DIR}" 2>/dev/null; then
@@ -306,15 +382,21 @@ if endpoint_ready || tcp_port_open; then
   echo "Refusing to start a second server." >&2
   exit 1
 fi
+if [[ -e "${SCHEDULER_RUNTIME_EVIDENCE_FILE}" ]]; then
+  echo "error: refusing to reuse scheduler runtime evidence: ${SCHEDULER_RUNTIME_EVIDENCE_FILE}" >&2
+  exit 1
+fi
 
 export HF_HOME
-export HF_HUB_OFFLINE="${HF_HUB_OFFLINE:-1}"
-export TRANSFORMERS_OFFLINE="${TRANSFORMERS_OFFLINE:-1}"
-export VLLM_NO_USAGE_STATS="${VLLM_NO_USAGE_STATS:-1}"
+export HF_HUB_OFFLINE="1"
+export TRANSFORMERS_OFFLINE="1"
+export VLLM_NO_USAGE_STATS="1"
 export VLLM_USE_V1
 export VLLM_SCHED_POLICY
-export PYTHONPATH="${VLLM_HOOK_DIR}${PYTHONPATH:+:${PYTHONPATH}}"
-export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export VLLM_SCHEDULER_RUNTIME_EVIDENCE="${SCHEDULER_RUNTIME_EVIDENCE_FILE}"
+export PYTHONPATH="${VLLM_RUNTIME_HOOK_DIR}"
+export PYTHONDONTWRITEBYTECODE="1"
+export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 
 VLLM_COMMAND=(
   "${ENV_PYTHON}" -m vllm.entrypoints.openai.api_server
@@ -347,7 +429,12 @@ if [[ -n "${VLLM_API_KEY:-}" ]]; then
   VLLM_COMMAND+=(--api-key "${VLLM_API_KEY}")
 fi
 
-: > "${LOG_FILE}"
+printf 'Verified vLLM distribution version: %s\n' \
+  "${INSTALLED_VLLM_VERSION}" > "${LOG_FILE}"
+if [[ -n "${VLLM_SAFE_WORKING_DIR}" ]]; then
+  cd -- "${VLLM_SAFE_WORKING_DIR}"
+fi
+printf 'Verified vLLM working directory: %s\n' "$(pwd -P)" >> "${LOG_FILE}"
 nohup "${VLLM_COMMAND[@]}" >> "${LOG_FILE}" 2>&1 &
 SERVER_PID=$!
 printf '%s\n' "${SERVER_PID}" > "${PID_FILE}.tmp"

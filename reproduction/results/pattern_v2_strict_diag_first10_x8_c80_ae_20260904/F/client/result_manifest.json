@@ -1,0 +1,15 @@
+{
+  "cell": "F",
+  "files": {
+    "prediction_decisions.json": "2eee580031cff6e5ba85347bd6ce6246a12876523713b88a3247b884dbaffb82",
+    "prediction_outcomes.json": "d5d0459afb72332bf2d61741374f551ff8516b1dc00f27817202e35347f141a8",
+    "request_events.json": "ff83ccad122286359fffb38779451254ea4e13b97bf133ae9427b6c0847fd3fc",
+    "speculation_execution_events.json": "bc0bcccac1e918c128810ef5bf0e66bee10fc06f97738d7fa57a686126573ad3",
+    "summary.json": "16ca7556004e2a339c49d5cd66035eea428f97c82484df7a4833c1c8652526ea",
+    "task_results.json": "4daa5e40d0ea240b79f0616acd51c9ef68d54e000aef1c78739291ebf7e1bcb2",
+    "tool_events.json": "a0c4ff88a811a11d469cf33b62d1e60d8ad16851dec440b8f2b8ed8f6b08b6c3"
+  },
+  "manifest_sha256": "afa5b157801857588929dab34686867eb7a06f3ef3f450376179fad27861a311",
+  "result_sha256": "33f73b025f3684e7ec5f1f3abadca9c647a733d04e6e88ef6e0ecacb178c1129",
+  "schema": "paste_repro.pattern_v2_strict_result_manifest.v1"
+}

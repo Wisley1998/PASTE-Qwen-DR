@@ -1,0 +1,15 @@
+{
+  "cell": "A",
+  "files": {
+    "prediction_decisions.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "prediction_outcomes.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "request_events.json": "c618e58b4cef8a639f1e287f31d5f6579efc32f6af2ffd92a187508c31519a60",
+    "speculation_execution_events.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "summary.json": "7634a5f329c4667bd5535c4fa2bb87ecf4c08d59af9899e6c312014377680989",
+    "task_results.json": "cb4570b6cc75637283eac3caf1589ce2bde8fc76710ceadf2da2c6df25e88739",
+    "tool_events.json": "4e3635817b7864d44886526cb0844d8e17bc875a197203355e3e1e7769fe94ec"
+  },
+  "manifest_sha256": "0ad973edfa69685fd6ae453327c055dd14cb979192f1d11cccbf1a582812ec1c",
+  "result_sha256": "3a174449d13c234470c9d303e9ed4b3cfd2649581be150f5a2ff8bb9c401b320",
+  "schema": "paste_repro.pattern_v2_strict_result_manifest.v1"
+}

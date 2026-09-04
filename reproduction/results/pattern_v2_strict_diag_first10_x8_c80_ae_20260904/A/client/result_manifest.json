@@ -1,0 +1,15 @@
+{
+  "cell": "A",
+  "files": {
+    "prediction_decisions.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "prediction_outcomes.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "request_events.json": "341052ba588c85092f5f070cd2cb646ef0fab8981a260d7416dd2538a6703f0f",
+    "speculation_execution_events.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "summary.json": "0d37cdc147a100d96a120378bf966941566c6d0bd505d05185635c52c1b33475",
+    "task_results.json": "1ba8db2e1b5382b6b5a47af30ed95ad9d61692d182e59ce5720fd02819ff15cd",
+    "tool_events.json": "af47f76461813afdc623d3c92269450e9440e1a719d4a1b0e00a846180870ffd"
+  },
+  "manifest_sha256": "7ec12d3bb226e6a6cca1c3f19f0fb2d430a19edcf51e1caf434b345db782d6e0",
+  "result_sha256": "fc7d54e62c78bc2aca8737faae55e7cf611d174d9108345ab53d1769a0fa7f7a",
+  "schema": "paste_repro.pattern_v2_strict_result_manifest.v1"
+}

@@ -1,0 +1,15 @@
+{
+  "cell": "F",
+  "files": {
+    "prediction_decisions.json": "a9d55e49d82125c0359ee859fea6c72482dd5b25c24c7a0974540b6bc175b7cf",
+    "prediction_outcomes.json": "4002d990174d0826175ab4299a638feb291ae0e0d3862a506e862b2a3203324a",
+    "request_events.json": "3d38d66a859da95115faf0fcaa09c4a980822be183aaf7e919f851cb03afeabc",
+    "speculation_execution_events.json": "449f1e3af988e4f94d743dc7a0509a5162bd8f3de6d2a79261f3f6a3caea8a66",
+    "summary.json": "72c0b4e098819ad94c0b254c2c3c79b2e0f44132241c216aa041e30add6ee713",
+    "task_results.json": "30384ddf5f4c1c8f61c8172b65858b4901e4520fb18b6b08d2319010cec995f6",
+    "tool_events.json": "ad4266abb8859f40e44eab680908737ef7f7a0c504bae24e8cff1d9dd2ddd3b1"
+  },
+  "manifest_sha256": "99768dcfece8a59f9f84eddc35b8cbca28e80d125bf07e1f4ff630f5318cd0c9",
+  "result_sha256": "23104fa0ba3377ec022d3b711b3c997c4c8923f3cdd4da86ace5fb1c6542866f",
+  "schema": "paste_repro.pattern_v2_strict_result_manifest.v1"
+}

@@ -1,0 +1,1 @@
+/home/aiscuser/PASTE-Qwen-DR/scripts/pythonhooks/sitecustomize.py

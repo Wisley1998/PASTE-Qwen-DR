@@ -18,3 +18,8 @@ reproduction/run/
 /datasets/azure_llm_2024/*.csv
 /reproduction/results/**/metrics.json
 /reproduction/results/**/raw_repeat_vectors.json
+
+# Large diagnostic/pilot event streams; curated reports and summaries are
+# force-added when they are useful audit evidence.
+/reproduction/results/pattern_v2_strict_diag_first10_x8_c80_ae_20260904/
+/reproduction/results/pattern_v2_strict_live_deployable_final30_c16_pilot_20260904/
