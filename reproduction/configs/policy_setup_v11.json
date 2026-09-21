@@ -1,0 +1,113 @@
+{
+  "schema": "paste.policy_setup.v11",
+  "status": "corrected_reference_not_yet_tuned",
+  "scope": "real vLLM, asynchronously simulated recorded tools, causal scheduler inputs",
+  "blocks": 3,
+  "cells": [
+    "native_fcfs",
+    "length_only",
+    "length_spec",
+    "full",
+    "gated_fcfs_spec"
+  ],
+  "common": {
+    "arrival_scale": 1.0,
+    "coalesce_s": 3.2,
+    "pending_capacity": 1024,
+    "completed_cache_capacity": 4096,
+    "realized_gain_weight": 0.25,
+    "request_timeout_s": 900
+  },
+  "dr": {
+    "repository": "PASTE-Qwen-DR",
+    "profile": "reproduction/configs/unified_workset_v1.env.example",
+    "runner": "reproduction/scripts/run_dr_trace_hybrid_pair.py",
+    "tune_plan": "/home/aiscuser/resubmission-runs/setup_v11/dr_tune_80.json",
+    "test_plan": "reproduction/artifacts/resubmission/dr_test_original_entry.json",
+    "predictor": "reproduction/artifacts/resubmission/predictor.json",
+    "working_set": 40,
+    "decode_target": 32,
+    "decode_max": 33,
+    "tool_capacity": 64,
+    "speculation_capacity": 64,
+    "top_k": 10,
+    "retention": "session",
+    "gpus": "0,1,2,3",
+    "port": 8200
+  },
+  "coding": {
+    "repository": "gemini-cli-PASTE",
+    "profile": "reproduction/configs/unified_workset_v1.env.example",
+    "runner": "reproduction/scripts/run_swe_trace_live_pair.py",
+    "tune_plan": "/home/aiscuser/resubmission-runs/setup_v11/coding_tune_64.json",
+    "test_plan": "reproduction/analysis/real_trace_hybrid_v3/plan.json",
+    "working_set": 24,
+    "decode_target": 24,
+    "decode_max": 25,
+    "tool_capacity": 16,
+    "speculation_capacity": 4,
+    "gpus": "4,5,6,7",
+    "port": 8300,
+    "tune_sources": [
+      "sphinx-doc__sphinx-8474",
+      "pylint-dev__pylint-7114"
+    ],
+    "test_sources": [
+      "mwaskom__seaborn-3190",
+      "scikit-learn__scikit-learn-13584",
+      "psf__requests-3362",
+      "matplotlib__matplotlib-24334",
+      "sympy__sympy-16503",
+      "pallets__flask-4992",
+      "pytest-dev__pytest-5495",
+      "pydata__xarray-4248"
+    ],
+    "tune_predictions": "resubmission-runs/setup_v11/coding_tune_predictions_64",
+    "test_predictions": "resubmission-runs/frozen_20260920/causal_readiness/coding/block1/high-b4-length-aware/tool_audit",
+    "mechanism": "completed same-path same-epoch cache; source-I/O credit only; no env/test full-service credit",
+    "tune_replicas_per_source": 32,
+    "test_replicas_per_source": 8
+  },
+  "selection": {
+    "data": "tune sources only; previously inspected test sources remain retrospective validation",
+    "objective": "maximize min(1-full/native_fcfs, 1-full/length_spec), require full also beats length_only",
+    "aggregation": "three rotated fresh-server blocks; source-task clustered comparisons; keep all attempts",
+    "eligibility": "100% completion, same request work, no fail-open, p95 full <= 1.05*both comparison p95 values",
+    "dr_stages": [
+      {
+        "tool_capacity_and_speculation_capacity": [
+          16,
+          32,
+          64
+        ],
+        "arrival_scale": [
+          1,
+          2,
+          4
+        ]
+      },
+      {
+        "realized_gain_weight": [
+          0.25,
+          0.9,
+          1.8
+        ],
+        "rule": "at best stage-one operating point, all non-target settings fixed"
+      }
+    ],
+    "coding_candidates": {
+      "speculation_capacity": [
+        0,
+        2,
+        4
+      ],
+      "arrival_scale": [
+        1,
+        2,
+        4
+      ]
+    },
+    "tie_break": "within 1 percentage point choose lower speculative worker-time, then smaller total tool capacity",
+    "promotion": "record all tune result hashes, winner and uncertainty in a new selected lock before test; no guaranteed positive effect"
+  }
+}

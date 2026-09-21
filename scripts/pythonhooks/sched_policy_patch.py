@@ -86,6 +86,28 @@ _SUPPORTED_POLICIES = {
 }
 
 
+_audited_ready_turns: set[str] = set()
+
+
+def _audit_ready_turns(scheduler: Any) -> None:
+    path = os.getenv("VLLM_SCHED_TURN_AUDIT")
+    if not path:
+        return
+    now = time.time()
+    rows = []
+    for request in getattr(scheduler, "running", []):
+        rid = str(getattr(request, "request_id", ""))
+        if rid in _audited_ready_turns:
+            continue
+        _audited_ready_turns.add(rid)
+        rows.append({"request_id": rid, "first_running_observed_at": now,
+                     "engine_wait_upper_bound_s": max(0.0, now - request.arrival_time)})
+    if rows:
+        with open(path, "a", encoding="utf-8") as handle:
+            for row in rows:
+                handle.write(json.dumps(row) + "\n")
+
+
 def _process_start_ticks() -> int:
     """Return Linux /proc start ticks so a runtime marker cannot reuse a PID."""
 
@@ -130,6 +152,7 @@ def _record_runtime_policy_use(scheduler_api: str, installed_policy: str) -> Non
     )
     payload = {
         "schema": _RUNTIME_POLICY_EVIDENCE_SCHEMA,
+        "ranker": _joint_v2_ranker() if installed_policy == "online_joint_pacer_v2" else None,
         "pid": pid,
         "ppid": os.getppid(),
         "process_start_ticks": _process_start_ticks(),
@@ -1238,6 +1261,11 @@ def _arrival_time(obj: Any) -> float:
 
 
 def _sampling_max_tokens(obj: Any) -> int:
+    meta = _decode_meta(obj)
+    if _strict_causal_metadata(meta):
+        # Replay may force the recorded output length in SamplingParams.
+        # The scheduler sees only the original request's declared limit.
+        return max(1, _meta_int(meta, "mt", int(_default_predicted_output_tokens())))
     value = getattr(obj, "max_tokens", None)
     if value is None:
         sampling_params = getattr(obj, "sampling_params", None)
@@ -2398,6 +2426,31 @@ def _joint_v2_score_s(
     return aged_score_s, over_budget
 
 
+def _joint_v2_ranker() -> str:
+    """Ordering alone; the Joint/KV admission hook stays installed in all arms."""
+    value = os.getenv("VLLM_SCHED_JOINT_V2_RANKER", "tool-aware").strip().lower()
+    if value not in {"fcfs", "length-aware", "tool-aware"}:
+        raise ValueError(f"invalid VLLM_SCHED_JOINT_V2_RANKER: {value!r}")
+    return value
+
+
+def _joint_v2_rank_score(f: dict[str, Any], *, ranker: str, **kwargs: Any) -> tuple[float, bool]:
+    if ranker != "tool-aware":
+        # Remove tool information before evaluating the common score, including
+        # tail cost and confidence: zeroing only the next-tool bonus leaks gain.
+        meta = {key: value for key, value in f["meta"].items() if key not in {
+            "nw", "rtw", "eg", "tool_eta_s_hat", "tool_hit_probability_hat",
+            "remaining_tool_wait_s_hat", "expected_gain_s_hat",
+        }}
+        f = {**f, "meta": meta, "next_tool_wait": 0.0}
+        config = kwargs["score_config"]
+        kwargs["score_config"] = config._replace(
+            tool_beta=0.0, remaining_tool_weight=0.0, realized_gain_weight=0.0,
+        )
+    score, over_budget = _joint_v2_score_s(f, **kwargs)
+    return (float(f["arrival"]) if ranker == "fcfs" else score), over_budget
+
+
 def _order_joint_pacer_v2_waiting(
     *,
     waiting_items: Iterable[Any],
@@ -2409,6 +2462,7 @@ def _order_joint_pacer_v2_waiting(
     waiting = list(waiting_items)
     running = list(running_items)
     score_config = _joint_v2_score_config_snapshot()
+    ranker = _joint_v2_ranker()
     live_tokens = float(
         sum(_active_context_tokens(item, prompt_len_fn) for item in running)
     )
@@ -2490,8 +2544,9 @@ def _order_joint_pacer_v2_waiting(
     def base_key(item: Any) -> tuple[Any, ...]:
         f = features[id(item)]
         is_new = _joint_v2_is_new_session(f["meta"])
-        score_s, over_budget = _joint_v2_score_s(
+        score_s, over_budget = _joint_v2_rank_score(
             f,
+            ranker=ranker,
             live_tokens=live_tokens,
             virtual_tokens=0.0,
             live_long_count=live_long_count,
@@ -2744,6 +2799,12 @@ def _oracle_log_interval_s() -> float:
 
 
 def _pending_return_kv_from_meta(meta: dict[str, Any]) -> int:
+    if _strict_causal_metadata(meta):
+        # No legacy fallback: npt/nmt may contain exact future trace values.
+        prompt = _meta_int(meta, "next_prompt_tokens_hat", _meta_int(meta, "pt", 0))
+        output = _meta_float(meta, "next_output_tokens_hat",
+                             _meta_float(meta, "po_hat", _default_predicted_output_tokens()))
+        return max(0, int(prompt + max(0.0, output)))
     next_prompt_tokens = _meta_int(meta, "npt", -1)
     if next_prompt_tokens < 0:
         next_prompt_tokens = _meta_int(meta, "pt", 0)
@@ -2762,8 +2823,8 @@ def _update_pending_returns(self: Any, running_items: Iterable[Any], now_s: floa
     """Track which sessions just entered tool-wait and when they will return.
 
     Runs every schedule() tick. Diffs the running set vs the previous tick;
-    for each departed request, decodes its meta and, if the trace has more
-    turns to come (rc>0) and a predicted next-tool-wait (nw) is present,
+    for each departed request, decodes its meta and, if another turn is
+    predicted and a predicted next-tool-wait is present,
     records (return_time, next_turn_kv_tokens) under the trace_id.
     Entries are cleared when the next turn re-appears in waiting/running,
     and stale entries (long past their expected return) are dropped.
@@ -2782,16 +2843,15 @@ def _update_pending_returns(self: Any, running_items: Iterable[Any], now_s: floa
             meta = _META_CACHE.get(rid)
             if not meta:
                 continue
-            try:
-                rc_val = int(meta.get("rc", 0) or 0)
-            except (TypeError, ValueError):
-                rc_val = 0
+            rc_val = _causal_meta_int(meta, predicted_key="remaining_calls_hat",
+                                       legacy_key="rc", default=1)
             trace_id = meta.get("t")
             if rc_val <= 0:
-                if trace_id is not None:
+                # A prediction of finality is not an authoritative session end.
+                if trace_id is not None and not _strict_causal_metadata(meta):
                     _v2_completed_sessions.add(str(trace_id))
                 continue
-            nw_val = meta.get("nw")
+            nw_val = meta.get("tool_eta_s_hat" if _strict_causal_metadata(meta) else "nw")
             if nw_val is None:
                 continue
             try:
@@ -4066,6 +4126,7 @@ def _install_v1(policy: str) -> bool:
     @wraps(original)
     def wrapped_schedule(self: Any, *args: Any, **kwargs: Any) -> Any:
         _record_runtime_policy_use("v1.Scheduler.schedule", policy)
+        _audit_ready_turns(self)
         waiting = getattr(self, "waiting", None)
         current_policy = _policy()
 

@@ -1,0 +1,91 @@
+{
+  "scope": "exploratory single fresh-server block; no performance promotion",
+  "checks": {
+    "high-b0-tool-aware": {
+      "checks": {
+        "same_plan": true,
+        "same_tasks": true,
+        "same_llm_work": true,
+        "all_sessions_completed": true,
+        "same_model": true,
+        "same_predictor": true,
+        "resource_cleanup": true
+      },
+      "mean_e2e_s": 320.1064364937047,
+      "failed_web_tool_calls": 106,
+      "file_sha256": "b11f7ae14ab661c50dc3ba4d44772bb244f61b3a28c6c9f39927139905595506"
+    },
+    "high-b2-tool-aware": {
+      "checks": {
+        "same_plan": true,
+        "same_tasks": true,
+        "same_llm_work": true,
+        "all_sessions_completed": true,
+        "same_model": true,
+        "same_predictor": true,
+        "resource_cleanup": true
+      },
+      "mean_e2e_s": 316.9077576275275,
+      "failed_web_tool_calls": 108,
+      "file_sha256": "3db1b31338862bfc6e2337d21dc6cb5bc2e671912444fc1f8c265d2d4918023f"
+    },
+    "high-b4-fcfs": {
+      "checks": {
+        "same_plan": true,
+        "same_tasks": true,
+        "same_llm_work": true,
+        "all_sessions_completed": true,
+        "same_model": true,
+        "same_predictor": true,
+        "resource_cleanup": true
+      },
+      "mean_e2e_s": 357.68748339943994,
+      "failed_web_tool_calls": 107,
+      "file_sha256": "affbe2d10c78dd8f17b34644a67b4b6e3a5b940a0f3f7de08ccecbb95a1dc2d6"
+    },
+    "high-b4-length-aware": {
+      "checks": {
+        "same_plan": true,
+        "same_tasks": true,
+        "same_llm_work": true,
+        "all_sessions_completed": true,
+        "same_model": true,
+        "same_predictor": true,
+        "resource_cleanup": true
+      },
+      "mean_e2e_s": 307.2584740060294,
+      "failed_web_tool_calls": 106,
+      "file_sha256": "1417bcf74d5dadb80737eaeb413f83b4b7d947e67478a86fd210c5514caffe9b"
+    },
+    "high-b4-native": {
+      "checks": {
+        "same_plan": true,
+        "same_tasks": true,
+        "same_llm_work": true,
+        "all_sessions_completed": true,
+        "same_model": true,
+        "same_predictor": true,
+        "resource_cleanup": true
+      },
+      "mean_e2e_s": 390.033991940532,
+      "failed_web_tool_calls": 104,
+      "file_sha256": "65cfd5399ea0c90f74d7009844f4b8484d6841c58cabd9e0713b0c4dc89d9802"
+    },
+    "high-b4-tool-aware": {
+      "checks": {
+        "same_plan": true,
+        "same_tasks": true,
+        "same_llm_work": true,
+        "all_sessions_completed": true,
+        "same_model": true,
+        "same_predictor": true,
+        "resource_cleanup": true
+      },
+      "mean_e2e_s": 313.95163553001476,
+      "failed_web_tool_calls": 108,
+      "file_sha256": "5d2d90d340b5bbd3df29beb1af012752e64b5ab0697fe5df4058b3f6a5a3b61a"
+    }
+  },
+  "web_output_scope": "actual URLs may change/fail; no across-run byte-equivalence claim; fixed-input correctness is separately audited",
+  "causal_scope": "ORACLE DIAGNOSTIC ONLY: original scheduler received exact trace suffix/finality; these checks do not establish online information isolation or online performance."
+}

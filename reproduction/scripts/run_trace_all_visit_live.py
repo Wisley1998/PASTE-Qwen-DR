@@ -260,6 +260,7 @@ def build_plan(args: argparse.Namespace) -> dict[str, Any]:
                         "event_index": cursor,
                         "call_index": tool.call_index,
                         "tool_name": tool.tool_name,
+                        "arguments": dict(tool.tool_args),
                         "duration_s": duration_s,
                         "visit_units": [
                             {"url": url, "duration_s": service_s}

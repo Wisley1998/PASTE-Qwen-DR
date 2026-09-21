@@ -13,6 +13,36 @@ from paste_repro.live_executor import SyncToolMapExecutor, WikipediaLiveExecutor
 
 
 class LiveToolBrokerTests(unittest.IsolatedAsyncioTestCase):
+    async def test_readiness_snapshot_requires_completion_freshness_and_unclaimed_ttl(self):
+        import time
+        clock = [0.0]
+        released = asyncio.Event()
+        async def execute(invocation):
+            await released.wait()
+            return {"private": "not part of snapshot", "_paste_transport": {
+                "reuse_valid_until_monotonic_s": time.monotonic() + (
+                    60 if invocation.arguments["url"].endswith("fresh") else -1)}}
+        broker = LiveToolBroker(execute, max_workers=2, max_speculative_workers=2,
+            ttl_s=10, clock=lambda: clock[0], require_reuse_validity=True)
+        try:
+            for suffix in ["fresh", "stale"]:
+                await broker.speculate(Invocation("visit", {"url": "https://example.test/" + suffix}),
+                                       session_id="s", priority=-0.5)
+            self.assertTrue(all(not j["reusable_now"] for j in broker.snapshot()["jobs"]))
+            released.set()
+            for _ in range(20):
+                await asyncio.sleep(0)
+                jobs = broker.snapshot()["jobs"]
+                if all(j["state"] == "completed" for j in jobs): break
+            self.assertEqual(sum(j["reusable_now"] for j in jobs), 1)
+            self.assertEqual(broker.authoritative_state, ())
+            self.assertNotIn("private", json.dumps(jobs))
+            clock[0] = 11
+            self.assertTrue(all(not j["prediction_available"] and not j["reusable_now"]
+                                for j in broker.snapshot()["jobs"]))
+        finally:
+            await broker.close()
+
     async def test_isolated_slice_preserves_baseline_authority_caps(
         self,
     ) -> None:
@@ -1193,6 +1223,7 @@ class LiveToolBrokerTests(unittest.IsolatedAsyncioTestCase):
             max_speculative_workers=1,
             max_speculative_pending=3,
             ttl_s=10,
+            require_reuse_validity=True,
         )
         await broker.speculate(Invocation("visit", {"name": "first"}), session_id="a")
         await first_started.wait()
@@ -1215,6 +1246,11 @@ class LiveToolBrokerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(broker.stats.commits, 1)
         await broker.cancel_predictions()
         await broker.close()
+        self.assertEqual(order.count("promoted"), 1)
+        cost = broker.resource_summary()["c"]
+        self.assertEqual(cost["physical_calls"], 1)
+        self.assertEqual(cost["useful_speculative_calls"], 0)
+        self.assertEqual(cost["unused_speculative_calls"], 0)
 
     async def test_result_is_private_until_exact_session_scoped_commit(self) -> None:
         calls: list[Invocation] = []

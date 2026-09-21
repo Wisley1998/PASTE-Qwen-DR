@@ -27,6 +27,7 @@ import time
 from typing import Any, Literal, Optional
 
 from .invocation import Invocation
+from .resource_accounting import current_usage, per_task_resources
 
 
 Executor = Callable[[Invocation], Awaitable[Any]]
@@ -99,6 +100,7 @@ class _ExecutionRecord:
     error: Optional[BaseException]
     started_at: float
     finished_at: float
+    reuse_valid_until: float = 0.0
 
 
 @dataclass
@@ -124,6 +126,7 @@ class _BrokerJob:
     expiry_task: "asyncio.Task[None] | None" = None
     discard_uncommitted_on_finish: bool = False
     discard_source: str | None = None
+    cache_access_at: float = 0.0
 
 
 class LiveToolBroker:
@@ -140,7 +143,13 @@ class LiveToolBroker:
     A zero minimum preserves authoritative-first dispatch.
     ``max_speculative_pending`` bounds queued, running,
     and completed-but-unclaimed predictions; authoritative calls are never
-    rejected by that speculative limit.  Optional ``tool_capacities`` impose
+    rejected by that speculative limit. With ``max_completed_predictions``
+    configured, completed results have a separate LRU bound and no longer
+    consume pending admission. ``retain_completed_predictions`` additionally
+    permits repeated exact session reuse (infinite retention TTL required;
+    executor result validity still applies). ``preempt_running_speculation``
+    requires a cancellation-safe executor and is enabled only for timers by
+    the experiment runner. Optional ``tool_capacities`` impose
     additional shared limits on physical calls of a given tool.  Both lanes
     consume the same per-tool capacity, so speculation cannot bypass a visit
     service's concurrency limit.  ``authoritative_tool_reserves`` can keep a
@@ -159,10 +168,14 @@ class LiveToolBroker:
         executor: Executor,
         *,
         max_workers: int = 8,
+        require_reuse_validity: bool = False,
         max_speculative_workers: int | None = None,
         max_authoritative_workers: int | None = None,
         min_speculative_workers: int = 0,
         max_speculative_pending: int | None = None,
+        max_completed_predictions: int | None = None,
+        retain_completed_predictions: bool = False,
+        preempt_running_speculation: bool = False,
         ttl_s: float = 30.0,
         clock: Callable[[], float] = time.monotonic,
         service_time_hints_s: Mapping[str, float] | None = None,
@@ -204,8 +217,18 @@ class LiveToolBroker:
             max_speculative_pending = max(max_workers, 2 * max_workers)
         if max_speculative_pending <= 0:
             raise ValueError("max_speculative_pending must be positive")
-        if ttl_s <= 0:
+        if math.isnan(ttl_s) or ttl_s <= 0:
             raise ValueError("ttl_s must be positive")
+        if max_completed_predictions is not None and (
+            isinstance(max_completed_predictions, bool)
+            or not isinstance(max_completed_predictions, int)
+            or max_completed_predictions < 1
+        ):
+            raise ValueError("max_completed_predictions must be a positive integer")
+        if retain_completed_predictions and (
+            max_completed_predictions is None or not math.isinf(ttl_s)
+        ):
+            raise ValueError("session result retention requires a separate cache limit and infinite TTL")
         if not 0.0 < service_ewma_alpha <= 1.0:
             raise ValueError("service_ewma_alpha must be in (0, 1]")
 
@@ -312,12 +335,17 @@ class LiveToolBroker:
                 )
             min_start_intervals[raw_name] = float(raw_interval)
 
+        self._require_reuse_validity = require_reuse_validity
         self._executor = executor
         self._max_workers = int(max_workers)
         self._max_speculative_workers = int(max_speculative_workers)
         self._max_authoritative_workers = int(max_authoritative_workers)
         self._min_speculative_workers = int(min_speculative_workers)
         self._max_speculative_pending = int(max_speculative_pending)
+        self._max_completed_predictions = max_completed_predictions
+        self._retain_completed_predictions = retain_completed_predictions
+        # Opt in only for a cancellation-safe executor (the recorded timer).
+        self._preempt_running_speculation = preempt_running_speculation
         self._ttl_s = float(ttl_s)
         self._clock = clock
         self._ewma_alpha = float(service_ewma_alpha)
@@ -416,6 +444,7 @@ class LiveToolBroker:
             "job_id": job.job_id,
             "invocation_id": f"tool-{job.job_id:08d}",
             "session_id": session_id,
+            "task_id": session_id,
             "tool": invocation.tool_name,
             "invocation_digest": self._invocation_digest(invocation),
             "speculative": originally_speculative,
@@ -457,6 +486,10 @@ class LiveToolBroker:
             "exposed_wait_s": None,
             "saved_service_s": None,
             "committed": False,
+            "cleanup_at": None,
+            "cpu_core_s": None,
+            "bytes_written": None,
+            "retained_result_bytes": 0,
             "reserved_speculative_dispatch": False,
             "authoritative_after_reserved_dispatch": False,
             "dispatch_lane": None,
@@ -477,6 +510,9 @@ class LiveToolBroker:
                 "max_authoritative_workers": self._max_authoritative_workers,
                 "min_speculative_workers": self._min_speculative_workers,
                 "max_speculative_pending": self._max_speculative_pending,
+                "max_completed_predictions": self._max_completed_predictions,
+                "retain_completed_predictions": self._retain_completed_predictions,
+                "preempt_running_speculation": self._preempt_running_speculation,
                 "tool_capacities": dict(sorted(self._tool_capacities.items())),
                 "authoritative_tool_capacities": dict(
                     sorted(self._authoritative_tool_capacities.items())
@@ -508,6 +544,44 @@ class LiveToolBroker:
             "rate_limit_wait_s": None,
         }
         return job
+
+    def _release_job_locked(self, job: _BrokerJob) -> None:
+        telemetry = self._tool_records[job.job_id]
+        if telemetry["cleanup_at"] is None:
+            telemetry["cleanup_at"] = self._clock()
+        self._jobs.pop(job.job_id, None)
+
+    def _pending_admission_count(self) -> int:
+        if self._max_completed_predictions is None:
+            return len(self._predictions)
+        return sum(job.state != "completed" for job in self._predictions.values())
+
+    def _retire_completed_locked(self, job: _BrokerJob, reason: str) -> None:
+        """Retire a cache entry without rewriting a successful physical reuse."""
+        key = self._prediction_key(job.session_id, job.invocation)
+        self._predictions.pop(key, None)
+        row = self._tool_records[job.job_id]
+        row["cache_retirement_reason"] = reason
+        if not row.get("committed"):
+            row["outcome"] = row["source"] = reason
+            self.stats.wasted_speculative_service_s += row.get("service_s") or 0.0
+        if job.expiry_task is not None:
+            job.expiry_task.cancel()
+        self._release_job_locked(job)
+
+    def _bound_completed_cache_locked(self) -> None:
+        if self._max_completed_predictions is None:
+            return
+        completed = sorted(
+            (job for job in self._predictions.values() if job.state == "completed"),
+            key=lambda job: (job.cache_access_at, job.job_id),
+        )
+        for job in completed[:max(0, len(completed) - self._max_completed_predictions)]:
+            self._retire_completed_locked(job, "cache_evicted")
+
+    def resource_summary(self) -> dict[str, dict[str, Any]]:
+        """Call after close/cleanup to include late work in its original task."""
+        return per_task_resources(self.tool_records(), now=self._clock())
 
     @staticmethod
     def _invocation_digest(invocation: Invocation) -> str:
@@ -673,6 +747,7 @@ class LiveToolBroker:
                 "invocation_id": f"rejected-{len(self._rejected_records) + 1:08d}",
                 "job_id": None,
                 "session_id": session_id,
+                "task_id": session_id,
                 "tool": invocation.tool_name,
                 "invocation_digest": self._invocation_digest(invocation),
                 "speculative": True,
@@ -721,6 +796,10 @@ class LiveToolBroker:
                 "exposed_wait_s": None,
                 "saved_service_s": None,
                 "committed": False,
+                "cleanup_at": None,
+                "cpu_core_s": None,
+                "bytes_written": None,
+                "retained_result_bytes": 0,
                 "reserved_speculative_dispatch": False,
                 "authoritative_after_reserved_dispatch": False,
                 "dispatch_lane": None,
@@ -743,6 +822,9 @@ class LiveToolBroker:
                     ),
                     "min_speculative_workers": self._min_speculative_workers,
                     "max_speculative_pending": self._max_speculative_pending,
+                "max_completed_predictions": self._max_completed_predictions,
+                "retain_completed_predictions": self._retain_completed_predictions,
+                "preempt_running_speculation": self._preempt_running_speculation,
                     "tool_capacities": dict(sorted(self._tool_capacities.items())),
                     "authoritative_tool_capacities": dict(
                         sorted(self._authoritative_tool_capacities.items())
@@ -875,7 +957,7 @@ class LiveToolBroker:
             job.generation += 1
             if not job.future.done():
                 job.future.cancel()
-            self._jobs.pop(job.job_id, None)
+            self._release_job_locked(job)
 
             expiry_task = job.expiry_task
             if (
@@ -1303,6 +1385,7 @@ class LiveToolBroker:
 
     async def _run(self, job: _BrokerJob) -> None:
         result: Any = None
+        reuse_valid_until = 0.0
         response_status: int | None = None
         bytes_read: int | None = None
         backend: str | None = None
@@ -1311,6 +1394,8 @@ class LiveToolBroker:
         http_attempt_log: list[dict[str, Any]] | None = None
         transport_identity_source: str | None = None
         error: BaseException | None = None
+        usage: dict[str, Any] = {}
+        usage_token = current_usage.set(usage)
         try:
             result = await self._executor(job.invocation)
             if isinstance(result, Mapping) and "_paste_transport" in result:
@@ -1318,6 +1403,7 @@ class LiveToolBroker:
                 result = dict(result)
                 result.pop("_paste_transport", None)
                 if isinstance(transport, Mapping):
+                    reuse_valid_until = float(transport.get("reuse_valid_until_monotonic_s", 0.0))
                     has_attempt_log = "http_attempt_log" in transport
                     raw_status = transport.get("response_status")
                     raw_bytes = transport.get("bytes_read")
@@ -1375,6 +1461,7 @@ class LiveToolBroker:
                         response_status = final_status
                     transport_identity_source = "actual_failure"
 
+        current_usage.reset(usage_token)
         finished_at = self._clock()
         async with self._lock:
             was_speculative_lane = job.lane == "speculative"
@@ -1400,6 +1487,11 @@ class LiveToolBroker:
             if job.worker_id is not None:
                 heapq.heappush(self._available_worker_ids, job.worker_id)
             telemetry = self._tool_records[job.job_id]
+            telemetry["cpu_core_s"] = usage.get("cpu_core_s")
+            telemetry["http_requests"] = usage.get("http_requests")
+            if "bytes_read" in usage:
+                bytes_read = usage["bytes_read"]
+            telemetry["reuse_valid_until_monotonic_s"] = reuse_valid_until
             telemetry["finish"] = finished_at
             telemetry["finished_at"] = finished_at
             telemetry["service_s"] = max(
@@ -1436,11 +1528,17 @@ class LiveToolBroker:
                     error=error,
                     started_at=job.started_at or finished_at,
                     finished_at=finished_at,
+                    reuse_valid_until=reuse_valid_until,
                 )
                 if error is None:
                     job.state = "completed"
+                    job.cache_access_at = finished_at
                     telemetry["outcome"] = "completed"
                     telemetry["result_digest"] = self._result_digest(result)
+                    if job.originally_speculative:
+                        telemetry["retained_result_bytes"] = len(
+                            json.dumps(result, ensure_ascii=False, default=str).encode("utf-8")
+                        )
                     if job.originally_speculative:
                         self.stats.speculative_completed += 1
                     if job.lane == "authoritative":
@@ -1465,7 +1563,7 @@ class LiveToolBroker:
                 if job.discard_source is not None:
                     telemetry["source"] = job.discard_source
                 telemetry["committed"] = False
-                self._jobs.pop(job.job_id, None)
+                self._release_job_locked(job)
             if error is None and service_s > 0:
                 old = self._service_ewma_s.get(job.invocation.tool_name)
                 self._service_ewma_s[job.invocation.tool_name] = (
@@ -1473,6 +1571,7 @@ class LiveToolBroker:
                     if old is None
                     else self._ewma_alpha * service_s + (1.0 - self._ewma_alpha) * old
                 )
+            self._bound_completed_cache_locked()
             self._dispatch_locked()
             self._touch_locked()
 
@@ -1600,7 +1699,7 @@ class LiveToolBroker:
                         start_deadline=deadline,
                     )
                     continue
-                if len(self._predictions) >= self._max_speculative_pending:
+                if self._pending_admission_count() >= self._max_speculative_pending:
                     replaceable = min(
                         (
                             job
@@ -1650,7 +1749,7 @@ class LiveToolBroker:
                             and not replaceable.expiry_task.done()
                         ):
                             replaceable.expiry_task.cancel()
-                        self._jobs.pop(replaceable.job_id, None)
+                        self._release_job_locked(replaceable)
                         self.stats.speculative_replaced_by_priority += 1
                     else:
                         self.stats.rejected_speculative_capacity += 1
@@ -1673,7 +1772,8 @@ class LiveToolBroker:
                 )
                 self._predictions[key] = job
                 self._push_locked(job)
-                job.expiry_task = asyncio.create_task(self._expire_after(job))
+                if math.isfinite(job.expires_at) or job.start_deadline is not None:
+                    job.expiry_task = asyncio.create_task(self._expire_after(job))
                 self.stats.speculative_admitted += 1
                 admitted[input_index] = True
             self._dispatch_locked()
@@ -1687,6 +1787,7 @@ class LiveToolBroker:
         session_id: str = "default",
         speculation_eligible: bool = True,
         reuse_running_speculation: bool = True,
+        _wait_started_at: float | None = None,
     ) -> LiveAuthoritativeResult:
         """Execute and commit one exact authoritative invocation.
 
@@ -1699,9 +1800,12 @@ class LiveToolBroker:
         """
 
         confirmation_at = self._clock()
-        wait_started = confirmation_at
+        wait_started = confirmation_at if _wait_started_at is None else _wait_started_at
         key = self._prediction_key(session_id, invocation)
+        if self._require_reuse_validity:
+            reuse_running_speculation = True
         race_backup: _BrokerJob | None = None
+        preempt: _BrokerJob | None = None
 
         async with self._lock:
             if self._closed:
@@ -1733,7 +1837,7 @@ class LiveToolBroker:
                     )
                     failed_telemetry["authoritative"] = True
                     failed_telemetry["exact_match"] = failed_prediction
-                    self._jobs.pop(job.job_id, None)
+                    self._release_job_locked(job)
                 self.stats.authoritative_misses += 1
                 self.stats.authoritative_executions += 1
                 job = self._new_job_locked(
@@ -1810,8 +1914,18 @@ class LiveToolBroker:
                     source = "reused"
                 telemetry["source"] = source
             self._dispatch_locked()
+            if (self._preempt_running_speculation and job.state == "queued"
+                    and self._running_total >= self._max_workers):
+                victims = [other for other in self._predictions.values()
+                           if other.state == "running" and other.lane == "speculative"
+                           and other.confirmed_at is None]
+                if victims:
+                    preempt = min(victims, key=lambda other: (other.priority, -other.queue_order))
+                    self._tool_records[preempt.job_id]["preempted_for_authority"] = True
             self._touch_locked()
 
+        if preempt is not None:
+            await self._discard_prediction(preempt, expired=False)
         if race_backup is not None:
             return await self._resolve_running_race(
                 speculative_job=job,
@@ -1848,7 +1962,7 @@ class LiveToolBroker:
                     self._tool_records[job.job_id]["source"] = (
                         "failed_speculation_uncommitted"
                     )
-                    self._jobs.pop(job.job_id, None)
+                    self._release_job_locked(job)
                     self.stats.authoritative_misses += 1
                     self.stats.authoritative_executions += 1
                     fallback = self._new_job_locked(
@@ -1872,19 +1986,32 @@ class LiveToolBroker:
                 fallback_record = await asyncio.shield(fallback.future)
                 if fallback_record.error is not None:
                     async with self._lock:
-                        self._jobs.pop(fallback.job_id, None)
+                        self._release_job_locked(fallback)
                     raise fallback_record.error
                 job = fallback
                 record = fallback_record
                 source = "executed_after_speculative_failure"
             else:
                 async with self._lock:
-                    self._jobs.pop(job.job_id, None)
+                    self._release_job_locked(job)
                 raise record.error
 
         finished_at = record.finished_at
         service_s = max(0.0, finished_at - record.started_at)
         saved_service_s = 0.0
+        if (job.originally_speculative
+                and self._tool_records[job.job_id].get("dispatch_lane") == "speculative"
+                and self._require_reuse_validity
+                and (not math.isfinite(record.reuse_valid_until)
+                     or record.reuse_valid_until <= time.monotonic())):
+            async with self._lock:
+                self._tool_records[job.job_id]["source"] = "invalid_freshness_fallback"
+                self._release_job_locked(job)
+            return await self.authoritative(
+                invocation, session_id=session_id, speculation_eligible=False,
+                _wait_started_at=wait_started,
+            )
+
         if job.originally_speculative:
             saved_service_s = max(
                 0.0,
@@ -1908,10 +2035,18 @@ class LiveToolBroker:
             telemetry["authoritative"] = True
             telemetry["exact_match"] = job.originally_speculative
             telemetry["exposed_wait_s"] = committed.exposed_wait_s
-            telemetry["saved_service_s"] = committed.saved_service_s
+            telemetry["saved_service_s"] = (telemetry.get("saved_service_s") or 0.0) + committed.saved_service_s
+            telemetry["reuse_count"] = telemetry.get("reuse_count", 0) + int(source in {"reused", "promoted_inflight"})
             telemetry["committed"] = True
             telemetry["outcome"] = "committed"
-            self._jobs.pop(job.job_id, None)
+            if (self._retain_completed_predictions
+                    and telemetry.get("dispatch_lane") == "speculative"
+                    and key not in self._predictions):
+                job.cache_access_at = self._clock()
+                self._predictions[key] = job
+                self._bound_completed_cache_locked()
+            else:
+                self._release_job_locked(job)
             self._authoritative_state.append(committed)
             self.stats.commits += 1
             self._touch_locked()
@@ -1942,7 +2077,7 @@ class LiveToolBroker:
             self._finalize_never_started_cancellation_locked(job, telemetry)
             if not job.future.done():
                 job.future.cancel()
-            self._jobs.pop(job.job_id, None)
+            self._release_job_locked(job)
             return
 
         if job.state in {"running", "cancelling"}:
@@ -1955,7 +2090,7 @@ class LiveToolBroker:
             self.stats.wasted_speculative_service_s += max(
                 0.0, end - job.started_at
             )
-        self._jobs.pop(job.job_id, None)
+        self._release_job_locked(job)
 
     async def _resolve_running_race(
         self,
@@ -2044,7 +2179,7 @@ class LiveToolBroker:
                 backup_telemetry = self._tool_records[backup_job.job_id]
                 backup_telemetry["source"] = "executed"
                 backup_telemetry["race_winner"] = True
-                self._jobs.pop(backup_job.job_id, None)
+                self._release_job_locked(backup_job)
                 self._mark_race_loser_locked(
                     speculative_job,
                     source="race_speculation_loser",
@@ -2091,7 +2226,7 @@ class LiveToolBroker:
             telemetry["committed"] = True
             telemetry["outcome"] = "committed"
             telemetry["race_winner"] = True
-            self._jobs.pop(winner_job.job_id, None)
+            self._release_job_locked(winner_job)
             self._mark_race_loser_locked(
                 loser_job,
                 source=(
@@ -2120,6 +2255,10 @@ class LiveToolBroker:
             key = self._prediction_key(job.session_id, job.invocation)
             if self._predictions.get(key) is not job:
                 return False
+            if job.state == "completed" and self._tool_records[job.job_id].get("committed"):
+                self._retire_completed_locked(job, "cache_expired" if expired else "session_closed")
+                self._touch_locked()
+                return True
             self._predictions.pop(key, None)
             if expired:
                 self.stats.speculative_expired += 1
@@ -2147,7 +2286,7 @@ class LiveToolBroker:
                 if runner is None and not job.future.done():
                     job.future.cancel()
             if runner is None:
-                self._jobs.pop(job.job_id, None)
+                self._release_job_locked(job)
             self._dispatch_locked()
             self._touch_locked()
 
@@ -2157,7 +2296,7 @@ class LiveToolBroker:
                 runner.cancel()
             await asyncio.gather(runner, return_exceptions=True)
             async with self._lock:
-                self._jobs.pop(job.job_id, None)
+                self._release_job_locked(job)
                 self._touch_locked()
         expiry_task = job.expiry_task
         if (
@@ -2196,7 +2335,7 @@ class LiveToolBroker:
                 if runner is None and not job.future.done():
                     job.future.cancel()
             if runner is None:
-                self._jobs.pop(job.job_id, None)
+                self._release_job_locked(job)
             self._dispatch_locked()
             self._touch_locked()
         if runner is not None:
@@ -2204,7 +2343,7 @@ class LiveToolBroker:
                 runner.cancel()
             await asyncio.gather(runner, return_exceptions=True)
             async with self._lock:
-                self._jobs.pop(job.job_id, None)
+                self._release_job_locked(job)
                 self._touch_locked()
         return True
 
@@ -2236,6 +2375,9 @@ class LiveToolBroker:
             for job in selected:
                 key = self._prediction_key(job.session_id, job.invocation)
                 if self._predictions.get(key) is not job:
+                    continue
+                if job.state == "completed" and self._tool_records[job.job_id].get("committed"):
+                    self._retire_completed_locked(job, "session_closed")
                     continue
                 self._predictions.pop(key, None)
                 self.stats.speculative_cancelled += 1
@@ -2275,7 +2417,7 @@ class LiveToolBroker:
                     if runner is None and not job.future.done():
                         job.future.cancel()
                 if runner is None:
-                    self._jobs.pop(job.job_id, None)
+                    self._release_job_locked(job)
                 else:
                     running.append((job, runner))
 
@@ -2304,7 +2446,7 @@ class LiveToolBroker:
             async with self._lock:
                 for job, runner in running:
                     if runner is not current:
-                        self._jobs.pop(job.job_id, None)
+                        self._release_job_locked(job)
                 self._touch_locked()
 
         for expiry_task in expiry_tasks:
@@ -2343,6 +2485,10 @@ class LiveToolBroker:
             for job in expired:
                 key = self._prediction_key(job.session_id, job.invocation)
                 if self._predictions.get(key) is not job:
+                    continue
+                if job.state == "completed" and self._tool_records[job.job_id].get("committed"):
+                    self._retire_completed_locked(job, "cache_expired")
+                    removed += 1
                     continue
                 self._predictions.pop(key, None)
                 self.stats.speculative_expired += 1
@@ -2402,7 +2548,7 @@ class LiveToolBroker:
                     if runner is None and not job.future.done():
                         job.future.cancel()
                 if runner is None:
-                    self._jobs.pop(job.job_id, None)
+                    self._release_job_locked(job)
                 else:
                     running.append((job, runner))
 
@@ -2430,7 +2576,7 @@ class LiveToolBroker:
             async with self._lock:
                 for job, runner in running:
                     if runner is not current:
-                        self._jobs.pop(job.job_id, None)
+                        self._release_job_locked(job)
                 self._touch_locked()
 
         for expiry_task in expiry_tasks:
@@ -2772,8 +2918,21 @@ class LiveToolBroker:
                     )
             else:
                 estimated_remaining_s = None
+            prediction_available = (
+                self._predictions.get(self._prediction_key(job.session_id, job.invocation)) is job
+                and job.expires_at > now
+                and job.state in {"queued", "running", "completed"}
+            )
+            valid_until = self._tool_records[job.job_id].get("reuse_valid_until_monotonic_s", 0.0)
+            reusable_now = (
+                prediction_available and job.state == "completed"
+                and (not self._require_reuse_validity
+                     or (math.isfinite(valid_until) and valid_until > time.monotonic()))
+            )
             public_jobs.append(
                 {
+                    "prediction_available": prediction_available,
+                    "reusable_now": reusable_now,
                     "job_id": job.job_id,
                     "session_id": job.session_id,
                     "tool_name": job.invocation.tool_name,
@@ -2862,6 +3021,9 @@ class LiveToolBroker:
                 "max_authoritative_workers": self._max_authoritative_workers,
                 "min_speculative_workers": self._min_speculative_workers,
                 "max_speculative_pending": self._max_speculative_pending,
+                "max_completed_predictions": self._max_completed_predictions,
+                "retain_completed_predictions": self._retain_completed_predictions,
+                "preempt_running_speculation": self._preempt_running_speculation,
                 "default_tool_capacity": self._max_workers,
                 "tool_capacities": dict(sorted(self._tool_capacities.items())),
                 "authoritative_tool_capacities": dict(

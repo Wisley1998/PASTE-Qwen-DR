@@ -6,6 +6,7 @@ import asyncio
 import base64
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
+from email.utils import parsedate_to_datetime
 from html import unescape
 import json
 import math
@@ -15,6 +16,7 @@ from typing import Any, Mapping
 from urllib.parse import parse_qs, quote, urlparse
 
 from .invocation import Invocation
+from .resource_accounting import current_usage
 
 
 class SyncToolMapExecutor:
@@ -54,9 +56,17 @@ class SyncToolMapExecutor:
                 f"tool {invocation.tool_name!r} does not provide call(arguments)"
             )
         loop = asyncio.get_running_loop()
-        future = loop.run_in_executor(
-            self._pool, partial(call, invocation.arguments)
-        )
+        usage = current_usage.get()
+
+        def measured_call() -> Any:
+            started = time.thread_time()
+            try:
+                return call(invocation.arguments)
+            finally:
+                if usage is not None:
+                    usage["cpu_core_s"] = time.thread_time() - started
+
+        future = loop.run_in_executor(self._pool, measured_call)
         try:
             # Shielding matters for physical capacity accounting: cancelling
             # an asyncio wrapper does not stop an already-running thread.
@@ -438,8 +448,18 @@ class WikipediaLiveExecutor:
             except ImportError as exc:  # pragma: no cover - runtime dependency
                 raise RuntimeError("WikipediaLiveExecutor requires aiohttp") from exc
             timeout = aiohttp.ClientTimeout(total=self._request_timeout_s)
+            trace = aiohttp.TraceConfig()
+
+            async def sent_headers(*_: Any) -> None:
+                usage = current_usage.get()
+                if usage is not None:
+                    usage["http_requests"] = usage.get("http_requests", 0) + 1
+
+            trace.on_request_headers_sent.append(sent_headers)
             self._session = aiohttp.ClientSession(
                 timeout=timeout,
+                cookie_jar=aiohttp.DummyCookieJar(),
+                trace_configs=[trace],
                 headers={
                     "User-Agent": "PASTE-live-tool-experiment/1.0",
                     "Accept": "application/json,text/html,text/plain;q=0.9,*/*;q=0.8",
@@ -457,6 +477,9 @@ class WikipediaLiveExecutor:
         return self._session
 
     async def __call__(self, invocation: Invocation) -> dict[str, Any]:
+        usage = current_usage.get()
+        if usage is not None and self._owns_session:
+            usage.update(http_requests=0, bytes_read=0)
         if invocation.tool_name == "search":
             return await self._search(invocation.arguments)
         if invocation.tool_name == "visit":
@@ -669,6 +692,8 @@ class WikipediaLiveExecutor:
                     status = int(response.status)
                     response.raise_for_status()
                     body = await response.read()
+                    if current_usage.get() is not None:
+                        current_usage.get()["bytes_read"] = current_usage.get().get("bytes_read", 0) + len(body)
                     charset = response.charset or "utf-8"
                 attempt_log.append(
                     {
@@ -857,6 +882,7 @@ class WikipediaLiveExecutor:
         )
         self._raise_batch_failure(fetched)
         pages = [page for page, _, _, _, _, _ in fetched]
+        valid_until = min((page.pop("_reuse_valid_until", 0.0) for page in pages), default=0.0)
         statuses = [status for _, status, _, _, _, _ in fetched]
         hosts = sorted({host for _, _, _, host, _, _ in fetched})
         http_attempts = sum(attempts for _, _, _, _, attempts, _ in fetched)
@@ -888,6 +914,7 @@ class WikipediaLiveExecutor:
                 "request_host": ",".join(hosts),
                 "http_attempts": http_attempts,
                 "http_retries": http_attempts - len(fetched),
+                "reuse_valid_until_monotonic_s": valid_until,
                 "http_attempt_log": attempt_log,
             },
         }
@@ -932,6 +959,8 @@ class WikipediaLiveExecutor:
                     chunks: list[bytes] = []
                     received = 0
                     async for chunk in response.content.iter_chunked(16 * 1024):
+                        if current_usage.get() is not None:
+                            current_usage.get()["bytes_read"] = current_usage.get().get("bytes_read", 0) + len(chunk)
                         if not chunk:
                             continue
                         remaining = self._max_response_bytes - received
@@ -943,6 +972,23 @@ class WikipediaLiveExecutor:
                         if received >= self._max_response_bytes:
                             break
                     charset = response.charset or "utf-8"
+                    cache_control = response.headers.get("Cache-Control", "").lower()
+                    freshness = re.search(r"(?:^|,)\s*max-age=(\d+)", cache_control)
+                    age = response.headers.get("Age", "0")
+                    vary = {part.strip().lower() for part in response.headers.get("Vary", "").split(",") if part.strip()}
+                    valid_until = 0.0
+                    # This executor uses fixed Accept/User-Agent headers and
+                    # aiohttp's fixed encoding advertisement, with no cookies.
+                    # Other representation dependencies require ordinary fetch.
+                    if (freshness and age.isdigit() and vary <= {"accept", "accept-encoding", "user-agent"}
+                            and not response.headers.get("Set-Cookie")
+                            and not any(flag in cache_control for flag in ("no-store", "no-cache", "private"))):
+                        try:
+                            date_s = parsedate_to_datetime(response.headers.get("Date", "")).timestamp()
+                            apparent_age = max(float(age), time.time() - date_s, 0.0)
+                            valid_until = started_monotonic_s + max(0.0, int(freshness.group(1)) - apparent_age)
+                        except (ValueError, TypeError, OverflowError):
+                            valid_until = 0.0
                     content_type = str(
                         response.headers.get("Content-Type", "")
                     ).lower()
@@ -1002,7 +1048,7 @@ class WikipediaLiveExecutor:
             title = self._plain_text(title_match.group(1)) if title_match else ""
             request_host = str(urlparse(target).hostname or "")
             return (
-                {"url": url, "title": title, "content": text},
+                {"url": url, "title": title, "content": text, "_reuse_valid_until": valid_until},
                 status,
                 received,
                 request_host,

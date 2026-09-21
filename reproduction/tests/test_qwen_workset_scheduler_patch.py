@@ -918,3 +918,189 @@ def test_strict_causal_schema_ignores_poisoned_legacy_oracle_fields(
     assert policy._joint_v2_soft_remaining_calls(poison) == 2
     assert poison_score == pytest.approx(clean_score)
     assert poison_over is clean_over
+
+@pytest.mark.parametrize('ranker', ['fcfs', 'length-aware'])
+def test_non_tool_ranker_is_invariant_to_all_tool_signals(ranker: str) -> None:
+    import copy
+    base = _score_feature(rlmt=100)
+    base['arrival'] = 1.0
+    poisoned = copy.deepcopy(base)
+    poisoned['next_tool_wait'] = 1e8
+    poisoned['meta'].update(nw=1e8, rtw=1e8, eg=1e8, nwc=1.0,
+        tool_eta_s_hat=1e8, tool_hit_probability_hat=1.0,
+        remaining_tool_wait_s_hat=1e8, expected_gain_s_hat=1e8)
+    kwargs = dict(ranker=ranker, live_tokens=0.0, virtual_tokens=0.0,
+        live_long_count=0, virtual_long_count=0, is_new_session=False,
+        score_config=policy._joint_v2_score_config_snapshot())
+    assert policy._joint_v2_rank_score(base, **kwargs) == policy._joint_v2_rank_score(poisoned, **kwargs)
+
+
+def test_ranker_changes_order_without_changing_admission_capacity(monkeypatch: pytest.MonkeyPatch) -> None:
+    requests = [_request('earlier'), _request('later')]
+    requests[0].arrival_time = 1.0
+    requests[1].arrival_time = 2.0
+    for ranker in ['fcfs', 'length-aware', 'tool-aware']:
+        monkeypatch.setenv('VLLM_SCHED_JOINT_V2_RANKER', ranker)
+        ordered, admitted, budget = policy._order_joint_pacer_v2_waiting(
+            waiting_items=requests, running_items=[], now_s=3.0,
+            prompt_len_fn=lambda item: item.num_prompt_tokens)
+        assert admitted == 2
+        assert set(ordered) == set(requests)
+        assert budget == policy._hbm_target_context_tokens()
+        if ranker == 'fcfs': assert ordered == requests
+
+
+def test_online_metadata_has_no_trace_suffix_or_outcome_inputs():
+    import inspect
+    names = set(inspect.signature(runner.causal_scheduler_metadata).parameters)
+    assert names == {"task_id", "call_index", "request_index", "prompt_tokens",
+                     "generation_cap", "po_ema", "tool_eta_s", "tool_confidence", "expected_gain_s"}
+    meta = runner.causal_scheduler_metadata(task_id="task", call_index=100,
+        request_index=100, prompt_tokens=700, generation_cap=512, po_ema=128,
+        tool_eta_s=2, tool_confidence=0.5)
+    assert meta["po_hat"] == 128  # Not clipped by this request's actual completion.
+    assert meta["remaining_calls_hat"] == 1  # No false finality on long traces.
+    assert meta["next_prompt_tokens_hat"] == 700
+    assert not set(meta) & {"n", "rc", "rlmt", "npt", "nmt", "po", "nw", "eg"}
+    # Completed history is allowed to update the predictor; no current outcome input.
+    after = runner.causal_scheduler_metadata(task_id="task", call_index=101,
+        request_index=101, prompt_tokens=700, generation_cap=512,
+        po_ema=0.5 * 32 + 0.5 * 128, tool_eta_s=2, tool_confidence=0.5)
+    assert after["po_hat"] == 80
+
+
+def test_live_branch_never_invokes_oracle_metadata_builder():
+    # Guard the actual entrypoint's branch boundary, not just the scalar helper.
+    import ast
+    import inspect
+    tree = ast.parse(inspect.getsource(runner))
+    oracle_names = {"build_scheduler_metadata", "fixed_trace_remaining_metadata"}
+    found = []
+    def visit(node, offline_only=False):
+        if isinstance(node, ast.If) and isinstance(node.test, ast.Name) and node.test.id == "live":
+            for child in node.body: visit(child, offline_only)
+            for child in node.orelse: visit(child, True)
+            return
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in oracle_names:
+            found.append(offline_only)
+        for child in ast.iter_child_nodes(node): visit(child, offline_only)
+    visit(tree)
+    assert found and all(found)
+
+
+@pytest.mark.parametrize("ranker", ["length-aware", "tool-aware", "fcfs"])
+def test_online_order_and_gate_ignore_forced_trace_completion_and_legacy_suffix(monkeypatch, ranker):
+    monkeypatch.setenv("VLLM_SCHED_JOINT_V2_RANKER", ranker)
+    def run(poison):
+        requests = []
+        for i, prompt in enumerate([700, 1200, 300]):
+            meta = runner.causal_scheduler_metadata(task_id=f"task{i}", call_index=1,
+                request_index=1, prompt_tokens=prompt, generation_cap=512,
+                po_ema=128, tool_eta_s=2+i, tool_confidence=0.5)
+            if poison:
+                meta.update(rc=0, n=1, rlmt=10**8, npt=10**8, nmt=10**8,
+                            po=1, nw=10**8, nwc=1, rtw=10**8, eg=10**8)
+            req = _Request(meta, arrival_time=1.0+i)
+            # Executor's forced token count is NOT the original declared cap.
+            req.max_tokens = 9999 if poison else 10
+            assert policy._sampling_max_tokens(req) == 512
+            requests.append(req)
+        ordered, admitted, budget = policy._order_joint_pacer_v2_waiting(
+            waiting_items=requests, running_items=[], now_s=5,
+            prompt_len_fn=lambda obj: obj.num_prompt_tokens)
+        return [policy._decode_meta(r)["t"] for r in ordered], admitted, budget
+    assert run(False) == run(True)
+
+
+def test_online_pending_return_ignores_oracle_finality_and_next_prompt(monkeypatch):
+    meta = runner.causal_scheduler_metadata(task_id="task", call_index=0,
+        request_index=0, prompt_tokens=700, generation_cap=512,
+        po_ema=128, tool_eta_s=2, tool_confidence=0.5)
+    for poison in [False, True]:
+        current = dict(meta)
+        if poison: current.update(rc=0, n=1, npt=10**9, nmt=10**9, nw=99999)
+        monkeypatch.setattr(policy, "_META_CACHE", {"departed": current})
+        monkeypatch.setattr(policy, "_prev_running_ids", {"departed"})
+        monkeypatch.setattr(policy, "_pending_returns", {})
+        monkeypatch.setattr(policy, "_v2_completed_sessions", set())
+        policy._update_pending_returns(SimpleNamespace(waiting=[]), [], 100)
+        assert policy._pending_returns == {"task": (102, 828)}
+        assert policy._v2_completed_sessions == set()
+
+
+def test_dr_online_generation_cap_is_not_derived_from_recorded_output():
+    import ast
+    import inspect
+    tree = ast.parse(inspect.getsource(runner))
+    calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)
+             and isinstance(n.func, ast.Name) and n.func.id == "causal_scheduler_metadata"]
+    assert len(calls) == 1
+    cap = next(k.value for k in calls[0].keywords if k.arg == "generation_cap")
+    assert ast.unparse(cap) == "min(public_generation_limit, public_context_limit - int(request['prompt_tokens']))"
+    # Changing the replay cap, completion, suffix or tool labels cannot affect it.
+    for replay_cap, actual in [(33, 1), (9999, 9000)]:
+        request = dict(prompt_tokens=700, max_tokens=replay_cap, fixed_completion_tokens=actual)
+        observed = eval(compile(ast.Expression(cap), "cap", "eval"),
+                        {"request": request, "public_generation_limit": 1024,
+                         "public_context_limit": 16384})
+        assert observed == 1024
+
+
+def test_readiness_credit_requires_observed_reusable_result_not_candidate_probability():
+    job = dict(prediction_available=True, reusable_now=False, state="running",
+               priority=0.5, service_estimate_s=4.0)
+    pending = runner.speculation_readiness({"jobs": [job]}, 4.0)
+    assert pending["pending"] == 1 and pending["expected_gain_s"] == 0
+    ready = runner.speculation_readiness({"jobs": [{**job, "state": "completed", "reusable_now": True}]}, 4.0)
+    assert ready["ready"] == 1 and ready["expected_gain_s"] == 2.0
+    stale = runner.speculation_readiness({"jobs": [{**job, "state": "completed"}]}, 4.0)
+    assert stale["ready"] == 0 and stale["expected_gain_s"] == 0
+    consumed = runner.speculation_readiness({"jobs": [{**job, "prediction_available": False}]}, 4.0)
+    assert consumed["expected_gain_s"] == 0
+
+
+@pytest.mark.parametrize("ranker", ["length-aware", "tool-aware"])
+def test_readiness_changes_only_tool_aware_rank_score(monkeypatch, ranker):
+    monkeypatch.setenv("VLLM_SCHED_JOINT_V2_REALIZED_GAIN_WEIGHT", "1")
+    base = runner.causal_scheduler_metadata(task_id="t", call_index=1, request_index=1,
+        prompt_tokens=700, generation_cap=1024, po_ema=128, tool_eta_s=4, tool_confidence=0.5)
+    def score(gain):
+        request = _Request({**base, "expected_gain_s_hat": gain}, arrival_time=1)
+        f = policy._hbm_feature(request, 3, lambda obj: obj.num_prompt_tokens, include_tool_key=False)
+        return policy._joint_v2_rank_score(f, ranker=ranker, live_tokens=0, virtual_tokens=0,
+            live_long_count=0, virtual_long_count=0, is_new_session=False,
+            score_config=policy._joint_v2_score_config_snapshot())[0]
+    if ranker == "length-aware": assert score(2) == score(0)
+    else: assert score(2) < score(0)
+
+
+def test_timed_cell_closes_broker_and_persists_result_without_http_executor(tmp_path, monkeypatch):
+    """Regression for the post-measurement None.close failure; no model/tool calls."""
+    import asyncio
+    from paste_repro.pattern_v2_all_visit_online import PatternV2CrossFitPredictor
+    monkeypatch.setattr(runner, "checked_plan", lambda _: {
+        "plan_sha256": "test", "traces": [], "sources": {"source_configuration": {
+            "max_output_tokens_cap": 1024, "max_model_len": 16384}}})
+    monkeypatch.setattr(PatternV2CrossFitPredictor, "from_path", lambda _: object())
+    predictor = tmp_path / "predictor.json"
+    predictor.write_text("{}")
+    output = tmp_path / "result.json"
+    args = runner.parser().parse_args(["run-cell", "--plan", str(tmp_path / "plan.json"),
+        "--system", "full", "--tool-backend", "timed", "--predictor", str(predictor),
+        "--output", str(output)])
+    assert asyncio.run(runner.run_cell(args)) == 0
+    result = runner.read_json(output)
+    assert result["settings"]["tool_backend"] == "timed"
+    assert result["resources"]["cpu_core_s"] is None
+    assert result["tool_jobs"] == []
+
+
+def test_timed_url_services_preserve_individual_durations_and_serial_sum():
+    tool = {"arguments": {"url": ["https://a.test", "https://b.test"]}, "duration_s": 10,
+            "visit_units": [{"url": "https://a.test", "duration_s": 2},
+                            {"url": "https://b.test", "duration_s": 8}]}
+    assert runner.timed_visit_durations(tool) == [2, 8]
+    with pytest.raises(ValueError, match="sum"):
+        runner.timed_visit_durations({**tool, "duration_s": 11})
+    with pytest.raises(ValueError, match="order"):
+        runner.timed_visit_durations({**tool, "visit_units": list(reversed(tool["visit_units"]))})

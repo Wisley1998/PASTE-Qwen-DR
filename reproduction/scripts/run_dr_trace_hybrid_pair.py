@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Run a paired live-LLM/offline-tool replay of real Qwen DR traces.
+"""Run a paired trace-conditioned replay of real Qwen DR traces.
+
+``--tool-backend live`` uses the existing broker and HTTP executor, with
+simulated Search sharing its capacity. Only raw URL fetches with explicit
+HTTP freshness are reusable. LLM messages and authoritative calls stay fixed;
+this measures execution latency/cost, not autonomous answer quality.
 
 The workload preserves complete, distinct DeepResearch trace sessions and their
 recorded messages/token cadence.  LLM calls execute on live vLLM.  Baseline
@@ -27,10 +32,13 @@ import math
 from pathlib import Path
 import re
 import statistics
+import sys
 import time
 from typing import Any, Mapping, Sequence
 
 import aiohttp
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 PLAN_SCHEMA = "paste_repro.dr_trace_hybrid_plan.v1"
@@ -327,11 +335,15 @@ def prepare(args: argparse.Namespace) -> int:
     if source.get("schema") != "paste_repro.trace_all_visit_live_plan.v1":
         raise ValueError("unsupported source plan schema")
     checked_hash(source, "plan_sha256", args.source_plan)
+    trace_offset = getattr(args, "trace_offset", 0)
+    if trace_offset < 0:
+        raise ValueError("trace offset must be non-negative")
+    source_traces = source["traces"][trace_offset:]
     arrivals = read_json(args.arrivals)
-    arrival_rows = arrivals.get("arrivals") or arrivals.get("traces")
+    arrival_rows = arrivals.get("arrivals") or arrivals.get("traces") or arrivals.get("sessions")
     if not isinstance(arrival_rows, list) or len(arrival_rows) < args.sessions:
         raise ValueError("arrival file contains too few rows")
-    if len(source.get("traces", [])) < args.sessions:
+    if len(source_traces) < args.sessions:
         raise ValueError("source plan contains too few distinct traces")
 
     offsets = [float(row["release_offset_s"]) for row in arrival_rows[:args.sessions]]
@@ -349,7 +361,7 @@ def prepare(args: argparse.Namespace) -> int:
     completion_tokens = 0
     tools = 0
     for index, (raw_trace, arrival) in enumerate(
-        zip(source["traces"][:args.sessions], arrival_rows[:args.sessions], strict=True)
+        zip(source_traces[:args.sessions], arrival_rows[:args.sessions], strict=True)
     ):
         trace = copy.deepcopy(raw_trace)
         trace["task_id"] = f"dr-{index + 1:03d}-{trace['trace_id']}"
@@ -400,7 +412,7 @@ def prepare(args: argparse.Namespace) -> int:
         "contract": {
             "benchmark": "Qwen DeepResearch real trace replay",
             "sessions": args.sessions,
-            "session_identity": "first 80 distinct real DR sessions; no replication",
+            "session_identity": f"{args.sessions} distinct DR sessions from offset {trace_offset}; no replication",
             "arrival_process": "unchanged raw Azure 3-second/80-arrival window",
             "llm_clock": "live vLLM Tongyi-DeepResearch-30B-A3B",
             "llm_prompts": "recorded real multi-turn messages",
@@ -417,6 +429,7 @@ def prepare(args: argparse.Namespace) -> int:
         },
         "sources": {
             "source_plan": str(args.source_plan.resolve()),
+            "trace_offset": trace_offset,
             "source_plan_file_sha256": file_sha256(args.source_plan),
             "source_plan_sha256": source["plan_sha256"],
             "arrival_path": str(args.arrivals.resolve()),
@@ -465,6 +478,62 @@ def schedx_id(metadata: Mapping[str, Any]) -> str:
         separators=(",", ":"),
     ).encode("utf-8").hex()
     return f"schedx{encoded}z"
+
+
+def causal_scheduler_metadata(
+    *, task_id: str, call_index: int, request_index: int,
+    prompt_tokens: int, generation_cap: int, po_ema: float,
+    tool_eta_s: float, tool_confidence: float, expected_gain_s: float = 0.0,
+) -> dict[str, Any]:
+    """Online signals only: current request, completed-output EMA and tool prediction.
+
+    One further call is a shared fixed prior, not a claim about trace finality.
+    Predict the next prompt by persistence. Never accept a trace or outcome here.
+    """
+    if generation_cap < 1 or prompt_tokens < 1:
+        raise ValueError("current prompt and declared generation cap must be positive")
+    po = max(1.0, min(float(po_ema), generation_cap))
+    eta = max(0.0, tool_eta_s)
+    confidence = max(0.0, min(1.0, tool_confidence))
+    return {
+        "ms": "paste.schedx.causal_prediction.v1",
+        "t": task_id, "c": call_index, "i": request_index,
+        "pt": prompt_tokens, "mt": generation_cap,
+        "po_hat": po, "remaining_calls_hat": 1,
+        "remaining_llm_tokens_hat": 2 * po,
+        "next_prompt_tokens_hat": prompt_tokens,
+        "next_output_tokens_hat": po,
+        "tool_eta_s_hat": eta, "tool_hit_probability_hat": confidence,
+        "remaining_tool_wait_s_hat": eta,
+        "expected_gain_s_hat": max(0.0, expected_gain_s),
+    }
+
+
+def speculation_readiness(snapshot: Mapping[str, Any], tool_eta_s: float) -> dict[str, Any]:
+    """Observe current broker state; readiness is not a future authoritative hit.
+
+    Pending jobs get no realized-work credit. Completed valid jobs receive only
+    a probability-weighted service estimate, never a known future saved duration.
+    """
+    ready = pending = unavailable = 0
+    gain = confidence = 0.0
+    for job in snapshot["jobs"]:
+        if not job["prediction_available"]:
+            unavailable += 1
+            continue
+        probability = min(1.0, max(0.0, float(job["priority"])))
+        confidence = max(confidence, probability)
+        if job["reusable_now"]:
+            ready += 1
+            service = job.get("service_estimate_s")
+            service = tool_eta_s if service is None else max(0.0, float(service))
+            gain = max(gain, probability * min(tool_eta_s, service))
+        elif job["state"] in {"queued", "running"}:
+            pending += 1
+        else:
+            unavailable += 1
+    return dict(ready=ready, pending=pending, unavailable=unavailable,
+                confidence=confidence, expected_gain_s=gain)
 
 
 def build_scheduler_metadata(
@@ -543,9 +612,97 @@ def build_scheduler_metadata(
     }
 
 
+def timed_visit_durations(tool: Mapping[str, Any]) -> list[float]:
+    """Executor-only URL service demands, preserving the frozen serial sum."""
+    urls = tool["arguments"].get("url", [])
+    urls = [urls] if isinstance(urls, str) else urls
+    units = tool.get("visit_units", [])
+    total = float(tool["duration_s"])
+    if [unit["url"] for unit in units] == urls and units:
+        durations = [float(unit["duration_s"]) for unit in units]
+        if any(not math.isfinite(value) or value < 0 for value in durations):
+            raise ValueError("invalid recorded URL duration")
+        if not math.isclose(sum(durations), total, rel_tol=1e-9, abs_tol=1e-9):
+            raise ValueError("recorded visit_units do not sum to the batch duration")
+        return durations
+    if units:
+        raise ValueError("recorded visit_units do not match the authoritative URL order")
+    # Non-HTTP/view-source calls have no executable URL units in this corpus.
+    return [total / len(urls)] * len(urls) if urls else []
+
+
 async def run_cell(args: argparse.Namespace) -> int:
     plan = checked_plan(args.plan)
     full = args.system == "full"
+    timed = getattr(args, "tool_backend", "replay") == "timed"
+    live = getattr(args, "tool_backend", "replay") in {"live", "timed"}
+    broker = executor = predictor = None
+    if live:
+        from paste_repro.invocation import Invocation
+        from paste_repro.live_broker import LiveToolBroker
+        from paste_repro.live_executor import WikipediaLiveExecutor
+        from paste_repro.pattern_v2_all_visit_online import PatternV2CrossFitPredictor
+        if args.preengine_policy != "fifo":
+            raise ValueError("live ranker comparisons require a fixed FIFO admission gate")
+        if args.predictor is None:
+            raise ValueError("live mode requires the frozen predictor, including at zero budget")
+        if not 0 <= args.speculation_capacity <= args.tool_capacity:
+            raise ValueError("speculation capacity must be in [0, tool capacity]")
+        if not 1 <= args.speculation_top_k <= 10:
+            raise ValueError("speculation top-k must be in [1, 10]")
+        if not timed and (not math.isfinite(args.speculation_ttl_s)
+                          or args.session_result_cache or args.preempt_speculation):
+            raise ValueError("session-stable retention and timer preemption require --tool-backend timed")
+        for trace in plan["traces"]:
+            for step in trace["steps"]:
+                for tool in step["tools_after"]:
+                    if "arguments" not in tool:
+                        raise ValueError("rebuild source plan with original prepare-only entry to retain tool arguments")
+        # Private executor input: neither the predictor nor scheduler reads
+        # these recorded service times before the simulated job completes.
+        recorded_services = {}
+        assigned_services = {}
+        if timed:
+            for trace in plan["traces"]:
+                for step in trace["steps"]:
+                    for tool in step["tools_after"]:
+                        if tool["tool_name"] != "visit":
+                            continue
+                        urls = tool["arguments"].get("url", [])
+                        urls = [urls] if isinstance(urls, str) else urls
+                        durations = timed_visit_durations(tool)
+                        for url, duration in zip(urls, durations):
+                            recorded_services.setdefault((trace["task_id"], url),
+                                duration)
+        executor = None if timed else WikipediaLiveExecutor(timeout_s=20, max_http_attempts=1, max_visit_urls=1)
+        async def execute(invocation):
+            if timed:
+                await asyncio.sleep(assigned_services[id(invocation)])
+                return {"simulated_tool": True, "_paste_transport": {
+                    "backend": "simulated_trace_tool", "http_attempts": 0, "bytes_read": 0,
+                    # The timer model has stable values during the existing TTL.
+                    # This is not evidence about HTTP freshness or real outputs.
+                    "reuse_valid_until_monotonic_s": (time.monotonic() + args.speculation_ttl_s
+                        if math.isfinite(args.speculation_ttl_s) else 1e300)}}
+
+            if invocation.tool_name in {"search", "google_scholar"}:
+                await asyncio.sleep(invocation.arguments["_simulated_service_s"])
+                return {"simulated_search": True, "_paste_transport": {
+                    "backend": "simulated_search", "http_attempts": 0, "bytes_read": 0}}
+            return await executor(invocation)
+        broker = LiveToolBroker(execute, max_workers=args.tool_capacity,
+            max_speculative_workers=args.speculation_capacity if full else 0,
+            max_speculative_pending=args.speculation_pending_capacity,
+            max_completed_predictions=args.speculation_cache_capacity,
+            retain_completed_predictions=args.session_result_cache,
+            preempt_running_speculation=args.preempt_speculation,
+            ttl_s=args.speculation_ttl_s, require_reuse_validity=True)
+        predictor = PatternV2CrossFitPredictor.from_path(args.predictor)
+        # The replay request["max_tokens"] was constructed from the recorded
+        # completion plus a buffer. It is NOT an online-visible request cap.
+        public_llm_config = plan["sources"]["source_configuration"]
+        public_generation_limit = int(public_llm_config["max_output_tokens_cap"])
+        public_context_limit = int(public_llm_config["max_model_len"])
     task_gate = (
         asyncio.Semaphore(args.max_active_tasks)
         if args.preengine_policy == "fifo" else None
@@ -582,6 +739,8 @@ async def run_cell(args: argparse.Namespace) -> int:
             )
         else:
             assert task_gate is not None
+            if live:
+                await asyncio.sleep(args.preengine_coalesce_s)
             await task_gate.acquire()
         try:
             yield
@@ -593,7 +752,7 @@ async def run_cell(args: argparse.Namespace) -> int:
                 task_gate.release()
 
     async def run_one(trace: Mapping[str, Any], http: aiohttp.ClientSession) -> None:
-        release = float(trace["release_offset_s"])
+        release = float(trace["release_offset_s"]) * getattr(args, "arrival_scale", 1.0)
         deadline = started_mono + release
         await asyncio.sleep(max(0.0, deadline - time.monotonic()))
         released = time.monotonic()
@@ -608,18 +767,53 @@ async def run_cell(args: argparse.Namespace) -> int:
             task_tool_wait_s = 0.0
             task_saved_tool_s = 0.0
             po_ema = 128.0
+            policy = predictor.start_session(source_session_id=session_id, runtime_session_id=task_id) if predictor else None
+            prior_tool = None
+            prediction_triggers = 0
+            observed_tool_s = 2.0
+            failed_tools = 0
             try:
                 steps = list(trace["steps"])
                 for request_index, step in enumerate(steps):
                     request = step["request"]
-                    next_tools = list(step["tools_after"])
                     fixed_completion = int(request["fixed_completion_tokens"])
-                    metadata = build_scheduler_metadata(
-                        trace,
-                        request_index,
-                        full=full,
-                        po_ema=po_ema,
-                    )
+                    if live:
+                        candidates = policy.predict_after_tool(
+                            tool_name=prior_tool["tool_name"],
+                            tool_arguments=prior_tool["arguments"],
+                            current_messages=request["messages"],
+                        ) if prior_tool else ()
+                        prediction_triggers += int(prior_tool is not None)
+                        prior_tool = None
+                        if full and args.speculation_capacity:
+                            batch = []
+                            for candidate in candidates[:args.speculation_top_k]:
+                                invocation = Invocation("visit", {"url": candidate.url, "goal": ""})
+                                if timed:
+                                    assigned_services[id(invocation)] = recorded_services.get(
+                                        (task_id, candidate.url), 2.0)
+                                batch.append((invocation, task_id, candidate.confidence))
+                            await broker.speculate_batch(batch,
+                                replace_lower_priority_queued=args.replace_queued_predictions)
+                        readiness = speculation_readiness(broker.snapshot(session_id=task_id), observed_tool_s)
+                        confidence = max(readiness["confidence"],
+                            max((c.confidence for c in candidates), default=0.0))
+                        metadata = causal_scheduler_metadata(
+                            task_id=task_id, call_index=int(request["call_index"]),
+                            request_index=request_index,
+                            prompt_tokens=int(request["prompt_tokens"]),
+                            generation_cap=min(public_generation_limit,
+                                public_context_limit - int(request["prompt_tokens"])),
+                            po_ema=po_ema,
+                            tool_eta_s=observed_tool_s, tool_confidence=confidence,
+                            expected_gain_s=readiness["expected_gain_s"],
+                        )
+                        metadata["readiness_at_submission"] = readiness
+                    else:
+                        # Legacy replay is an explicitly oracle diagnostic mode.
+                        metadata = build_scheduler_metadata(
+                            trace, request_index, full=full, po_ema=po_ema,
+                        )
                     request_id = schedx_id(metadata)
                     payload = {
                         "model": args.model,
@@ -678,7 +872,54 @@ async def run_cell(args: argparse.Namespace) -> int:
                             }
                         )
 
+                    next_tools = list(step["tools_after"])
                     for tool in next_tools:
+                        if live:
+                            queued_at = time.monotonic()
+                            deliveries = []
+                            results = []
+                            name, arguments = tool["tool_name"], tool["arguments"]
+                            if name == "visit":
+                                urls = arguments.get("url", [])
+                                if isinstance(urls, str):
+                                    urls = [urls]
+                                invocations = [Invocation("visit", {"url": url, "goal": ""}) for url in urls]
+                            elif name in {"search", "google_scholar"}:
+                                invocations = [Invocation(name, {**arguments, "_simulated_service_s": tool["duration_s"]})]
+                            else:
+                                raise ValueError(f"unsupported real tool: {name}")
+                            durations = (timed_visit_durations(tool) if name == "visit"
+                                         else [float(tool["duration_s"])])
+                            saved = 0.0
+                            for invocation, duration in zip(invocations, durations):
+                                if timed:
+                                    assigned_services[id(invocation)] = duration
+                                try:
+                                    delivery = await broker.authoritative(invocation, session_id=task_id)
+                                    deliveries.append(delivery)
+                                    results.append(delivery.result)
+                                    saved += min(duration, delivery.saved_service_s) if timed else delivery.saved_service_s
+                                except Exception as exc:
+                                    failed_tools += 1
+                                    results.append({"error": type(exc).__name__, "message": str(exc)})
+                            finished = time.monotonic()
+                            exposed = finished - queued_at
+                            observed_tool_s = 0.5 * observed_tool_s + 0.5 * exposed
+                            task_tool_wait_s += exposed
+                            task_saved_tool_s += saved
+                            completed_tools += 1
+                            prior_tool = tool
+                            # Goal is formatting context; only raw URL fetches are cached.
+                            result_digest = canonical_hash({"goal": arguments.get("goal", ""), "results": results})
+                            tool_events.append({"task_id": task_id, "session_id": session_id,
+                                "event_index": tool["event_index"], "call_index": tool["call_index"],
+                                "tool_name": name, "queued_offset_s": queued_at - started_mono,
+                                "end_offset_s": finished - started_mono, "exposed_wait_s": exposed,
+                                "full_service_s": tool["duration_s"], "executed_service_s": None,
+                                "offline_saved_s": 0.0, "offline_cache_hit_urls": [],
+                                "saved_service_s": saved,
+                                "sources": [d.source for d in deliveries], "result_sha256": result_digest})
+                            continue
                         full_service = float(tool["duration_s"])
                         offline_saved = float(tool["offline_saved_s"]) if full else 0.0
                         executed_service = max(0.0, full_service - offline_saved)
@@ -723,6 +964,9 @@ async def run_cell(args: argparse.Namespace) -> int:
             except BaseException as exc:
                 error = f"{type(exc).__name__}: {exc}"
             ended = time.monotonic()
+            if broker:
+                await broker.cancel_predictions(session_id=task_id)
+            cleanup_ended = time.monotonic()
             async with result_lock:
                 task_rows.append(
                     {
@@ -739,14 +983,26 @@ async def run_cell(args: argparse.Namespace) -> int:
                         "saved_tool_s": task_saved_tool_s,
                         "completed_requests": completed_requests,
                         "completed_tools": completed_tools,
+                        "cleanup_s": cleanup_ended - ended,
+                        "failed_tool_calls": failed_tools,
+                        "prediction_triggers": prediction_triggers,
                         "ok": error is None,
                         "error": error,
                     }
                 )
 
-    connector = aiohttp.TCPConnector(limit=0, limit_per_host=0)
+    # Tool gaps can outlast vLLM's idle keep-alive timeout. Fresh local LLM
+    # connections avoid reusing a socket that the server is concurrently closing.
+    connector = aiohttp.TCPConnector(limit=0, limit_per_host=0, force_close=live)
     async with aiohttp.ClientSession(connector=connector) as http:
         await asyncio.gather(*(run_one(trace, http) for trace in plan["traces"]))
+    if broker:
+        await broker.close()
+        if executor is not None:
+            await executor.close()
+        costs = broker.resource_summary()
+        for row in task_rows:
+            row["resources"] = costs.get(row["task_id"], {})
     ended_mono = time.monotonic()
     ended_wall = time.time()
 
@@ -773,9 +1029,9 @@ async def run_cell(args: argparse.Namespace) -> int:
         ),
         "p95_preengine_gate_wait_s": percentile(gate_waits, 0.95),
         "full_tool_service_s": sum(float(row["full_service_s"]) for row in tool_events),
-        "executed_tool_service_s": sum(float(row["executed_service_s"]) for row in tool_events),
+        "executed_tool_service_s": sum(float(row["executed_service_s"]) for row in tool_events) if not live else None,
         "exposed_tool_wait_s": sum(float(row["exposed_wait_s"]) for row in tool_events),
-        "saved_tool_service_s": sum(float(row["offline_saved_s"]) for row in tool_events),
+        "saved_tool_service_s": sum(float(row.get("saved_service_s", row["offline_saved_s"])) for row in tool_events),
         "offline_url_hits": sum(len(row["offline_cache_hit_urls"]) for row in tool_events),
     }
     result: dict[str, Any] = {
@@ -794,9 +1050,7 @@ async def run_cell(args: argparse.Namespace) -> int:
             "scheduler": "native_fcfs" if not full else "online_joint_pacer_v2",
             "scheduler_metadata_schema": SCHEDULER_METADATA_SCHEMA,
             "preengine_policy": args.preengine_policy,
-            "session_persistent_admission": (
-                args.preengine_policy == "gain-pressure"
-            ),
+            "session_persistent_admission": True,
             "preengine_coalesce_s": args.preengine_coalesce_s,
             "preengine_prefill_tokens_per_s": (
                 args.preengine_prefill_tokens_per_s
@@ -816,6 +1070,41 @@ async def run_cell(args: argparse.Namespace) -> int:
         "llm_events": llm_events,
         "tool_events": tool_events,
     }
+    if live:
+        from paste_repro.resource_accounting import summarize_resources
+        result["settings"].update(tool_backend="timed" if timed else "live", speculation_capacity=args.speculation_capacity if full else 0,
+            speculation_top_k=args.speculation_top_k,
+            speculation_ttl_s=args.speculation_ttl_s if math.isfinite(args.speculation_ttl_s) else "session",
+            speculation_pending_capacity=args.speculation_pending_capacity,
+            speculation_cache_capacity=args.speculation_cache_capacity,
+            session_result_cache=args.session_result_cache,
+            preempt_speculation=args.preempt_speculation,
+            replace_queued_predictions=args.replace_queued_predictions,
+            speculative_priority="larger positive confidence first",
+            arrival_scale=args.arrival_scale, predictor_sha256=file_sha256(args.predictor),
+            scheduler="externally configured; verify server ranker evidence",
+            scheduler_metadata_schema="paste.schedx.causal_prediction.v1",
+            scheduler_generation_cap_source="configured max_output_tokens_cap clipped only by current context headroom; never replay max_tokens",
+            scheduler_generation_cap=public_generation_limit,
+            llm_estimator="completed-output EMA(alpha=0.5, initial=128); remaining calls prior=1; next prompt=current prompt",
+            tool_mechanism="raw URL fetch; explicit HTTP freshness validation; simulated Search",
+            scope="fixed trace calls/messages/LLM work; not autonomous solve-quality or dynamic-web equality")
+        result["tool_jobs"] = list(broker.tool_records())
+        result["resources"] = summarize_resources(result["tool_jobs"], now=ended_mono)
+        if timed:
+            result["settings"].update(
+                tool_mechanism="shared broker with asynchronous recorded-duration executor; exact session invocation match; retention/cache/preemption settings explicit above; stable synthetic result",
+                timing_scope="original visit_units durations, proportional reconciliation only when units omit non-HTTP entries; speculative matching URL uses first recorded per-session URL service; unmatched candidate2s prior; timings private to executor",
+                scope="policy simulation with real LLM; simulated worker-time is not CPU/network cost or output correctness evidence")
+            for row in [result, *task_rows]:
+                row["resources"]["cpu_core_s"] = None
+                row["resources"]["measurement_scope"] = "simulated trace worker occupancy; no physical CPU/network measurement"
+                for key in ("http_requests", "http_request_bytes", "http_response_body_bytes"):
+                    row["resources"][key] = None
+        summary["executed_tool_service_s"] = result["resources"]["worker_occupancy_s"]
+        summary["completion_rate"] = len(good) / len(task_rows) if task_rows else 0.0
+        summary["p99_e2e_s"] = percentile(e2e, 0.99)
+        summary["failed_tool_calls"] = sum(row["failed_tool_calls"] for row in task_rows)
     result["result_sha256"] = canonical_hash(result)
     write_json(args.output, result)
     print(json.dumps({"output": str(args.output), "system": args.system, **summary}, indent=2))
@@ -1028,6 +1317,7 @@ def parser() -> argparse.ArgumentParser:
     prep.add_argument("--source-plan", type=Path, required=True)
     prep.add_argument("--arrivals", type=Path, required=True)
     prep.add_argument("--sessions", type=int, default=80)
+    prep.add_argument("--trace-offset", type=int, default=0)
     prep.add_argument("--output", type=Path, required=True)
     prep.set_defaults(func=prepare)
 
@@ -1058,6 +1348,22 @@ def parser() -> argparse.ArgumentParser:
     cell.add_argument("--preengine-pressure-weight", type=float, default=1.0)
     cell.add_argument("--preengine-tool-gain-beta", type=float, default=1.0)
     cell.add_argument("--preengine-aging-alpha", type=float, default=0.05)
+    cell.add_argument("--tool-backend", choices=("replay", "live", "timed"), default="replay")
+    cell.add_argument("--predictor", type=Path)
+    cell.add_argument("--speculation-capacity", type=int, default=4)
+    cell.add_argument("--speculation-top-k", type=int, default=10,
+        help="Execution prefix of the unchanged frozen predictor ranking")
+    cell.add_argument("--speculation-ttl-s", type=float, default=60,
+        help="Private candidate retention limit; origin HTTP freshness still bounds reuse")
+    cell.add_argument("--speculation-pending-capacity", type=int, default=128)
+    cell.add_argument("--speculation-cache-capacity", type=int, default=None,
+        help="Separate completed-result capacity; omitted retains legacy combined limit")
+    cell.add_argument("--session-result-cache", action="store_true",
+        help="Timed backend only: retain successful speculative results across repeated demands; requires infinite TTL")
+    cell.add_argument("--preempt-speculation", action="store_true",
+        help="Timed backend only: cancel lowest-utility unclaimed running work when authority needs a slot")
+    cell.add_argument("--replace-queued-predictions", action="store_true")
+    cell.add_argument("--arrival-scale", type=float, default=1.0)
     cell.add_argument("--tool-capacity", type=int, default=16)
     cell.add_argument("--request-timeout-s", type=float, default=900.0)
     cell.set_defaults(func=lambda value: asyncio.run(run_cell(value)))
